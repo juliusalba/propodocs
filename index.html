@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMG Internal Pricing Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 64rem;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .service-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .service-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+        
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .tier-btn {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            position: relative;
+        }
+        
+        .tier-btn:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .tier-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tier-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tier-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .tier-setup {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .addon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .addon-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+        
+        .addon-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .addon-btn {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        
+        .addon-btn:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .price-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .price-large {
+            font-size: 1.25rem;
+            color: #059669;
+        }
+        
+        .margin-good {
+            color: #059669;
+        }
+        
+        .margin-bad {
+            color: #dc2626;
+        }
+        
+        .warning {
+            font-size: 0.75rem;
+            color: #dc2626;
+            margin-top: 0.25rem;
+        }
+        
+        .contract-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .contract-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .contract-option:hover {
+            background-color: #f9fafb;
+        }
+        
+        .details-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .details-btn:hover {
+            color: #111827;
+        }
+        
+        .details-section {
+            margin-top: 1.5rem;
+        }
+        
+        .detail-item {
+            padding: 1rem;
+            border: 1px solid #f3f4f6;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-title {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .detail-content {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111827;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .addon-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i data-lucide="calculator"></i>
+                VMG Pricing Calculator
+            </h1>
+            <p>Quick, consistent, profitable quotes • v1.0</p>
+        </div>
+
+        <!-- Services -->
+        <div class="card">
+            <h2><i data-lucide="settings"></i> Select Services</h2>
+            
+            <div class="service-group">
+                <div class="service-title">
+                    <i data-lucide="users"></i>
+                    <span>Traffic Driver</span>
+                    <span class="tooltip" data-tooltip="Lead generation through paid media management">
+                        <i data-lucide="info"></i>
+                    </span>
+                </div>
+                <div class="tier-grid">
+                    <button class="tier-btn" data-service="traffic" data-tier="1">
+                        <div class="tier-label">Tier 1</div>
+                        <div class="tier-price">$7.5K</div>
+                        <div class="tier-setup">+$3.8K setup</div>
+                    </button>
+                    <button class="tier-btn" data-service="traffic" data-tier="2">
+                        <div class="tier-label">Tier 2</div>
+                        <div class="tier-price">$12.5K</div>
+                        <div class="tier-setup">+$6.3K setup</div>
+                    </button>
+                    <button class="tier-btn" data-service="traffic" data-tier="3">
+                        <div class="tier-label">Tier 3</div>
+                        <div class="tier-price">$19K</div>
+                        <div class="tier-setup">+$9.5K setup</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <div class="service-title">
+                    <i data-lucide="zap"></i>
+                    <span>Retention & CRM</span>
+                    <span class="tooltip" data-tooltip="Email marketing and customer lifecycle management">
+                        <i data-lucide="info"></i>
+                    </span>
+                </div>
+                <div class="tier-grid">
+                    <button class="tier-btn" data-service="retention" data-tier="1">
+                        <div class="tier-label">Tier 1</div>
+                        <div class="tier-price">$3.5K</div>
+                        <div class="tier-setup">+$1.8K setup</div>
+                    </button>
+                    <button class="tier-btn" data-service="retention" data-tier="2">
+                        <div class="tier-label">Tier 2</div>
+                        <div class="tier-price">$6K</div>
+                        <div class="tier-setup">+$3K setup</div>
+                    </button>
+                    <button class="tier-btn" data-service="retention" data-tier="3">
+                        <div class="tier-label">Tier 3</div>
+                        <div class="tier-price">$9.3K</div>
+                        <div class="tier-setup">+$4.6K setup</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <div class="service-title">
+                    <i data-lucide="file-text"></i>
+                    <span>Creative Support</span>
+                    <span class="tooltip" data-tooltip="Ad creative production and design services">
+                        <i data-lucide="info"></i>
+                    </span>
+                </div>
+                <div class="tier-grid">
+                    <button class="tier-btn" data-service="creative" data-tier="1">
+                        <div class="tier-label">Tier 1</div>
+                        <div class="tier-price">$2.5K</div>
+                        <div class="tier-setup">+$1.3K setup</div>
+                    </button>
+                    <button class="tier-btn" data-service="creative" data-tier="2">
+                        <div class="tier-label">Tier 2</div>
+                        <div class="tier-price">$5K</div>
+                        <div class="tier-setup">+$2.5K setup</div>
+                    </button>
+                    <button class="tier-btn" data-service="creative" data-tier="3">
+                        <div class="tier-label">Tier 3</div>
+                        <div class="tier-price">$8.3K</div>
+                        <div class="tier-setup">+$4.1K setup</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add-ons -->
+        <div class="card">
+            <h2><i data-lucide="plus"></i> Add-ons</h2>
+            
+            <div class="addon-grid">
+                <div class="addon-item">
+                    <div>
+                        <div class="tooltip" data-tooltip="Custom landing page builds">
+                            <strong>Landing Pages</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">$2,500</div>
+                    </div>
+                    <div class="addon-controls">
+                        <button class="addon-btn" onclick="updateAddon('landingPages', -1)">−</button>
+                        <span id="landingPages-count">0</span>
+                        <button class="addon-btn" onclick="updateAddon('landingPages', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="addon-item">
+                    <div>
+                        <div class="tooltip" data-tooltip="Complete sales funnel setup">
+                            <strong>Sales Funnels</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">$6,250</div>
+                    </div>
+                    <div class="addon-controls">
+                        <button class="addon-btn" onclick="updateAddon('funnels', -1)">−</button>
+                        <span id="funnels-count">0</span>
+                        <button class="addon-btn" onclick="updateAddon('funnels', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="addon-item">
+                    <div>
+                        <div class="tooltip" data-tooltip="Custom reporting dashboard">
+                            <strong>Analytics Dashboard</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">$2K + $500/mo</div>
+                    </div>
+                    <input type="checkbox" id="dashboard" onchange="calculateTotals()">
+                </div>
+
+                <div class="addon-item">
+                    <div>
+                        <strong>Strategy Workshop</strong>
+                        <div style="font-size: 0.75rem; color: #6b7280;">$3.5K - $6K</div>
+                    </div>
+                    <select id="workshop" onchange="calculateTotals()" style="font-size: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.25rem; padding: 0.25rem;">
+                        <option value="">None</option>
+                        <option value="halfDay">Half-day</option>
+                        <option value="fullDay">Full-day</option>
+                    </select>
+                </div>
+
+                <div class="addon-item">
+                    <div>
+                        <div class="tooltip" data-tooltip="5 professional videos">
+                            <strong>Video Pack</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">$4,000</div>
+                    </div>
+                    <div class="addon-controls">
+                        <button class="addon-btn" onclick="updateAddon('videoPack', -1)">−</button>
+                        <span id="videoPack-count">0</span>
+                        <button class="addon-btn" onclick="updateAddon('videoPack', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-grid">
+            <!-- Contract Terms -->
+            <div class="card">
+                <h2><i data-lucide="calendar"></i> Contract Terms</h2>
+                <div class="contract-options">
+                    <label class="contract-option">
+                        <input type="radio" name="contract" value="6" checked onchange="calculateTotals()">
+                        <div>
+                            <div><strong>6 months</strong></div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Standard terms</div>
+                        </div>
+                    </label>
+                    <label class="contract-option">
+                        <input type="radio" name="contract" value="12" onchange="calculateTotals()">
+                        <div>
+                            <div><strong>12 months</strong></div>
+                            <div style="font-size: 0.75rem; color: #059669;">5% discount</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Pricing Summary -->
+            <div class="card">
+                <h2><i data-lucide="dollar-sign"></i> Quote Summary</h2>
+                <div style="margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #6b7280;">Monthly:</span>
+                        <span class="price-display" id="monthly-total">$0</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #6b7280;">Setup:</span>
+                        <span style="font-size: 1.125rem;" id="setup-total">$0</span>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #6b7280;">Annual Value:</span>
+                        <span class="price-large" id="annual-total">$0</span>
+                    </div>
+                </div>
+                <div id="margin-display" class="hidden" style="margin-top: 1rem; padding: 0.75rem; background-color: #f9fafb; border-radius: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
+                        <span>Margin:</span>
+                        <span id="margin-percent">0%</span>
+                    </div>
+                    <div id="margin-warning" class="warning hidden">⚠️ Below 60% target</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Toggle -->
+        <div style="text-align: center; margin: 2rem 0;">
+            <button class="details-btn" onclick="toggleDetails()">
+                <i data-lucide="eye"></i>
+                <span id="details-toggle-text">Show deliverables & exclusions</span>
+            </button>
+        </div>
+
+        <!-- Details Section -->
+        <div id="details-section" class="card hidden">
+            <h2>What's Included</h2>
+            <div id="details-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Service data
+        const services = {
+            traffic: {
+                name: "Traffic Driver",
+                tiers: {
+                    1: { monthly: 7500, setup: 3750, internalCost: 2800, description: "Google + Meta up to $5K spend" },
+                    2: { monthly: 12500, setup: 6250, internalCost: 5000, description: "Google + Meta + LinkedIn up to $15K spend" },
+                    3: { monthly: 19000, setup: 9500, internalCost: 7500, description: "All channels + TikTok up to $50K spend" }
+                }
+            },
+            retention: {
+                name: "Retention & CRM",
+                tiers: {
+                    1: { monthly: 3500, setup: 1750, internalCost: 1200, description: "3 basic flows with basic templates" },
+                    2: { monthly: 6000, setup: 3000, internalCost: 2400, description: "Full lifecycle with A/B testing" },
+                    3: { monthly: 9250, setup: 4625, internalCost: 3750, description: "Multi-channel with AI segmentation" }
+                }
+            },
+            creative: {
+                name: "Creative Support",
+                tiers: {
+                    1: { monthly: 2500, setup: 1250, internalCost: 1000, description: "8-10 creatives per month, 5 days turnaround" },
+                    2: { monthly: 5000, setup: 2500, internalCost: 2000, description: "15-20 creatives per month, 3 days turnaround" },
+                    3: { monthly: 8250, setup: 4125, internalCost: 3250, description: "Unlimited creatives, 48 hours turnaround" }
+                }
+            }
+        };
+
+        const addOnPrices = {
+            landingPages: 2500,
+            funnels: 6250,
+            dashboard: { setup: 2000, monthly: 500 },
+            workshop: { halfDay: 3500, fullDay: 6000 },
+            videoPack: 4000
+        };
+
+        let selectedServices = {};
+        let addOns = {
+            landingPages: 0,
+            funnels: 0,
+            dashboard: false,
+            workshop: null,
+            videoPack: 0
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            setupEventListeners();
+            calculateTotals();
+        });
+
+        function setupEventListeners() {
+            // Service tier buttons
+            document.querySelectorAll('.tier-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const service = this.dataset.service;
+                    const tier = parseInt(this.dataset.tier);
+                    
+                    // Toggle selection
+                    if (selectedServices[service] === tier) {
+                        selectedServices[service] = null;
+                        this.classList.remove('selected');
+                    } else {
+                        selectedServices[service] = tier;
+                        
+                        // Remove selected class from siblings
+                        this.parentElement.querySelectorAll('.tier-btn').forEach(sibling => {
+                            sibling.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                    }
+                    
+                    calculateTotals();
+                });
+            });
+        }
+
+        function updateAddon(type, change) {
+            addOns[type] = Math.max(0, addOns[type] + change);
+            document.getElementById(`${type}-count`).textContent = addOns[type];
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            let monthlyTotal = 0;
+            let setupTotal = 0;
+            let internalCostTotal = 0;
+
+            // Calculate selected services
+            Object.entries(selectedServices).forEach(([service, tier]) => {
+                if (tier && services[service] && services[service].tiers[tier]) {
+                    const serviceData = services[service].tiers[tier];
+                    monthlyTotal += serviceData.monthly;
+                    setupTotal += serviceData.setup;
+                    internalCostTotal += serviceData.internalCost;
+                }
+            });
+
+            // Add-ons
+            monthlyTotal += addOns.landingPages * addOnPrices.landingPages;
+            monthlyTotal += addOns.funnels * addOnPrices.funnels;
+            
+            if (document.getElementById('dashboard').checked) {
+                setupTotal += addOnPrices.dashboard.setup;
+                monthlyTotal += addOnPrices.dashboard.monthly;
+                addOns.dashboard = true;
+            } else {
+                addOns.dashboard = false;
+            }
+
+            const workshop = document.getElementById('workshop').value;
+            if (workshop === 'halfDay') {
+                monthlyTotal += addOnPrices.workshop.halfDay;
+                addOns.workshop = 'halfDay';
+            } else if (workshop === 'fullDay') {
+                monthlyTotal += addOnPrices.workshop.fullDay;
+                addOns.workshop = 'fullDay';
+            } else {
+                addOns.workshop = null;
+            }
+
+            monthlyTotal += addOns.videoPack * addOnPrices.videoPack;
+
+            // Contract discount
+            const contractTerm = document.querySelector('input[name="contract"]:checked').value;
+            if (contractTerm === '12') {
+                monthlyTotal *= 0.95;
+            }
+
+            const annualTotal = monthlyTotal * 12 + setupTotal;
+            const margin = monthlyTotal > 0 ? ((monthlyTotal - internalCostTotal) / monthlyTotal) * 100 : 0;
+
+            // Update display
+            document.getElementById('monthly-total').textContent = `$${monthlyTotal.toLocaleString()}`;
+            document.getElementById('setup-total').textContent = `$${setupTotal.toLocaleString()}`;
+            document.getElementById('annual-total').textContent = `$${annualTotal.toLocaleString()}`;
+
+            // Show/hide margin display
+            const marginDisplay = document.getElementById('margin-display');
+            const marginPercent = document.getElementById('margin-percent');
+            const marginWarning = document.getElementById('margin-warning');
+
+            if (monthlyTotal > 0) {
+                marginDisplay.classList.remove('hidden');
+                marginPercent.textContent = `${margin.toFixed(1)}%`;
+                marginPercent.className = margin >= 60 ? 'margin-good' : 'margin-bad';
+                
+                if (margin < 60) {
+                    marginWarning.classList.remove('hidden');
+                } else {
+                    marginWarning.classList.add('hidden');
+                }
+            } else {
+                marginDisplay.classList.add('hidden');
+            }
+        }
+
+        function toggleDetails() {
+            const detailsSection = document.getElementById('details-section');
+            const toggleText = document.getElementById('details-toggle-text');
+            
+            if (detailsSection.classList.contains('hidden')) {
+                detailsSection.classList.remove('hidden');
+                toggleText.textContent = 'Hide deliverables & exclusions';
+                updateDetailsContent();
+            } else {
+                detailsSection.classList.add('hidden');
+                toggleText.textContent = 'Show deliverables & exclusions';
+            }
+        }
+
+        function updateDetailsContent() {
+            const detailsContent = document.getElementById('details-content');
+            let html = '';
+
+            // Selected services
+            Object.entries(selectedServices).forEach(([service, tier]) => {
+                if (tier && services[service] && services[service].tiers[tier]) {
+                    const serviceData = services[service].tiers[tier];
+                    html += `
+                        <div class="detail-item">
+                            <div class="detail-title">${services[service].name} - Tier ${tier} ($${serviceData.monthly.toLocaleString()}/mo)</div>
+                            <div class="detail-content">${serviceData.description}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Add-ons
+            const activeAddOns = [];
+            if (addOns.landingPages > 0) activeAddOns.push(`${addOns.landingPages} Landing Pages`);
+            if (addOns.funnels > 0) activeAddOns.push(`${addOns.funnels} Sales Funnels`);
+            if (addOns.dashboard) activeAddOns.push('Advanced Analytics Dashboard');
+            if (addOns.workshop) activeAddOns.push(`Strategy Workshop (${addOns.workshop === 'halfDay' ? 'Half-day' : 'Full-day'})`);
+            if (addOns.videoPack > 0) activeAddOns.push(`${addOns.videoPack} Video/Motion Packs`);
+
+            if (activeAddOns.length > 0) {
+                html += `
+                    <div class="detail-item">
+                        <div class="detail-title">Add-ons</div>
+                        <div class="detail-content">
+                            ${activeAddOns.map(addon => `• ${addon}`).join('<br>')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            detailsContent.innerHTML = html || '<div class="detail-content">No services selected</div>';
+        }
+    </script>
+</body>
+</html>
