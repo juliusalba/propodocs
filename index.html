@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VMG Internal Pricing Calculator</title>
     <style>
+        :root {
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --scale: 1;
+        }
+        
+        .text-small {
+            --scale: 0.85;
+        }
+        
+        .text-large {
+            --scale: 1.15;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,202 +32,327 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background: #fafafa;
             color: #1f2937;
-            line-height: 1.6;
+            line-height: 1.5;
+            overflow-x: auto;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1800px;
             margin: 0 auto;
-            padding: 2rem 1rem;
+            padding: calc(1rem * var(--scale));
+            min-height: 100vh;
+        }
+        
+        /* Text Size Controls */
+        .controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .control-btn {
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+        
+        .control-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .control-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
         }
         
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 3rem;
-            color: white;
+            margin-bottom: calc(1.5rem * var(--scale));
+            padding: calc(1rem * var(--scale));
         }
         
         .header h1 {
-            font-size: 2.5rem;
+            font-size: calc(var(--text-2xl) * var(--scale));
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: #111827;
+            margin-bottom: calc(0.5rem * var(--scale));
         }
         
         .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            color: #6b7280;
+            font-size: calc(var(--text-sm) * var(--scale));
+        }
+        
+        /* Layout Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: calc(1.5rem * var(--scale));
+            height: calc(100vh - 120px);
+        }
+        
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: calc(1rem * var(--scale));
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: calc(1rem * var(--scale));
         }
         
         /* Cards */
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
+            background: white;
+            border-radius: calc(0.75rem * var(--scale));
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: calc(1.25rem * var(--scale));
+            transition: all 0.2s ease;
         }
         
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
         .card h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #1f2937;
+            font-size: calc(var(--text-lg) * var(--scale));
+            font-weight: 600;
+            margin-bottom: calc(1rem * var(--scale));
+            color: #111827;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: calc(0.5rem * var(--scale));
         }
         
-        /* Service Section */
+        /* Services */
+        .services-card {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
         .service-group {
-            margin-bottom: 2rem;
+            margin-bottom: calc(1.5rem * var(--scale));
         }
         
         .service-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e5e7eb;
+            gap: calc(0.5rem * var(--scale));
+            margin-bottom: calc(0.75rem * var(--scale));
+            padding-bottom: calc(0.5rem * var(--scale));
+            border-bottom: 1px solid #f3f4f6;
         }
         
         .service-title {
-            font-size: 1.2rem;
+            font-size: calc(var(--text-base) * var(--scale));
             font-weight: 600;
             color: #374151;
         }
         
-        .tooltip {
-            position: relative;
+        .service-icon {
+            width: calc(1.125rem * var(--scale));
+            height: calc(1.125rem * var(--scale));
+            color: #3b82f6;
+        }
+        
+        /* Info Icon */
+        .info-icon {
+            width: calc(1rem * var(--scale));
+            height: calc(1rem * var(--scale));
+            color: #6b7280;
             cursor: help;
         }
         
-        .tooltip:hover::after {
-            content: attr(data-tip);
-            position: absolute;
-            bottom: 130%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #111827;
-            color: white;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            white-space: nowrap;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .tooltip:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #111827;
-            z-index: 1000;
-        }
-        
-        /* Tier Buttons */
+        /* Tier Grid */
         .tier-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: calc(0.75rem * var(--scale));
         }
         
         .tier-btn {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #f8fafc;
             border: 2px solid #e2e8f0;
-            border-radius: 1rem;
-            padding: 1.5rem;
+            border-radius: calc(0.5rem * var(--scale));
+            padding: calc(1rem * var(--scale));
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-align: left;
             position: relative;
-            overflow: hidden;
         }
         
         .tier-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             border-color: #3b82f6;
+            background: #f0f9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
         
         .tier-btn.selected {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            background: #eff6ff;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-        }
-        
-        .tier-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .tier-btn.selected::before,
-        .tier-btn:hover::before {
-            transform: scaleX(1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
         .tier-label {
-            font-size: 0.875rem;
+            font-size: calc(var(--text-xs) * var(--scale));
             color: #6b7280;
-            margin-bottom: 0.25rem;
+            margin-bottom: calc(0.25rem * var(--scale));
             font-weight: 500;
         }
         
         .tier-price {
-            font-size: 1.75rem;
-            font-weight: 800;
+            font-size: calc(var(--text-lg) * var(--scale));
+            font-weight: 700;
             color: #111827;
-            margin-bottom: 0.25rem;
+            margin-bottom: calc(0.25rem * var(--scale));
         }
         
         .tier-setup {
-            font-size: 0.8rem;
+            font-size: calc(var(--text-xs) * var(--scale));
             color: #6b7280;
         }
         
         .tier-features {
-            font-size: 0.75rem;
+            font-size: calc(var(--text-xs) * var(--scale));
             color: #059669;
-            margin-top: 0.5rem;
+            margin-top: calc(0.25rem * var(--scale));
             font-weight: 500;
+        }
+        
+        /* Modal */
+        .tier-modal {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: calc(0.75rem * var(--scale));
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+            padding: calc(1.25rem * var(--scale));
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+            margin-top: calc(0.5rem * var(--scale));
+            max-width: 350px;
+        }
+        
+        .tier-btn:hover .tier-modal {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .modal-header {
+            font-size: calc(var(--text-base) * var(--scale));
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: calc(0.75rem * var(--scale));
+            padding-bottom: calc(0.5rem * var(--scale));
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .modal-section {
+            margin-bottom: calc(1rem * var(--scale));
+        }
+        
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .modal-section-title {
+            font-size: calc(var(--text-sm) * var(--scale));
+            font-weight: 600;
+            color: #059669;
+            margin-bottom: calc(0.5rem * var(--scale));
+        }
+        
+        .modal-section-title.exclusions {
+            color: #dc2626;
+        }
+        
+        .modal-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .modal-list li {
+            font-size: calc(var(--text-xs) * var(--scale));
+            color: #6b7280;
+            margin-bottom: calc(0.375rem * var(--scale));
+            padding-left: calc(1rem * var(--scale));
+            position: relative;
+        }
+        
+        .modal-list li:before {
+            content: '•';
+            color: #9ca3af;
+            position: absolute;
+            left: 0;
+        }
+        
+        .modal-pricing {
+            background: #f8fafc;
+            border-radius: calc(0.5rem * var(--scale));
+            padding: calc(0.75rem * var(--scale));
+            margin-top: calc(0.75rem * var(--scale));
+        }
+        
+        .modal-pricing-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: calc(var(--text-xs) * var(--scale));
+            margin-bottom: calc(0.25rem * var(--scale));
+        }
+        
+        .modal-pricing-row:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: #059669;
         }
         
         /* Add-ons */
         .addon-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: calc(0.75rem * var(--scale));
         }
         
         .addon-item {
             background: #f8fafc;
             border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 1rem;
+            border-radius: calc(0.5rem * var(--scale));
+            padding: calc(0.75rem * var(--scale));
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -221,33 +365,34 @@
         }
         
         .addon-info h3 {
-            font-size: 0.95rem;
+            font-size: calc(var(--text-sm) * var(--scale));
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            margin-bottom: calc(0.25rem * var(--scale));
             color: #374151;
         }
         
         .addon-price {
-            font-size: 0.8rem;
+            font-size: calc(var(--text-xs) * var(--scale));
             color: #6b7280;
         }
         
         .addon-controls {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: calc(0.25rem * var(--scale));
         }
         
         .addon-btn {
-            width: 2rem;
-            height: 2rem;
+            width: calc(1.75rem * var(--scale));
+            height: calc(1.75rem * var(--scale));
             border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
+            border-radius: calc(0.375rem * var(--scale));
             background: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: calc(var(--text-sm) * var(--scale));
             font-weight: 600;
             transition: all 0.2s ease;
         }
@@ -257,30 +402,27 @@
             border-color: #9ca3af;
         }
         
-        .addon-btn:active {
-            transform: scale(0.95);
-        }
-        
         .addon-count {
             font-weight: 600;
-            min-width: 1.5rem;
+            min-width: calc(1.5rem * var(--scale));
             text-align: center;
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         /* Contract Terms */
         .contract-options {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: calc(0.75rem * var(--scale));
         }
         
         .contract-option {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem;
+            gap: calc(0.75rem * var(--scale));
+            padding: calc(0.75rem * var(--scale));
             border: 2px solid #e5e7eb;
-            border-radius: 0.75rem;
+            border-radius: calc(0.5rem * var(--scale));
             cursor: pointer;
             transition: all 0.2s ease;
             background: white;
@@ -297,46 +439,42 @@
         }
         
         .contract-radio {
-            width: 1.25rem;
-            height: 1.25rem;
+            width: calc(1.125rem * var(--scale));
+            height: calc(1.125rem * var(--scale));
             accent-color: #3b82f6;
         }
         
         .contract-details h3 {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            margin-bottom: calc(0.25rem * var(--scale));
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         .contract-benefit {
-            font-size: 0.875rem;
+            font-size: calc(var(--text-xs) * var(--scale));
             color: #059669;
             font-weight: 500;
         }
         
-        /* Results */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
+        /* Summary */
         .summary-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem 0;
+            padding: calc(0.5rem * var(--scale)) 0;
             border-bottom: 1px solid #f3f4f6;
         }
         
         .summary-item:last-child {
             border-bottom: none;
-            padding-top: 1rem;
+            padding-top: calc(0.75rem * var(--scale));
             border-top: 2px solid #e5e7eb;
         }
         
         .summary-label {
             font-weight: 500;
             color: #6b7280;
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         .summary-value {
@@ -344,31 +482,31 @@
         }
         
         .summary-monthly {
-            font-size: 2rem;
+            font-size: calc(var(--text-xl) * var(--scale));
             color: #3b82f6;
         }
         
         .summary-setup {
-            font-size: 1.25rem;
+            font-size: calc(var(--text-lg) * var(--scale));
             color: #374151;
         }
         
         .summary-annual {
-            font-size: 1.5rem;
+            font-size: calc(var(--text-lg) * var(--scale));
             color: #059669;
         }
         
         /* Margin Display */
         .margin-display {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-            border-radius: 0.75rem;
+            margin-top: calc(1rem * var(--scale));
+            padding: calc(0.75rem * var(--scale));
+            background: #f0fdf4;
+            border-radius: calc(0.5rem * var(--scale));
             border: 1px solid #d1fae5;
         }
         
         .margin-display.warning {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            background: #fef2f2;
             border-color: #fecaca;
         }
         
@@ -376,6 +514,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         .margin-good {
@@ -389,38 +528,38 @@
         }
         
         .margin-warning {
-            font-size: 0.875rem;
+            font-size: calc(var(--text-xs) * var(--scale));
             color: #dc2626;
-            margin-top: 0.5rem;
+            margin-top: calc(0.5rem * var(--scale));
             font-weight: 500;
         }
         
         /* Details */
         .details-toggle {
             text-align: center;
-            margin: 2rem 0;
+            margin: calc(1rem * var(--scale)) 0;
         }
         
         .details-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 2rem;
-            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: calc(1.5rem * var(--scale));
+            padding: calc(0.5rem * var(--scale)) calc(1rem * var(--scale));
             color: #374151;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         .details-btn:hover {
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: #f9fafb;
+            border-color: #9ca3af;
         }
         
         .details-content {
             display: none;
+            grid-column: 1 / -1;
         }
         
         .details-content.show {
@@ -429,46 +568,57 @@
         
         .detail-item {
             background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
+            border-radius: calc(0.5rem * var(--scale));
+            padding: calc(1rem * var(--scale));
+            margin-bottom: calc(0.75rem * var(--scale));
             border: 1px solid #e5e7eb;
         }
         
         .detail-title {
             font-weight: 600;
             color: #111827;
-            margin-bottom: 0.75rem;
-            font-size: 1.1rem;
+            margin-bottom: calc(0.5rem * var(--scale));
+            font-size: calc(var(--text-base) * var(--scale));
         }
         
         .detail-description {
             color: #6b7280;
-            line-height: 1.6;
+            line-height: 1.5;
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         .detail-list {
-            margin-top: 0.5rem;
+            margin-top: calc(0.5rem * var(--scale));
             color: #6b7280;
+            font-size: calc(var(--text-sm) * var(--scale));
         }
         
         .detail-list li {
-            margin-left: 1rem;
-            margin-bottom: 0.25rem;
+            margin-left: calc(1rem * var(--scale));
+            margin-bottom: calc(0.25rem * var(--scale));
         }
         
         /* Responsive */
+        @media (max-width: 1400px) {
+            .main-grid {
+                grid-template-columns: 1.8fr 1fr;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .left-column {
+                overflow-y: visible;
+            }
+        }
+        
         @media (max-width: 768px) {
             .container {
-                padding: 1rem 0.5rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .card {
-                padding: 1.5rem;
+                padding: calc(0.75rem * var(--scale));
             }
             
             .tier-grid {
@@ -479,270 +629,623 @@
                 grid-template-columns: 1fr;
             }
             
-            .results-grid {
-                grid-template-columns: 1fr;
+            .controls {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 1rem;
             }
-            
-            .tier-price {
-                font-size: 1.5rem;
-            }
-        }
-        
-        /* Icons */
-        .icon {
-            width: 1.25rem;
-            height: 1.25rem;
-            color: #3b82f6;
-        }
-        
-        .icon-info {
-            width: 1rem;
-            height: 1rem;
-            color: #6b7280;
-        }
-        
-        /* Animations */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .card {
-            animation: slideIn 0.6s ease-out;
         }
         
         .hidden {
             display: none !important;
         }
+        
+        /* Compact mode for smaller screens */
+        @media (max-height: 800px) {
+            .container {
+                padding: calc(0.75rem * var(--scale));
+            }
+            
+            .header {
+                margin-bottom: calc(1rem * var(--scale));
+                padding: calc(0.5rem * var(--scale));
+            }
+            
+            .card {
+                padding: calc(1rem * var(--scale));
+            }
+            
+            .service-group {
+                margin-bottom: calc(1rem * var(--scale));
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Text Size Controls -->
+    <div class="controls">
+        <button class="control-btn" onclick="setTextSize('small')" title="Small Text">A</button>
+        <button class="control-btn active" onclick="setTextSize('normal')" title="Normal Text">A</button>
+        <button class="control-btn" onclick="setTextSize('large')" title="Large Text">A</button>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🧮 VMG Pricing Calculator</h1>
+            <h1>VMG Pricing Calculator</h1>
             <p>Quick, consistent, profitable quotes • v1.0</p>
         </div>
 
-        <!-- Services -->
-        <div class="card">
-            <h2>
-                <span class="icon">⚙️</span>
-                Select Services
-            </h2>
-            
-            <!-- Traffic Driver -->
-            <div class="service-group">
-                <div class="service-header">
-                    <span class="icon">👥</span>
-                    <span class="service-title">Traffic Driver</span>
-                    <span class="tooltip icon-info" data-tip="Lead generation through paid media management">ℹ️</span>
-                </div>
-                <div class="tier-grid">
-                    <div class="tier-btn" onclick="selectTier('traffic', 1)" id="traffic-1">
-                        <div class="tier-label">Tier 1</div>
-                        <div class="tier-price">$7.5K</div>
-                        <div class="tier-setup">+$3.8K setup</div>
-                        <div class="tier-features">Google + Meta • $5K spend • 63% margin</div>
-                    </div>
-                    <div class="tier-btn" onclick="selectTier('traffic', 2)" id="traffic-2">
-                        <div class="tier-label">Tier 2</div>
-                        <div class="tier-price">$12.5K</div>
-                        <div class="tier-setup">+$6.3K setup</div>
-                        <div class="tier-features">+ LinkedIn • $15K spend • 60% margin</div>
-                    </div>
-                    <div class="tier-btn" onclick="selectTier('traffic', 3)" id="traffic-3">
-                        <div class="tier-label">Tier 3</div>
-                        <div class="tier-price">$19K</div>
-                        <div class="tier-setup">+$9.5K setup</div>
-                        <div class="tier-features">All channels • $50K spend • 61% margin</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Retention & CRM -->
-            <div class="service-group">
-                <div class="service-header">
-                    <span class="icon">⚡</span>
-                    <span class="service-title">Retention & CRM</span>
-                    <span class="tooltip icon-info" data-tip="Email marketing and customer lifecycle management">ℹ️</span>
-                </div>
-                <div class="tier-grid">
-                    <div class="tier-btn" onclick="selectTier('retention', 1)" id="retention-1">
-                        <div class="tier-label">Tier 1</div>
-                        <div class="tier-price">$3.5K</div>
-                        <div class="tier-setup">+$1.8K setup</div>
-                        <div class="tier-features">3 basic flows • Templates • 66% margin</div>
-                    </div>
-                    <div class="tier-btn" onclick="selectTier('retention', 2)" id="retention-2">
-                        <div class="tier-label">Tier 2</div>
-                        <div class="tier-price">$6K</div>
-                        <div class="tier-setup">+$3K setup</div>
-                        <div class="tier-features">Full lifecycle • A/B testing • 60% margin</div>
-                    </div>
-                    <div class="tier-btn" onclick="selectTier('retention', 3)" id="retention-3">
-                        <div class="tier-label">Tier 3</div>
-                        <div class="tier-price">$9.3K</div>
-                        <div class="tier-setup">+$4.6K setup</div>
-                        <div class="tier-features">Multi-channel • AI segmentation • 59% margin</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Creative Support -->
-            <div class="service-group">
-                <div class="service-header">
-                    <span class="icon">🎨</span>
-                    <span class="service-title">Creative Support</span>
-                    <span class="tooltip icon-info" data-tip="Ad creative production and design services">ℹ️</span>
-                </div>
-                <div class="tier-grid">
-                    <div class="tier-btn" onclick="selectTier('creative', 1)" id="creative-1">
-                        <div class="tier-label">Tier 1</div>
-                        <div class="tier-price">$2.5K</div>
-                        <div class="tier-setup">+$1.3K setup</div>
-                        <div class="tier-features">8-10 creatives • 5 days • 60% margin</div>
-                    </div>
-                    <div class="tier-btn" onclick="selectTier('creative', 2)" id="creative-2">
-                        <div class="tier-label">Tier 2</div>
-                        <div class="tier-price">$5K</div>
-                        <div class="tier-setup">+$2.5K setup</div>
-                        <div class="tier-features">15-20 creatives • 3 days • 60% margin</div>
-                    </div>
-                    <div class="tier-btn" onclick="selectTier('creative', 3)" id="creative-3">
-                        <div class="tier-label">Tier 3</div>
-                        <div class="tier-price">$8.3K</div>
-                        <div class="tier-setup">+$4.1K setup</div>
-                        <div class="tier-features">Unlimited • 48 hours • 61% margin</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add-ons -->
-        <div class="card">
-            <h2>
-                <span class="icon">➕</span>
-                Add-ons
-            </h2>
-            
-            <div class="addon-grid">
-                <div class="addon-item">
-                    <div class="addon-info">
-                        <h3 class="tooltip" data-tip="Custom landing page builds">Landing Pages</h3>
-                        <div class="addon-price">$2,500 each</div>
-                    </div>
-                    <div class="addon-controls">
-                        <button class="addon-btn" onclick="updateAddon('landingPages', -1)">−</button>
-                        <span class="addon-count" id="landingPages-count">0</span>
-                        <button class="addon-btn" onclick="updateAddon('landingPages', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="addon-item">
-                    <div class="addon-info">
-                        <h3 class="tooltip" data-tip="Complete sales funnel setup">Sales Funnels</h3>
-                        <div class="addon-price">$5,000-$7,500 each</div>
-                    </div>
-                    <div class="addon-controls">
-                        <button class="addon-btn" onclick="updateAddon('funnels', -1)">−</button>
-                        <span class="addon-count" id="funnels-count">0</span>
-                        <button class="addon-btn" onclick="updateAddon('funnels', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="addon-item">
-                    <div class="addon-info">
-                        <h3 class="tooltip" data-tip="Custom reporting dashboard">Analytics Dashboard</h3>
-                        <div class="addon-price">$2,000 setup + $500/mo</div>
-                    </div>
-                    <label class="addon-controls">
-                        <input type="checkbox" class="contract-radio" id="dashboard-check" onchange="calculateTotals()">
-                    </label>
-                </div>
-
-                <div class="addon-item">
-                    <div class="addon-info">
-                        <h3>Strategy Workshop</h3>
-                        <div class="addon-price">$3,500 - $6,000</div>
-                    </div>
-                    <select id="workshop-select" onchange="calculateTotals()" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white;">
-                        <option value="">None</option>
-                        <option value="halfDay">Half-day ($3,500)</option>
-                        <option value="fullDay">Full-day ($6,000)</option>
-                    </select>
-                </div>
-
-                <div class="addon-item">
-                    <div class="addon-info">
-                        <h3 class="tooltip" data-tip="5 professional videos">Video Pack</h3>
-                        <div class="addon-price">$4,000 (5 videos)</div>
-                    </div>
-                    <div class="addon-controls">
-                        <button class="addon-btn" onclick="updateAddon('videoPack', -1)">−</button>
-                        <span class="addon-count" id="videoPack-count">0</span>
-                        <button class="addon-btn" onclick="updateAddon('videoPack', 1)">+</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results -->
-        <div class="results-grid">
-            <!-- Contract Terms -->
-            <div class="card">
-                <h2>
-                    <span class="icon">📅</span>
-                    Contract Terms
-                </h2>
-                <div class="contract-options">
-                    <label class="contract-option" id="contract-6">
-                        <input type="radio" name="contract" value="6" class="contract-radio" checked onchange="calculateTotals()">
-                        <div class="contract-details">
-                            <h3>6 months</h3>
-                            <div style="color: #6b7280; font-size: 0.875rem;">Standard terms</div>
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Services -->
+                <div class="card services-card">
+                    <h2>Services</h2>
+                    
+                    <!-- Traffic Driver -->
+                    <div class="service-group">
+                        <div class="service-header">
+                            <div class="service-title">Traffic Driver</div>
+                            <div class="info-icon" style="margin-left: auto;">ℹ</div>
                         </div>
-                    </label>
-                    <label class="contract-option" id="contract-12">
-                        <input type="radio" name="contract" value="12" class="contract-radio" onchange="calculateTotals()">
-                        <div class="contract-details">
-                            <h3>12 months</h3>
-                            <div class="contract-benefit">5% discount applied</div>
+                        <div class="tier-grid">
+                            <div class="tier-btn" onclick="selectTier('traffic', 1)" id="traffic-1">
+                                <div class="tier-label">Tier 1</div>
+                                <div class="tier-price">$7.5K</div>
+                                <div class="tier-setup">+$3.8K setup</div>
+                                <div class="tier-features">Google + Meta • $5K • 63%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Traffic Driver - Tier 1</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Paid Media Management (Google + Meta, up to $5K ad spend)</li>
+                                            <li>Full campaign setup (audience targeting, keyword research, placements)</li>
+                                            <li>Ad copywriting + creative integration</li>
+                                            <li>Pixel setup + conversion tracking</li>
+                                            <li>1 funnel (landing page, opt-in, thank-you page)</li>
+                                            <li>Up to 4 campaigns / 8 ad sets live</li>
+                                            <li>5 static ad variations + 1 light motion ad</li>
+                                            <li>Bi-weekly campaign review + adjustments</li>
+                                            <li>Monthly dashboard + 1 client strategy call</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>Management covers up to $5K ad spend only</li>
+                                            <li>No LinkedIn, TikTok, or programmatic</li>
+                                            <li>No advanced CRO testing</li>
+                                            <li>Additional creatives upsold separately</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$7,500</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$3,750</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>63%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tier-btn" onclick="selectTier('traffic', 2)" id="traffic-2">
+                                <div class="tier-label">Tier 2</div>
+                                <div class="tier-price">$12.5K</div>
+                                <div class="tier-setup">+$6.3K setup</div>
+                                <div class="tier-features">+ LinkedIn • $15K • 60%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Traffic Driver - Tier 2</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Paid Media Management (Google + Meta + LinkedIn, up to $15K ad spend)</li>
+                                            <li>Multi-channel targeting + placement strategy</li>
+                                            <li>Campaign setup for 2 funnels (lead gen + retargeting)</li>
+                                            <li>Ongoing A/B testing (ads + landing pages)</li>
+                                            <li>Ad copywriting, creative integration, conversion tracking</li>
+                                            <li>Weekly optimization + budget allocation</li>
+                                            <li>Up to 6 campaigns / 12 ad sets live</li>
+                                            <li>10 static ads + 3 motion ads</li>
+                                            <li>Dashboard + 2 client calls/month</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>Ad spend above $15K requires upgrade to Tier 3</li>
+                                            <li>No enterprise-level programmatic or OTT</li>
+                                            <li>Funnel builds beyond 2 are add-ons</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$12,500</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$6,250</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tier-btn" onclick="selectTier('traffic', 3)" id="traffic-3">
+                                <div class="tier-label">Tier 3</div>
+                                <div class="tier-price">$19K</div>
+                                <div class="tier-setup">+$9.5K setup</div>
+                                <div class="tier-features">All channels • $50K • 61%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Traffic Driver - Tier 3</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Paid Media Management (Google, Meta, LinkedIn, TikTok optional, up to $50K ad spend)</li>
+                                            <li>Full-funnel strategy (prospecting, retargeting, nurture)</li>
+                                            <li>Unlimited funnels within agreed scope</li>
+                                            <li>Creative strategy workshop + integration of AI-driven insights</li>
+                                            <li>Continuous optimization + AI creative rotation</li>
+                                            <li>CRO testing for landing pages (A/B + multivariate)</li>
+                                            <li>10+ campaigns live</li>
+                                            <li>15+ ad variations/month, including motion + video</li>
+                                            <li>Custom dashboard + monthly strategy workshop</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>Ad spend above $50K requires custom pricing</li>
+                                            <li>Web development outside funnels</li>
+                                            <li>In-person shoots (upsell)</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$18,000-$20,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$9,000-$10,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>60-61%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </label>
+                    </div>
+
+                    <!-- Retention & CRM -->
+                    <div class="service-group">
+                        <div class="service-header">
+                            <div class="service-title">Retention & CRM</div>
+                            <div class="info-icon" style="margin-left: auto;">ℹ</div>
+                        </div>
+                        <div class="tier-grid">
+                            <div class="tier-btn" onclick="selectTier('retention', 1)" id="retention-1">
+                                <div class="tier-label">Tier 1</div>
+                                <div class="tier-price">$3.5K</div>
+                                <div class="tier-setup">+$1.8K setup</div>
+                                <div class="tier-features">3 flows • Templates • 66%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Retention & CRM - Tier 1</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Setup + management of 3 flows: Welcome, Abandoned Cart, Review Requests</li>
+                                            <li>Basic email template design (3 emails)</li>
+                                            <li>Monthly performance report</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>No advanced segmentation</li>
+                                            <li>No SMS/WhatsApp</li>
+                                            <li>No AI personalization</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$3,500</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$1,750</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>66%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tier-btn" onclick="selectTier('retention', 2)" id="retention-2">
+                                <div class="tier-label">Tier 2</div>
+                                <div class="tier-price">$6K</div>
+                                <div class="tier-setup">+$3K setup</div>
+                                <div class="tier-features">Lifecycle • A/B test • 60%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Retention & CRM - Tier 2</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Full lifecycle automation (welcome, nurture, loyalty, upsell)</li>
+                                            <li>CRM optimization + list management</li>
+                                            <li>6-8 designed emails/month with copy support</li>
+                                            <li>A/B testing of subject lines, send times, and creative</li>
+                                            <li>Deliverability monitoring</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>No SMS/WhatsApp unless upsold</li>
+                                            <li>No predictive AI segmentation</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$6,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$3,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tier-btn" onclick="selectTier('retention', 3)" id="retention-3">
+                                <div class="tier-label">Tier 3</div>
+                                <div class="tier-price">$9.3K</div>
+                                <div class="tier-setup">+$4.6K setup</div>
+                                <div class="tier-features">Multi-channel • AI • 59%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Retention & CRM - Tier 3</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Multi-channel CRM (email, SMS, WhatsApp)</li>
+                                            <li>AI-driven segmentation + personalization</li>
+                                            <li>10-12 designed emails/month + automated campaigns</li>
+                                            <li>Monthly creative refresh (templates + graphics)</li>
+                                            <li>Quarterly CRM strategy workshop</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>No outbound prospecting (separate service)</li>
+                                            <li>No sales team automation unless scoped separately</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$8,500-$10,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$4,250-$5,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>59-60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Creative Support -->
+                    <div class="service-group">
+                        <div class="service-header">
+                            <div class="service-title">Creative Support</div>
+                            <div class="info-icon" style="margin-left: auto;">ℹ</div>
+                        </div>
+                        <div class="tier-grid">
+                            <div class="tier-btn" onclick="selectTier('creative', 1)" id="creative-1">
+                                <div class="tier-label">Tier 1</div>
+                                <div class="tier-price">$2.5K</div>
+                                <div class="tier-setup">+$1.3K setup</div>
+                                <div class="tier-features">8-10 ads • 5 days • 60%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Creative Support - Tier 1</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>8-10 ad creatives/month (static + light motion)</li>
+                                            <li>Turnaround: 5 business days</li>
+                                            <li>1 revision per creative</li>
+                                            <li>Delivered in platform-ready formats</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>No long-form video</li>
+                                            <li>No unlimited requests</li>
+                                            <li>No photo shoots</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$2,500</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$1,250</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tier-btn" onclick="selectTier('creative', 2)" id="creative-2">
+                                <div class="tier-label">Tier 2</div>
+                                <div class="tier-price">$5K</div>
+                                <div class="tier-setup">+$2.5K setup</div>
+                                <div class="tier-features">15-20 ads • 3 days • 60%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Creative Support - Tier 2</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>15-20 creatives/month (mix of static, video, motion)</li>
+                                            <li>3-4 short-form videos included</li>
+                                            <li>Turnaround: 3 business days</li>
+                                            <li>2 revisions per creative</li>
+                                            <li>Delivered in multiple aspect ratios (IG, FB, LinkedIn)</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>No unlimited requests</li>
+                                            <li>No photo shoots (upsell)</li>
+                                            <li>No branding or identity design</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$5,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$2,500</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>60%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tier-btn" onclick="selectTier('creative', 3)" id="creative-3">
+                                <div class="tier-label">Tier 3</div>
+                                <div class="tier-price">$8.3K</div>
+                                <div class="tier-setup">+$4.1K setup</div>
+                                <div class="tier-features">Unlimited • 48hr • 61%</div>
+                                
+                                <div class="tier-modal">
+                                    <div class="modal-header">Creative Support - Tier 3</div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title">✓ Deliverables</div>
+                                        <ul class="modal-list">
+                                            <li>Unlimited creative requests via managed CaaS</li>
+                                            <li>Priority turnaround (48 hours)</li>
+                                            <li>Campaign-focused strategy add-ons (messaging variations, creative testing guidance)</li>
+                                            <li>Motion/video heavy content supported</li>
+                                            <li>Access to quarterly creative strategy session</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-section">
+                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
+                                        <ul class="modal-list">
+                                            <li>Photo/video shoots not included</li>
+                                            <li>Custom branding projects not included</li>
+                                            <li>No long-form content production</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="modal-pricing">
+                                        <div class="modal-pricing-row">
+                                            <span>Monthly:</span>
+                                            <span>$7,500-$9,000</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Setup:</span>
+                                            <span>$3,750-$4,500</span>
+                                        </div>
+                                        <div class="modal-pricing-row">
+                                            <span>Margin:</span>
+                                            <span>60-61%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add-ons -->
+                <div class="card">
+                    <h2>Add-ons</h2>
+                    
+                    <div class="addon-grid">
+                        <div class="addon-item">
+                            <div class="addon-info">
+                                <h3>Landing Pages</h3>
+                                <div class="addon-price">$2,500 each</div>
+                            </div>
+                            <div class="addon-controls">
+                                <button class="addon-btn" onclick="updateAddon('landingPages', -1)">−</button>
+                                <span class="addon-count" id="landingPages-count">0</span>
+                                <button class="addon-btn" onclick="updateAddon('landingPages', 1)">+</button>
+                            </div>
+                        </div>
+
+                        <div class="addon-item">
+                            <div class="addon-info">
+                                <h3>Sales Funnels</h3>
+                                <div class="addon-price">$5K-$7.5K each</div>
+                            </div>
+                            <div class="addon-controls">
+                                <button class="addon-btn" onclick="updateAddon('funnels', -1)">−</button>
+                                <span class="addon-count" id="funnels-count">0</span>
+                                <button class="addon-btn" onclick="updateAddon('funnels', 1)">+</button>
+                            </div>
+                        </div>
+
+                        <div class="addon-item">
+                            <div class="addon-info">
+                                <h3>Analytics Dashboard</h3>
+                                <div class="addon-price">$2K setup + $500/mo</div>
+                            </div>
+                            <label class="addon-controls">
+                                <input type="checkbox" class="contract-radio" id="dashboard-check" onchange="calculateTotals()">
+                            </label>
+                        </div>
+
+                        <div class="addon-item">
+                            <div class="addon-info">
+                                <h3>Strategy Workshop</h3>
+                                <div class="addon-price">$3.5K - $6K</div>
+                            </div>
+                            <select id="workshop-select" onchange="calculateTotals()" style="padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; font-size: calc(var(--text-xs) * var(--scale));">
+                                <option value="">None</option>
+                                <option value="halfDay">Half-day</option>
+                                <option value="fullDay">Full-day</option>
+                            </select>
+                        </div>
+
+                        <div class="addon-item">
+                            <div class="addon-info">
+                                <h3>Video Pack</h3>
+                                <div class="addon-price">$4K (5 videos)</div>
+                            </div>
+                            <div class="addon-controls">
+                                <button class="addon-btn" onclick="updateAddon('videoPack', -1)">−</button>
+                                <span class="addon-count" id="videoPack-count">0</span>
+                                <button class="addon-btn" onclick="updateAddon('videoPack', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Quote Summary -->
-            <div class="card">
-                <h2>
-                    <span class="icon">💰</span>
-                    Quote Summary
-                </h2>
-                <div class="summary-item">
-                    <span class="summary-label">Monthly:</span>
-                    <span class="summary-value summary-monthly" id="monthly-total">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Setup:</span>
-                    <span class="summary-value summary-setup" id="setup-total">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Annual Value:</span>
-                    <span class="summary-value summary-annual" id="annual-total">$0</span>
-                </div>
-                <div id="margin-display" class="margin-display hidden">
-                    <div class="margin-row">
-                        <span>Profit Margin:</span>
-                        <span id="margin-percent" class="margin-good">0%</span>
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Contract Terms -->
+                <div class="card">
+                    <h2>Contract Terms</h2>
+                    <div class="contract-options">
+                        <label class="contract-option" id="contract-6">
+                            <input type="radio" name="contract" value="6" class="contract-radio" checked onchange="calculateTotals()">
+                            <div class="contract-details">
+                                <h3>6 months</h3>
+                                <div style="color: #6b7280; font-size: calc(var(--text-xs) * var(--scale));">Standard terms</div>
+                            </div>
+                        </label>
+                        <label class="contract-option" id="contract-12">
+                            <input type="radio" name="contract" value="12" class="contract-radio" onchange="calculateTotals()">
+                            <div class="contract-details">
+                                <h3>12 months</h3>
+                                <div class="contract-benefit">5% discount applied</div>
+                            </div>
+                        </label>
                     </div>
-                    <div id="margin-warning" class="margin-warning hidden">⚠️ Below 60% target - consider adjusting scope</div>
+                </div>
+
+                <!-- Quote Summary -->
+                <div class="card">
+                    <h2>Quote Summary</h2>
+                    <div class="summary-item">
+                        <span class="summary-label">Monthly:</span>
+                        <span class="summary-value summary-monthly" id="monthly-total">$0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Setup:</span>
+                        <span class="summary-value summary-setup" id="setup-total">$0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Annual Value:</span>
+                        <span class="summary-value summary-annual" id="annual-total">$0</span>
+                    </div>
+                    <div id="margin-display" class="margin-display hidden">
+                        <div class="margin-row">
+                            <span>Profit Margin:</span>
+                            <span id="margin-percent" class="margin-good">0%</span>
+                        </div>
+                        <div id="margin-warning" class="margin-warning hidden">⚠️ Below 60% target</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -750,13 +1253,13 @@
         <!-- Details Toggle -->
         <div class="details-toggle">
             <button class="details-btn" onclick="toggleDetails()">
-                <span id="details-toggle-text">👁️ Show deliverables & scope</span>
+                <span id="details-toggle-text">Show deliverables & scope</span>
             </button>
         </div>
 
         <!-- Details Content -->
         <div class="card details-content" id="details-content">
-            <h2>📋 What's Included</h2>
+            <h2>What's Included</h2>
             <div id="details-list"></div>
         </div>
     </div>
@@ -807,6 +1310,20 @@
             workshop: null,
             videoPack: 0
         };
+
+        // Text size control
+        function setTextSize(size) {
+            const container = document.querySelector('.container');
+            const buttons = document.querySelectorAll('.control-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            container.className = container.className.replace(/text-\w+/, '');
+            if (size !== 'normal') {
+                container.classList.add(`text-${size}`);
+            }
+        }
 
         // Functions
         function selectTier(service, tier) {
@@ -926,10 +1443,10 @@
             
             if (detailsContent.classList.contains('show')) {
                 detailsContent.classList.remove('show');
-                toggleText.textContent = '👁️ Show deliverables & scope';
+                toggleText.textContent = 'Show deliverables & scope';
             } else {
                 detailsContent.classList.add('show');
-                toggleText.textContent = '🙈 Hide deliverables & scope';
+                toggleText.textContent = 'Hide deliverables & scope';
                 updateDetailsContent();
             }
         }
