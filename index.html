@@ -72,7 +72,6 @@
             justify-content: center;
             font-size: 0.875rem;
             transition: all 0.2s ease;
-            font-weight: 600;
         }
         
         .control-btn:hover {
@@ -176,18 +175,26 @@
             color: #374151;
         }
         
-        .service-icon {
-            width: calc(1.125rem * var(--scale));
-            height: calc(1.125rem * var(--scale));
-            color: #3b82f6;
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            cursor: help;
         }
         
-        /* Info Icon */
-        .info-icon {
-            width: calc(1rem * var(--scale));
-            height: calc(1rem * var(--scale));
-            color: #6b7280;
-            cursor: help;
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111827;
+            color: white;
+            padding: calc(0.5rem * var(--scale));
+            border-radius: calc(0.375rem * var(--scale));
+            font-size: calc(var(--text-xs) * var(--scale));
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
         /* Tier Grid */
@@ -205,14 +212,11 @@
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: left;
-            position: relative;
         }
         
         .tier-btn:hover {
             border-color: #3b82f6;
             background: #f0f9ff;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
         
         .tier-btn.selected {
@@ -245,100 +249,6 @@
             color: #059669;
             margin-top: calc(0.25rem * var(--scale));
             font-weight: 500;
-        }
-        
-        /* Modal */
-        .tier-modal {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: calc(0.75rem * var(--scale));
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-            padding: calc(1.25rem * var(--scale));
-            z-index: 100;
-            opacity: 0;
-            transform: translateY(-10px);
-            pointer-events: none;
-            transition: all 0.2s ease;
-            margin-top: calc(0.5rem * var(--scale));
-            max-width: 350px;
-        }
-        
-        .tier-btn:hover .tier-modal {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        
-        .modal-header {
-            font-size: calc(var(--text-base) * var(--scale));
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: calc(0.75rem * var(--scale));
-            padding-bottom: calc(0.5rem * var(--scale));
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .modal-section {
-            margin-bottom: calc(1rem * var(--scale));
-        }
-        
-        .modal-section:last-child {
-            margin-bottom: 0;
-        }
-        
-        .modal-section-title {
-            font-size: calc(var(--text-sm) * var(--scale));
-            font-weight: 600;
-            color: #059669;
-            margin-bottom: calc(0.5rem * var(--scale));
-        }
-        
-        .modal-section-title.exclusions {
-            color: #dc2626;
-        }
-        
-        .modal-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .modal-list li {
-            font-size: calc(var(--text-xs) * var(--scale));
-            color: #6b7280;
-            margin-bottom: calc(0.375rem * var(--scale));
-            padding-left: calc(1rem * var(--scale));
-            position: relative;
-        }
-        
-        .modal-list li:before {
-            content: '•';
-            color: #9ca3af;
-            position: absolute;
-            left: 0;
-        }
-        
-        .modal-pricing {
-            background: #f8fafc;
-            border-radius: calc(0.5rem * var(--scale));
-            padding: calc(0.75rem * var(--scale));
-            margin-top: calc(0.75rem * var(--scale));
-        }
-        
-        .modal-pricing-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: calc(var(--text-xs) * var(--scale));
-            margin-bottom: calc(0.25rem * var(--scale));
-        }
-        
-        .modal-pricing-row:last-child {
-            margin-bottom: 0;
-            font-weight: 600;
-            color: #059669;
         }
         
         /* Add-ons */
@@ -598,10 +508,19 @@
             margin-bottom: calc(0.25rem * var(--scale));
         }
         
+        /* Icons */
+        .icon {
+            font-size: calc(var(--text-base) * var(--scale));
+        }
+        
         /* Responsive */
         @media (max-width: 1400px) {
             .main-grid {
                 grid-template-columns: 1.8fr 1fr;
+            }
+            
+            .tier-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
         
@@ -673,7 +592,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>VMG Pricing Calculator</h1>
+            <h1>🧮 VMG Pricing Calculator</h1>
             <p>Quick, consistent, profitable quotes • v1.0</p>
         </div>
 
@@ -683,13 +602,17 @@
             <div class="left-column">
                 <!-- Services -->
                 <div class="card services-card">
-                    <h2>Services</h2>
+                    <h2>
+                        <span class="icon">⚙️</span>
+                        Select Services
+                    </h2>
                     
                     <!-- Traffic Driver -->
                     <div class="service-group">
                         <div class="service-header">
-                            <div class="service-title">Traffic Driver</div>
-                            <div class="info-icon" style="margin-left: auto;">ℹ</div>
+                            <span class="icon">👥</span>
+                            <span class="service-title">Traffic Driver</span>
+                            <span class="tooltip icon" data-tip="Lead generation through paid media management">ℹ️</span>
                         </div>
                         <div class="tier-grid">
                             <div class="tier-btn" onclick="selectTier('traffic', 1)" id="traffic-1">
@@ -697,150 +620,18 @@
                                 <div class="tier-price">$7.5K</div>
                                 <div class="tier-setup">+$3.8K setup</div>
                                 <div class="tier-features">Google + Meta • $5K • 63%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Traffic Driver - Tier 1</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Paid Media Management (Google + Meta, up to $5K ad spend)</li>
-                                            <li>Full campaign setup (audience targeting, keyword research, placements)</li>
-                                            <li>Ad copywriting + creative integration</li>
-                                            <li>Pixel setup + conversion tracking</li>
-                                            <li>1 funnel (landing page, opt-in, thank-you page)</li>
-                                            <li>Up to 4 campaigns / 8 ad sets live</li>
-                                            <li>5 static ad variations + 1 light motion ad</li>
-                                            <li>Bi-weekly campaign review + adjustments</li>
-                                            <li>Monthly dashboard + 1 client strategy call</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>Management covers up to $5K ad spend only</li>
-                                            <li>No LinkedIn, TikTok, or programmatic</li>
-                                            <li>No advanced CRO testing</li>
-                                            <li>Additional creatives upsold separately</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$7,500</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$3,750</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>63%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                            
                             <div class="tier-btn" onclick="selectTier('traffic', 2)" id="traffic-2">
                                 <div class="tier-label">Tier 2</div>
                                 <div class="tier-price">$12.5K</div>
                                 <div class="tier-setup">+$6.3K setup</div>
                                 <div class="tier-features">+ LinkedIn • $15K • 60%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Traffic Driver - Tier 2</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Paid Media Management (Google + Meta + LinkedIn, up to $15K ad spend)</li>
-                                            <li>Multi-channel targeting + placement strategy</li>
-                                            <li>Campaign setup for 2 funnels (lead gen + retargeting)</li>
-                                            <li>Ongoing A/B testing (ads + landing pages)</li>
-                                            <li>Ad copywriting, creative integration, conversion tracking</li>
-                                            <li>Weekly optimization + budget allocation</li>
-                                            <li>Up to 6 campaigns / 12 ad sets live</li>
-                                            <li>10 static ads + 3 motion ads</li>
-                                            <li>Dashboard + 2 client calls/month</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>Ad spend above $15K requires upgrade to Tier 3</li>
-                                            <li>No enterprise-level programmatic or OTT</li>
-                                            <li>Funnel builds beyond 2 are add-ons</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$12,500</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$6,250</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>60%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                            
                             <div class="tier-btn" onclick="selectTier('traffic', 3)" id="traffic-3">
                                 <div class="tier-label">Tier 3</div>
                                 <div class="tier-price">$19K</div>
                                 <div class="tier-setup">+$9.5K setup</div>
                                 <div class="tier-features">All channels • $50K • 61%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Traffic Driver - Tier 3</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Paid Media Management (Google, Meta, LinkedIn, TikTok optional, up to $50K ad spend)</li>
-                                            <li>Full-funnel strategy (prospecting, retargeting, nurture)</li>
-                                            <li>Unlimited funnels within agreed scope</li>
-                                            <li>Creative strategy workshop + integration of AI-driven insights</li>
-                                            <li>Continuous optimization + AI creative rotation</li>
-                                            <li>CRO testing for landing pages (A/B + multivariate)</li>
-                                            <li>10+ campaigns live</li>
-                                            <li>15+ ad variations/month, including motion + video</li>
-                                            <li>Custom dashboard + monthly strategy workshop</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>Ad spend above $50K requires custom pricing</li>
-                                            <li>Web development outside funnels</li>
-                                            <li>In-person shoots (upsell)</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$18,000-$20,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$9,000-$10,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>60-61%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -848,8 +639,9 @@
                     <!-- Retention & CRM -->
                     <div class="service-group">
                         <div class="service-header">
-                            <div class="service-title">Retention & CRM</div>
-                            <div class="info-icon" style="margin-left: auto;">ℹ</div>
+                            <span class="icon">⚡</span>
+                            <span class="service-title">Retention & CRM</span>
+                            <span class="tooltip icon" data-tip="Email marketing and customer lifecycle management">ℹ️</span>
                         </div>
                         <div class="tier-grid">
                             <div class="tier-btn" onclick="selectTier('retention', 1)" id="retention-1">
@@ -857,133 +649,18 @@
                                 <div class="tier-price">$3.5K</div>
                                 <div class="tier-setup">+$1.8K setup</div>
                                 <div class="tier-features">3 flows • Templates • 66%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Retention & CRM - Tier 1</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Setup + management of 3 flows: Welcome, Abandoned Cart, Review Requests</li>
-                                            <li>Basic email template design (3 emails)</li>
-                                            <li>Monthly performance report</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>No advanced segmentation</li>
-                                            <li>No SMS/WhatsApp</li>
-                                            <li>No AI personalization</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$3,500</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$1,750</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>66%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                            
                             <div class="tier-btn" onclick="selectTier('retention', 2)" id="retention-2">
                                 <div class="tier-label">Tier 2</div>
                                 <div class="tier-price">$6K</div>
                                 <div class="tier-setup">+$3K setup</div>
                                 <div class="tier-features">Lifecycle • A/B test • 60%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Retention & CRM - Tier 2</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Full lifecycle automation (welcome, nurture, loyalty, upsell)</li>
-                                            <li>CRM optimization + list management</li>
-                                            <li>6-8 designed emails/month with copy support</li>
-                                            <li>A/B testing of subject lines, send times, and creative</li>
-                                            <li>Deliverability monitoring</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>No SMS/WhatsApp unless upsold</li>
-                                            <li>No predictive AI segmentation</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$6,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$3,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>60%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                            
                             <div class="tier-btn" onclick="selectTier('retention', 3)" id="retention-3">
                                 <div class="tier-label">Tier 3</div>
                                 <div class="tier-price">$9.3K</div>
                                 <div class="tier-setup">+$4.6K setup</div>
                                 <div class="tier-features">Multi-channel • AI • 59%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Retention & CRM - Tier 3</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Multi-channel CRM (email, SMS, WhatsApp)</li>
-                                            <li>AI-driven segmentation + personalization</li>
-                                            <li>10-12 designed emails/month + automated campaigns</li>
-                                            <li>Monthly creative refresh (templates + graphics)</li>
-                                            <li>Quarterly CRM strategy workshop</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>No outbound prospecting (separate service)</li>
-                                            <li>No sales team automation unless scoped separately</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$8,500-$10,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$4,250-$5,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>59-60%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -991,8 +668,9 @@
                     <!-- Creative Support -->
                     <div class="service-group">
                         <div class="service-header">
-                            <div class="service-title">Creative Support</div>
-                            <div class="info-icon" style="margin-left: auto;">ℹ</div>
+                            <span class="icon">🎨</span>
+                            <span class="service-title">Creative Support</span>
+                            <span class="tooltip icon" data-tip="Ad creative production and design services">ℹ️</span>
                         </div>
                         <div class="tier-grid">
                             <div class="tier-btn" onclick="selectTier('creative', 1)" id="creative-1">
@@ -1000,136 +678,18 @@
                                 <div class="tier-price">$2.5K</div>
                                 <div class="tier-setup">+$1.3K setup</div>
                                 <div class="tier-features">8-10 ads • 5 days • 60%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Creative Support - Tier 1</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>8-10 ad creatives/month (static + light motion)</li>
-                                            <li>Turnaround: 5 business days</li>
-                                            <li>1 revision per creative</li>
-                                            <li>Delivered in platform-ready formats</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>No long-form video</li>
-                                            <li>No unlimited requests</li>
-                                            <li>No photo shoots</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$2,500</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$1,250</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>60%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                            
                             <div class="tier-btn" onclick="selectTier('creative', 2)" id="creative-2">
                                 <div class="tier-label">Tier 2</div>
                                 <div class="tier-price">$5K</div>
                                 <div class="tier-setup">+$2.5K setup</div>
                                 <div class="tier-features">15-20 ads • 3 days • 60%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Creative Support - Tier 2</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>15-20 creatives/month (mix of static, video, motion)</li>
-                                            <li>3-4 short-form videos included</li>
-                                            <li>Turnaround: 3 business days</li>
-                                            <li>2 revisions per creative</li>
-                                            <li>Delivered in multiple aspect ratios (IG, FB, LinkedIn)</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>No unlimited requests</li>
-                                            <li>No photo shoots (upsell)</li>
-                                            <li>No branding or identity design</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$5,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$2,500</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>60%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                            
                             <div class="tier-btn" onclick="selectTier('creative', 3)" id="creative-3">
                                 <div class="tier-label">Tier 3</div>
                                 <div class="tier-price">$8.3K</div>
                                 <div class="tier-setup">+$4.1K setup</div>
                                 <div class="tier-features">Unlimited • 48hr • 61%</div>
-                                
-                                <div class="tier-modal">
-                                    <div class="modal-header">Creative Support - Tier 3</div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title">✓ Deliverables</div>
-                                        <ul class="modal-list">
-                                            <li>Unlimited creative requests via managed CaaS</li>
-                                            <li>Priority turnaround (48 hours)</li>
-                                            <li>Campaign-focused strategy add-ons (messaging variations, creative testing guidance)</li>
-                                            <li>Motion/video heavy content supported</li>
-                                            <li>Access to quarterly creative strategy session</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-section">
-                                        <div class="modal-section-title exclusions">✗ Exclusions</div>
-                                        <ul class="modal-list">
-                                            <li>Photo/video shoots not included</li>
-                                            <li>Custom branding projects not included</li>
-                                            <li>No long-form content production</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="modal-pricing">
-                                        <div class="modal-pricing-row">
-                                            <span>Monthly:</span>
-                                            <span>$7,500-$9,000</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Setup:</span>
-                                            <span>$3,750-$4,500</span>
-                                        </div>
-                                        <div class="modal-pricing-row">
-                                            <span>Margin:</span>
-                                            <span>60-61%</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1137,12 +697,15 @@
 
                 <!-- Add-ons -->
                 <div class="card">
-                    <h2>Add-ons</h2>
+                    <h2>
+                        <span class="icon">➕</span>
+                        Add-ons
+                    </h2>
                     
                     <div class="addon-grid">
                         <div class="addon-item">
                             <div class="addon-info">
-                                <h3>Landing Pages</h3>
+                                <h3 class="tooltip" data-tip="Custom landing page builds">Landing Pages</h3>
                                 <div class="addon-price">$2,500 each</div>
                             </div>
                             <div class="addon-controls">
@@ -1154,7 +717,7 @@
 
                         <div class="addon-item">
                             <div class="addon-info">
-                                <h3>Sales Funnels</h3>
+                                <h3 class="tooltip" data-tip="Complete sales funnel setup">Sales Funnels</h3>
                                 <div class="addon-price">$5K-$7.5K each</div>
                             </div>
                             <div class="addon-controls">
@@ -1166,7 +729,7 @@
 
                         <div class="addon-item">
                             <div class="addon-info">
-                                <h3>Analytics Dashboard</h3>
+                                <h3 class="tooltip" data-tip="Custom reporting dashboard">Analytics Dashboard</h3>
                                 <div class="addon-price">$2K setup + $500/mo</div>
                             </div>
                             <label class="addon-controls">
@@ -1188,7 +751,7 @@
 
                         <div class="addon-item">
                             <div class="addon-info">
-                                <h3>Video Pack</h3>
+                                <h3 class="tooltip" data-tip="5 professional videos">Video Pack</h3>
                                 <div class="addon-price">$4K (5 videos)</div>
                             </div>
                             <div class="addon-controls">
@@ -1205,7 +768,10 @@
             <div class="right-column">
                 <!-- Contract Terms -->
                 <div class="card">
-                    <h2>Contract Terms</h2>
+                    <h2>
+                        <span class="icon">📅</span>
+                        Contract Terms
+                    </h2>
                     <div class="contract-options">
                         <label class="contract-option" id="contract-6">
                             <input type="radio" name="contract" value="6" class="contract-radio" checked onchange="calculateTotals()">
@@ -1226,7 +792,10 @@
 
                 <!-- Quote Summary -->
                 <div class="card">
-                    <h2>Quote Summary</h2>
+                    <h2>
+                        <span class="icon">💰</span>
+                        Quote Summary
+                    </h2>
                     <div class="summary-item">
                         <span class="summary-label">Monthly:</span>
                         <span class="summary-value summary-monthly" id="monthly-total">$0</span>
@@ -1253,13 +822,13 @@
         <!-- Details Toggle -->
         <div class="details-toggle">
             <button class="details-btn" onclick="toggleDetails()">
-                <span id="details-toggle-text">Show deliverables & scope</span>
+                <span id="details-toggle-text">👁️ Show deliverables & scope</span>
             </button>
         </div>
 
         <!-- Details Content -->
         <div class="card details-content" id="details-content">
-            <h2>What's Included</h2>
+            <h2>📋 What's Included</h2>
             <div id="details-list"></div>
         </div>
     </div>
@@ -1443,10 +1012,10 @@
             
             if (detailsContent.classList.contains('show')) {
                 detailsContent.classList.remove('show');
-                toggleText.textContent = 'Show deliverables & scope';
+                toggleText.textContent = '👁️ Show deliverables & scope';
             } else {
                 detailsContent.classList.add('show');
-                toggleText.textContent = 'Hide deliverables & scope';
+                toggleText.textContent = '🙈 Hide deliverables & scope';
                 updateDetailsContent();
             }
         }
