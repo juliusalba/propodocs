@@ -6,6 +6,7 @@ import { AddonsSection } from './components/AddonsSection';
 import { ContractTerms } from './components/ContractTerms';
 import { QuoteSummary } from './components/QuoteSummary';
 import { DetailsModal } from './components/DetailsModal';
+import { UsageLog } from './components/UsageLog';
 import { services, addOnPrices } from './data/pricingData';
 import type { SelectedServices, AddOnsState } from './types';
 
@@ -174,11 +175,14 @@ function App() {
   }, [selectedServices, addOns, contractTerm]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto p-6">
         <Header clientName={clientName} onClientNameChange={setClientName} />
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Usage Log */}
+        <UsageLog />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Services & Addons */}
           <div className="xl:col-span-2 space-y-6">
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
