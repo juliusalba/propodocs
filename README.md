@@ -2,8 +2,6 @@
 
 A professional, interactive pricing calculator for Vogel Marketing Group's service packages. Built with React, TypeScript, and Vite, featuring VMG's signature maroon branding and PDF export capabilities.
 
-![VMG Logo](public/vmg-logo-circle.jpg)
-
 ## 🎯 Overview
 
 The VMG Pricing Calculator is a sophisticated tool designed to help sales teams and clients quickly configure and price marketing service packages. It provides real-time calculations, profit margin analysis, and professional PDF quote generation.
