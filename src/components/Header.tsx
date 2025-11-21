@@ -17,7 +17,7 @@ export function Header({ clientName, onClientNameChange }: HeaderProps) {
                     <img
                         src="/vmg-logo-circle.jpg"
                         alt="VMG Logo"
-                        className="w-20 h-20 rounded-full shadow-lg"
+                        className="w-24 h-24 rounded-full shadow-xl object-cover"
                     />
                     <div className="text-left">
                         <h1 className="text-4xl font-light tracking-wide" style={{ color: '#7A1E1E' }}>
@@ -26,7 +26,6 @@ export function Header({ clientName, onClientNameChange }: HeaderProps) {
                         <p className="text-sm text-gray-600 font-light tracking-wider mt-1">PRICING CALCULATOR</p>
                     </div>
                 </div>
-
                 {/* Client Name Input */}
                 <div className="max-w-md mx-auto">
                     <div className="relative">
