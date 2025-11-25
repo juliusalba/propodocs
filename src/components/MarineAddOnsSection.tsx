@@ -8,11 +8,11 @@ interface MarineAddOnsSectionProps {
 
 export function MarineAddOnsSection({ addOns, onUpdate }: MarineAddOnsSectionProps) {
     const categories = {
-        conversational: { title: '💬 Conversational & Capture', icon: '💬' },
-        email: { title: '📧 Email/SMS & Enablement', icon: '📧' },
-        creative: { title: '🎨 Creative/CRO/Inventory', icon: '🎨' },
-        local: { title: '📍 Local & Reputation', icon: '📍' },
-        events: { title: '🎪 Events & Production', icon: '🎪' }
+        conversational: { title: 'Conversational & Capture', icon: '💬' },
+        email: { title: 'Email/SMS & Enablement', icon: '📧' },
+        creative: { title: 'Creative/CRO/Inventory', icon: '🎨' },
+        local: { title: 'Local & Reputation', icon: '📍' },
+        events: { title: 'Events & Production', icon: '🎪' }
     };
 
     const addOnsByCategory = {
@@ -53,8 +53,8 @@ export function MarineAddOnsSection({ addOns, onUpdate }: MarineAddOnsSectionPro
                             <button
                                 onClick={() => onUpdate(key as keyof MarineAddOnsState, !addOns[key as keyof MarineAddOnsState])}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${addOns[key as keyof MarineAddOnsState]
-                                        ? 'bg-gradient-to-r from-[#7A1E1E] to-[#501010] text-white shadow-md'
-                                        : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-[#7A1E1E]'
+                                    ? 'bg-gradient-to-r from-[#7A1E1E] to-[#501010] text-white shadow-md'
+                                    : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-[#7A1E1E]'
                                     }`}
                             >
                                 {addOns[key as keyof MarineAddOnsState] ? 'Added' : 'Add'}
