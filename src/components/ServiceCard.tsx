@@ -73,8 +73,15 @@ export function ServiceCard({ title, icon, description, tiers, selectedTier, onS
                                     <span className="text-sm font-normal text-gray-500">/mo</span>
                                 </div>
 
-                                <div className="text-xs text-gray-500 mb-3 font-medium">
-                                    +${(tier.setup / 1000).toFixed(1)}K setup
+                                <div className="text-xs text-gray-500 mb-3 font-medium group/setup relative">
+                                    <div className="flex items-center gap-1">
+                                        <span>+${tier.setup.toLocaleString()} setup fee</span>
+                                        <Info className="w-3 h-3 text-gray-400 cursor-help" />
+                                    </div>
+                                    <div className="absolute left-0 top-full mt-1 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover/setup:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20 shadow-xl">
+                                        50% of first month's retainer (covers onboarding + strategy)
+                                        <div className="absolute bottom-full left-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+                                    </div>
                                 </div>
 
                                 <div className="text-xs font-medium text-emerald-600 border-t border-gray-200 pt-3 mt-3 leading-relaxed">

@@ -1,4 +1,4 @@
-import { DollarSign, FileDown, TrendingUp, AlertCircle } from 'lucide-react';
+import { DollarSign, FileDown, TrendingUp, AlertCircle, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface QuoteSummaryProps {
@@ -29,9 +29,16 @@ export function QuoteSummary({ monthlyTotal, setupTotal, annualTotal, margin, on
                     </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 border-b-2 border-gray-100">
-                    <span className="text-gray-600 font-semibold">Setup:</span>
+                <div className="flex justify-between items-center py-3 border-b-2 border-gray-100 group/setup relative">
+                    <span className="text-gray-600 font-semibold flex items-center gap-1.5">
+                        Setup Fee:
+                        <Info className="w-3.5 h-3.5 text-gray-400 cursor-help" />
+                    </span>
                     <span className="text-xl font-bold text-gray-700">${setupTotal.toLocaleString()}</span>
+                    <div className="absolute left-0 top-full mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover/setup:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20 shadow-xl">
+                        50% of first month's retainer (covers onboarding + strategy)
+                        <div className="absolute bottom-full left-8 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+                    </div>
                 </div>
 
                 <div className="flex justify-between items-center py-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl px-4 -mx-2">
