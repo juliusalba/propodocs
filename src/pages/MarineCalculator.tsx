@@ -86,6 +86,51 @@ export function MarineCalculator() {
         }
     };
 
+    const handleExportPDF = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/generate-marine-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    clientName,
+                    selectedTier,
+                    addOns,
+                    totals,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`PDF generation failed: ${errorText}`);
+            }
+
+            const blob = await response.blob();
+            const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+
+            const url = window.URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `VMG-Marine-Quote-${clientName || 'Client'}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+            document.body.appendChild(a);
+            a.click();
+
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+
+            console.log('Marine PDF downloaded successfully');
+        } catch (error) {
+            console.error('Error generating Marine PDF:', error);
+            alert('Failed to generate PDF. Please ensure the PDF server is running.');
+        }
+    };
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="max-w-7xl mx-auto p-6">
@@ -232,11 +277,23 @@ export function MarineCalculator() {
                             </div>
 
                             {totals.monthlyTotal > 0 && (
-                                <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                                    <p className="text-xs text-gray-700 leading-relaxed">
-                                        <strong>6-month term</strong> • <strong>&lt;5-minute response SLA</strong> • Setup fee covers onboarding + strategy
-                                    </p>
-                                </div>
+                                <>
+                                    <button
+                                        onClick={handleExportPDF}
+                                        className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-[#7A1E1E] to-[#501010] text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 0 012-2h5.586a1 0 01.707.293l5.414 5.414a1 0 01.293.707V19a2 0 01-2 2z" />
+                                        </svg>
+                                        Export PDF
+                                    </button>
+
+                                    <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                                        <p className="text-xs text-gray-700 leading-relaxed">
+                                            <strong>6-month term</strong> • <strong>&lt;5-minute response SLA</strong> • Setup fee covers onboarding + strategy
+                                        </p>
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
