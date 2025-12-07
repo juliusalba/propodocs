@@ -110,7 +110,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onFileProces
 
     const getFileIcon = (fileName: string) => {
         if (fileName.endsWith('.pdf')) return <FileText className="w-8 h-8 text-red-500" />;
-        if (fileName.endsWith('.docx')) return <FileType className="w-8 h-8 text-blue-500" />;
+        if (fileName.endsWith('.docx')) return <FileType className="w-8 h-8 text-[#8C0000]" />;
         if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv'))
             return <FileSpreadsheet className="w-8 h-8 text-green-500" />;
         return <FileText className="w-8 h-8 text-emerald-600" />;

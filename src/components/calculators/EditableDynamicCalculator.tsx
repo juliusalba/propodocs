@@ -157,7 +157,7 @@ function TierCard({
     formatCurrency: (value: number) => string;
 }) {
     return (
-        <div className={`bg-white border-2 border-gray-200 rounded-xl p-5 transition-all ${isEditMode ? 'hover:shadow-md' : 'hover:border-[#3b82f6] cursor-pointer'
+        <div className={`bg-white border-2 border-gray-200 rounded-xl p-5 transition-all ${isEditMode ? 'hover:shadow-md' : 'hover:border-[#8C0000] cursor-pointer'
             }`}>
             <div className="flex items-start justify-between mb-3">
                 <div>
@@ -167,7 +167,7 @@ function TierCard({
             </div>
 
             <div className="mb-4">
-                <div className="text-2xl font-bold text-[#3b82f6]">
+                <div className="text-2xl font-bold text-[#8C0000]">
                     {formatCurrency(tier.monthlyPrice)}
                     <span className="text-sm font-normal text-gray-500">/mo</span>
                 </div>

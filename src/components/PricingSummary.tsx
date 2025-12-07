@@ -46,7 +46,7 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
             <div className="my-8 border border-gray-200 rounded-xl overflow-hidden bg-white">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="font-bold text-gray-900">Investment Summary</h3>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 capitalize">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#8C0000]/10 text-[#8C0000] capitalize">
                         {tier?.name || 'Custom'} Plan
                     </span>
                 </div>

@@ -61,8 +61,8 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
                         </div>
                     </div>
                     <div className="flex gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Users className="w-4 h-4 text-blue-600" />
+                        <div className="w-8 h-8 bg-[#8C0000]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Users className="w-4 h-4 text-[#8C0000]" />
                         </div>
                         <div>
                             <h4 className="font-medium text-gray-900">Save Time</h4>
@@ -92,7 +92,7 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
             content: (
                 <div className="space-y-3">
                     <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="w-6 h-6 bg-[#8C0000] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                             1
                         </div>
                         <div>
@@ -103,7 +103,7 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="w-6 h-6 bg-[#8C0000] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                             2
                         </div>
                         <div>
@@ -114,7 +114,7 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="w-6 h-6 bg-[#8C0000] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                             3
                         </div>
                         <div>
@@ -132,7 +132,7 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
     return (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
+            <div className="bg-gradient-to-r from-[#8C0000] to-[#500000] p-6 text-white">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                         <Lightbulb className="w-5 h-5" />
@@ -157,7 +157,7 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
                                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isExpanded ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isExpanded ? 'bg-[#8C0000] text-white' : 'bg-gray-100 text-gray-600'
                                         }`}>
                                         <Icon className="w-4 h-4" />
                                     </div>
@@ -195,7 +195,7 @@ export function CalculatorGuide({ onCreateNew }: CalculatorGuideProps) {
                 <div className="p-6 bg-gray-50 border-t border-gray-100">
                     <button
                         onClick={onCreateNew}
-                        className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-[#8C0000] text-white rounded-xl font-medium hover:bg-[#500000] transition-colors"
                     >
                         <Sparkles className="w-5 h-5" />
                         Create Your First Calculator
