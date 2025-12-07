@@ -23,6 +23,7 @@ import { ContractEditor } from './pages/ContractEditor';
 import { ContractSigning } from './pages/ContractSigning';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ConfigProvider } from 'antd';
+import { Analytics } from '@vercel/analytics/react';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -165,6 +166,7 @@ function App() {
           <Route path="/c/:token" element={<ContractSigning />} />
           <Route path="/proposal/:id/success" element={<AcceptanceSuccess />} />
         </Routes>
+        <Analytics />
       </AuthProvider>
     </ConfigProvider>
   );
