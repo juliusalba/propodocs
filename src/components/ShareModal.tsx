@@ -24,7 +24,46 @@ export function ShareModal({ isOpen, onClose, proposalId, proposalTitle, clientN
     const toast = useToast();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    const shareUrl = providedShareUrl || `${window.location.origin}/proposal/${proposalId}`;
+    const [shareUrl, setShareUrl] = useState(providedShareUrl || '');
+    const [loadingLink, setLoadingLink] = useState(false);
+
+    // Fetch or create public link on mount
+    useEffect(() => {
+        if (providedShareUrl) {
+            setShareUrl(providedShareUrl);
+            return;
+        }
+
+        const fetchLink = async () => {
+            if (!proposalId) return;
+            setLoadingLink(true);
+            try {
+                // First try to get existing links
+                const { links } = await api.getLinks(Number(proposalId));
+                const publicLink = links?.find((l: any) => !l.revoked_at);
+
+                if (publicLink) {
+                    setShareUrl(`${window.location.origin}/p/${publicLink.token}`);
+                } else {
+                    // Create new permanent public link
+                    const newLink = await api.createLink(Number(proposalId), {
+                        type: 'view',
+                        expires_at: null
+                    });
+                    setShareUrl(`${window.location.origin}/p/${newLink.token}`);
+                }
+            } catch (error) {
+                console.error('Failed to generate share link:', error);
+                toast.error('Failed to generate share link');
+            } finally {
+                setLoadingLink(false);
+            }
+        };
+
+        if (isOpen) {
+            fetchLink();
+        }
+    }, [proposalId, isOpen, providedShareUrl, toast]);
 
     // Auto-resize textarea
     useEffect(() => {
@@ -35,6 +74,7 @@ export function ShareModal({ isOpen, onClose, proposalId, proposalTitle, clientN
     }, [message]);
 
     const handleCopyLink = () => {
+        if (!shareUrl) return;
         navigator.clipboard.writeText(shareUrl);
         setCopied(true);
         toast.success('Link copied to clipboard');
@@ -127,7 +167,11 @@ export function ShareModal({ isOpen, onClose, proposalId, proposalTitle, clientN
                                 <div className="flex gap-2">
                                     <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-600 truncate flex items-center gap-2">
                                         <Globe className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                                        {shareUrl}
+                                        {loadingLink ? (
+                                            <span className="text-gray-400 italic">Generating link...</span>
+                                        ) : (
+                                            shareUrl || 'Error generating link'
+                                        )}
                                     </div>
                                     <button
                                         onClick={handleCopyLink}
