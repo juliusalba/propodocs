@@ -35,8 +35,8 @@ router.post('/register', async (req, res) => {
             return;
         }
 
-        // Hash password
-        const passwordHash = await bcrypt.hash(data.password, 10);
+        // Hash password (8 rounds = fast but still secure)
+        const passwordHash = await bcrypt.hash(data.password, 8);
 
         // Create user
         const { data: newUser, error } = await supabase
@@ -290,8 +290,8 @@ router.post('/reset-password', async (req, res) => {
             return;
         }
 
-        // Hash new password
-        const passwordHash = await bcrypt.hash(password, 10);
+        // Hash new password (8 rounds = fast but still secure)
+        const passwordHash = await bcrypt.hash(password, 8);
 
         // Update user password
         const { error: updateError } = await supabase
