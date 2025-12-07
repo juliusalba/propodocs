@@ -9,10 +9,11 @@ export interface JWTPayload {
 export interface AuthRequest extends Request {
     user?: JWTPayload;
     body: any;
-    params: any;
-    query: any;
+    params: any; // Allow explicit param access
+    query: any;  // Allow explicit query access
     headers: any;
-    file?: Express.Multer.File; // For multer file uploads
+    file?: any;  // Use specific type or any to avoid namespace issues
+    ip: string;  // Explicitly include ip from Request
 }
 
 export function generateToken(payload: JWTPayload): string {
