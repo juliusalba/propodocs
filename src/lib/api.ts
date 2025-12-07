@@ -359,7 +359,12 @@ class APIClient {
     }
 
     async getTemplates() {
-        return this.request('/templates');
+        // Cache templates for 15 minutes (rarely change)
+        return cache.getOrFetch(
+            'templates:list',
+            () => this.request('/templates'),
+            { ttl: 15 * 60 * 1000, useMemory: true, usePersistent: false }
+        );
     }
 
     async getTemplate(id: number) {
@@ -379,11 +384,21 @@ class APIClient {
 
     // Calculators
     async getCalculators() {
-        return this.request('/calculators');
+        // Cache calculators list for 10 minutes
+        return cache.getOrFetch(
+            'calculators:list',
+            () => this.request('/calculators'),
+            { ttl: 10 * 60 * 1000, useMemory: true, usePersistent: false }
+        );
     }
 
     async getCalculator(id: string) {
-        return this.request(`/calculators/${id}`);
+        // Cache individual calculator for 30 minutes
+        return cache.getOrFetch(
+            `calculator:${id}`,
+            () => this.request(`/calculators/${id}`),
+            { ttl: 30 * 60 * 1000, useMemory: true, usePersistent: true }
+        );
     }
 
     async createCalculator(data: any) {
