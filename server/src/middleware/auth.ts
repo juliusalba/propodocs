@@ -12,7 +12,6 @@ export interface AuthRequest extends Request {
     params: any;
     query: any;
     headers: any;
-    ip?: string;
     file?: Express.Multer.File; // For multer file uploads
 }
 
