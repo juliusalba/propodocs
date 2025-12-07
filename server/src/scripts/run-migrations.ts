@@ -29,11 +29,8 @@ async function runMigrations() {
             const sql = await fs.readFile(filePath, 'utf-8');
 
             try {
-                // Execute SQL using Supabase's RPC or direct query
-                const { error } = await supabase.rpc('exec_sql', { sql_query: sql }).catch(async () => {
-                    // If RPC doesn't exist, try direct query (for simple statements)
-                    return await supabase.from('_migrations').insert({ sql, file });
-                });
+                // Try executing SQL using Supabase's RPC
+                const { error } = await supabase.rpc('exec_sql', { sql_query: sql });
 
                 if (error) {
                     console.log(`⚠️  Note: ${file} may already be applied or needs manual execution`);
