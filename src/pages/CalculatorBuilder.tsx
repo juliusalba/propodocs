@@ -288,7 +288,7 @@ function CalculatorBuilderInner() {
                                         {([
                                             { id: 'light', label: 'Light', colors: 'bg-white border-gray-300 text-gray-900' },
                                             { id: 'dark', label: 'Dark', colors: 'bg-gray-900 border-gray-700 text-white' },
-                                            { id: 'brand', label: 'Brand', colors: 'bg-blue-600 border-blue-700 text-white' }
+                                            { id: 'brand', label: 'Brand', colors: 'bg-[#8C0000] border-[#500000] text-white' }
                                         ] as const).map((themeOption) => (
                                             <button
                                                 key={themeOption.id}
