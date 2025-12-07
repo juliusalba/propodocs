@@ -1,15 +1,57 @@
-import { useState, useMemo } from 'react';
-import { Waves, Ship, Anchor } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { Waves, Ship, Anchor, ArrowLeft, FileDown } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { marineTiers } from '../data/marinePricingData';
 import { MarineAddOnsSection } from '../components/MarineAddOnsSection';
+import { ProposalButton } from '../components/ProposalButton';
+import { ClientDetailsForm, type ClientDetails } from '../components/ClientDetailsForm';
+import { QuoteSummary } from '../components/QuoteSummary';
+import { api } from '../lib/api';
 import type { MarineAddOnsState } from '../types/marine';
+import { useToast } from '../components/Toast';
 
 export function MarineCalculator() {
     const navigate = useNavigate();
+    const toast = useToast();
 
     const [selectedTier, setSelectedTier] = useState<'wake' | 'harbor' | 'offshore' | null>(null);
-    const [clientName, setClientName] = useState('');
+    const [clientDetails, setClientDetails] = useState<ClientDetails>({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        address: ''
+    });
+    const [searchParams] = useSearchParams();
+    const proposalId = searchParams.get('id');
+
+    useEffect(() => {
+        if (proposalId) {
+            loadProposal(Number(proposalId));
+        }
+    }, [proposalId]);
+
+    const loadProposal = async (id: number) => {
+        try {
+            const response = await api.getProposal(id);
+            const proposal = response.proposal; // API returns { proposal: ... }
+            if (proposal && proposal.calculator_data) {
+                const data = proposal.calculator_data;
+                if (data.selectedTier) setSelectedTier(data.selectedTier);
+                if (data.addOns) setAddOns(data.addOns);
+
+                setClientDetails({
+                    name: proposal.client_name || '',
+                    company: proposal.client_company || '',
+                    email: proposal.client_email || '',
+                    phone: proposal.client_phone || '',
+                    address: proposal.client_address || ''
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load proposal:', error);
+        }
+    };
 
     const [addOns, setAddOns] = useState<MarineAddOnsState>({
         aiChat: false,
@@ -28,11 +70,62 @@ export function MarineCalculator() {
         topUps: 0
     });
 
-    const handleAddonUpdate = (key: keyof MarineAddOnsState, value: any) => {
+    const handleAddonUpdate = (key: keyof MarineAddOnsState, value: unknown) => {
         setAddOns(prev => ({
             ...prev,
             [key]: value
         }));
+    };
+
+    const handleClientDetailsChange = (key: keyof ClientDetails, value: string) => {
+        setClientDetails(prev => ({
+            ...prev,
+            [key]: value
+        }));
+    };
+
+    const handleExportPDF = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/generate-marine-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    clientName: clientDetails.name,
+                    clientDetails,
+                    selectedTier,
+                    addOns,
+                    totals,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`PDF generation failed: ${errorText}`);
+            }
+
+            const blob = await response.blob();
+            const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Marine-Quote-${clientDetails.name || 'Client'}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+            document.body.appendChild(a);
+            a.click();
+
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+
+            console.log('PDF downloaded successfully');
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toast.error('Failed to generate PDF. Please try again.');
+        }
     };
 
 
@@ -86,49 +179,7 @@ export function MarineCalculator() {
         }
     };
 
-    const handleExportPDF = async () => {
-        try {
-            const response = await fetch('http://localhost:3001/generate-marine-pdf', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    clientName,
-                    selectedTier,
-                    addOns,
-                    totals,
-                }),
-            });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`PDF generation failed: ${errorText}`);
-            }
-
-            const blob = await response.blob();
-            const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-
-            const url = window.URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `VMG-Marine-Quote-${clientName || 'Client'}-${new Date().toISOString().split('T')[0]}.pdf`;
-
-            document.body.appendChild(a);
-            a.click();
-
-            setTimeout(() => {
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            }, 100);
-
-            console.log('Marine PDF downloaded successfully');
-        } catch (error) {
-            console.error('Error generating Marine PDF:', error);
-            alert('Failed to generate PDF. Please ensure the PDF server is running.');
-        }
-    };
 
 
     return (
@@ -137,15 +188,16 @@ export function MarineCalculator() {
                 {/* Header */}
                 <div className="mb-8">
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate('/dashboard')}
                         className="text-sm text-gray-600 hover:text-gray-900 mb-4 flex items-center gap-1"
                     >
-                        ← Back to Calculator Selection
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Dashboard
                     </button>
 
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-3 rounded-xl shadow-md" style={{ background: 'linear-gradient(135deg, #7A1E1E 0%, #501010 100%)' }}>
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 rounded-xl shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}>
                                 <Waves className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -153,15 +205,9 @@ export function MarineCalculator() {
                                 <p className="text-gray-600">All-In Growth Playbook — One monthly number. More buyers.</p>
                             </div>
                         </div>
-
-                        <input
-                            type="text"
-                            placeholder="Client/Dealer Name"
-                            value={clientName}
-                            onChange={(e) => setClientName(e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#7A1E1E] focus:outline-none transition-colors"
-                        />
                     </div>
+
+                    <ClientDetailsForm details={clientDetails} onChange={handleClientDetailsChange} />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -184,8 +230,8 @@ export function MarineCalculator() {
                                             key={tierKey}
                                             onClick={() => setSelectedTier(isSelected ? null : tierKey)}
                                             className={`group text-left p-5 rounded-xl border-2 transition-all duration-300 relative overflow-hidden ${isSelected
-                                                ? 'border-[#7A1E1E] shadow-lg shadow-red-100 scale-[1.02]'
-                                                : 'bg-white border-gray-200 hover:border-[#7A1E1E] hover:shadow-md hover:-translate-y-0.5'
+                                                ? 'border-[#3b82f6] shadow-lg shadow-red-100 scale-[1.02]'
+                                                : 'bg-white border-gray-200 hover:border-[#3b82f6] hover:shadow-md hover:-translate-y-0.5'
                                                 }`}
                                             style={isSelected ? { background: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)' } : {}}
                                         >
@@ -194,7 +240,7 @@ export function MarineCalculator() {
                                             )}
 
                                             <div className="relative">
-                                                <div className="mb-3 p-2 rounded-lg inline-block" style={{ background: 'linear-gradient(135deg, #7A1E1E 0%, #501010 100%)' }}>
+                                                <div className="mb-3 p-2 rounded-lg inline-block" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}>
                                                     <div className="text-white">{getTierIcon(tierKey)}</div>
                                                 </div>
 
@@ -240,65 +286,69 @@ export function MarineCalculator() {
 
                     {/* Right Column - Summary */}
                     <div className="space-y-6">
-                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-200 p-6 shadow-xl sticky top-6">
-                            <h2 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
-                                <div className="p-2 rounded-lg shadow-md" style={{ background: 'linear-gradient(135deg, #7A1E1E 0%, #501010 100%)' }}>
-                                    <span className="text-white">💰</span>
+
+
+                        {totals.monthlyTotal > 0 && (
+                            <>
+                                <QuoteSummary
+                                    monthlyTotal={totals.monthlyTotal}
+                                    setupTotal={totals.setupTotal}
+                                    annualTotal={totals.annualTotal}
+                                    margin={100} // Marine calculator doesn't track margin yet
+                                    action={
+                                        <div className="flex flex-col gap-3 mt-8">
+                                            <ProposalButton
+                                                clientName={clientDetails.name}
+                                                clientDetails={clientDetails}
+                                                calculatorType="marine"
+                                                calculatorData={{
+                                                    selectedTier,
+                                                    addOns,
+                                                    tierDetails: selectedTier ? marineTiers[selectedTier] : null
+                                                }}
+                                                totals={totals}
+                                                onValidate={() => {
+                                                    if (!clientDetails.name) {
+                                                        toast.error('Please enter a client name');
+                                                        return false;
+                                                    }
+                                                    if (!selectedTier) {
+                                                        toast.error('Please select a tier');
+                                                        return false;
+                                                    }
+                                                    return true;
+                                                }}
+                                            />
+                                            {proposalId && (
+                                                <button
+                                                    onClick={() => navigate(`/proposals/${proposalId}/edit`)}
+                                                    className="w-full bg-white border-2 border-[#3b82f6] text-[#3b82f6] font-bold py-3 px-6 rounded-xl hover:bg-red-50 transition-all duration-300 flex items-center justify-center gap-2"
+                                                >
+                                                    <ArrowLeft className="w-4 h-4" />
+                                                    Back to Editor
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={handleExportPDF}
+                                                className="w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
+                                            >
+                                                <FileDown className="w-4 h-4" />
+                                                Export as PDF
+                                            </button>
+                                        </div>
+                                    }
+                                />
+
+                                <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                                    <p className="text-xs text-gray-700 leading-relaxed">
+                                        <strong>6-month term</strong> • <strong>&lt;5-minute response SLA</strong> • Setup fee covers onboarding + strategy
+                                    </p>
                                 </div>
-                                Quote Summary
-                            </h2>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center py-3 border-b-2 border-gray-100">
-                                    <span className="text-gray-600 font-semibold">Monthly:</span>
-                                    <span className="text-3xl font-bold" style={{ background: 'linear-gradient(to right, #7A1E1E, #501010)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                        ${Math.round(totals.monthlyTotal).toLocaleString()}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center py-3 border-b-2 border-gray-100">
-                                    <span className="text-gray-600 font-semibold">Setup Fee:</span>
-                                    <span className="text-xl font-bold text-gray-700">${totals.setupTotal.toLocaleString()}</span>
-                                </div>
-
-                                {totals.oneTimeTotal > 0 && (
-                                    <div className="flex justify-between items-center py-3 border-b-2 border-gray-100">
-                                        <span className="text-gray-600 font-semibold">One-Time:</span>
-                                        <span className="text-xl font-bold text-gray-700">${totals.oneTimeTotal.toLocaleString()}</span>
-                                    </div>
-                                )}
-
-                                <div className="flex justify-between items-center py-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl px-4 -mx-2">
-                                    <span className="text-gray-700 font-semibold">6-Month Value:</span>
-                                    <span className="text-2xl font-bold text-emerald-600">
-                                        ${Math.round(totals.annualTotal).toLocaleString()}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {totals.monthlyTotal > 0 && (
-                                <>
-                                    <button
-                                        onClick={handleExportPDF}
-                                        className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-[#7A1E1E] to-[#501010] text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 0 012-2h5.586a1 0 01.707.293l5.414 5.414a1 0 01.293.707V19a2 0 01-2 2z" />
-                                        </svg>
-                                        Export PDF
-                                    </button>
-
-                                    <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                                        <p className="text-xs text-gray-700 leading-relaxed">
-                                            <strong>6-month term</strong> • <strong>&lt;5-minute response SLA</strong> • Setup fee covers onboarding + strategy
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }

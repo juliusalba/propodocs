@@ -31,12 +31,12 @@ export function MarineAddOnsSection({ addOns, onUpdate }: MarineAddOnsSectionPro
         const isNumber = typeof addOns[key as keyof MarineAddOnsState] === 'number';
 
         return (
-            <div key={key} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#7A1E1E] transition-colors">
+            <div key={key} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#3b82f6] transition-colors">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 mb-1">{addOn.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">{addOn.description}</p>
-                        <div className="text-sm font-bold" style={{ color: '#7A1E1E' }}>
+                        <div className="text-sm font-bold" style={{ color: '#3b82f6' }}>
                             {typeof addOn.price === 'number'
                                 ? `$${addOn.price.toLocaleString()}/mo`
                                 : addOn.price.setup
@@ -53,8 +53,8 @@ export function MarineAddOnsSection({ addOns, onUpdate }: MarineAddOnsSectionPro
                             <button
                                 onClick={() => onUpdate(key as keyof MarineAddOnsState, !addOns[key as keyof MarineAddOnsState])}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${addOns[key as keyof MarineAddOnsState]
-                                    ? 'bg-gradient-to-r from-[#7A1E1E] to-[#501010] text-white shadow-md'
-                                    : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-[#7A1E1E]'
+                                    ? 'bg-gradient-to-r from-[#3b82f6] to-[#1d4ed8] text-white shadow-md'
+                                    : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-[#3b82f6]'
                                     }`}
                             >
                                 {addOns[key as keyof MarineAddOnsState] ? 'Added' : 'Add'}
@@ -68,7 +68,7 @@ export function MarineAddOnsSection({ addOns, onUpdate }: MarineAddOnsSectionPro
                                         const current = addOns[key as keyof MarineAddOnsState] as number;
                                         if (current > 0) onUpdate(key as keyof MarineAddOnsState, current - 1);
                                     }}
-                                    className="w-8 h-8 rounded-lg bg-white border-2 border-gray-300 hover:border-[#7A1E1E] font-bold text-gray-700 transition-colors"
+                                    className="w-8 h-8 rounded-lg bg-white border-2 border-gray-300 hover:border-[#3b82f6] font-bold text-gray-700 transition-colors"
                                     disabled={(addOns[key as keyof MarineAddOnsState] as number) === 0}
                                 >
                                     −
@@ -81,7 +81,7 @@ export function MarineAddOnsSection({ addOns, onUpdate }: MarineAddOnsSectionPro
                                         const current = addOns[key as keyof MarineAddOnsState] as number;
                                         onUpdate(key as keyof MarineAddOnsState, current + 1);
                                     }}
-                                    className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#7A1E1E] to-[#501010] text-white font-bold hover:shadow-md transition-all"
+                                    className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#1d4ed8] text-white font-bold hover:shadow-md transition-all"
                                 >
                                     +
                                 </button>

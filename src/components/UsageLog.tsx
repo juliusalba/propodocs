@@ -49,7 +49,7 @@ export function UsageLog() {
     return (
         <div className="bg-gradient-to-r from-red-50 to-white border border-red-100 rounded-xl p-4 mb-6 shadow-sm">
             <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg" style={{ background: 'linear-gradient(135deg, #7A1E1E 0%, #501010 100%)' }}>
+                <div className="p-2 rounded-lg" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}>
                     <Clock className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1">
@@ -59,7 +59,7 @@ export function UsageLog() {
                 {usageCount > 1 && (
                     <div className="text-right">
                         <div className="text-xs text-gray-500">Total Uses</div>
-                        <div className="text-lg font-bold" style={{ color: '#7A1E1E' }}>{usageCount}</div>
+                        <div className="text-lg font-bold" style={{ color: '#3b82f6' }}>{usageCount}</div>
                     </div>
                 )}
             </div>

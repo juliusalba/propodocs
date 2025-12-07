@@ -1,0 +1,56 @@
+/* Custom table styles for BlockNote editor */
+
+/* Bold row styling */
+.bn-table-row-bold {
+    font-weight: 700 !important;
+}
+
+.bn-table-row-bold td {
+    font-weight: 700 !important;
+    background-color: #fef3c7 !important; /* Yellow highlight */
+}
+
+/* Bold column styling */
+.bn-table-col-bold {
+    font-weight: 700 !important;
+}
+
+.bn-table-col-bold td:nth-child(var(--col-index)) {
+    font-weight: 700 !important;
+    background-color: #dbeafe !important; /* Blue highlight */
+}
+
+/* Highlighted row */
+.bn-table-row-highlight {
+    background-color: #fef3c7 !important;
+}
+
+/* Highlighted column */
+.bn-table-col-highlight td:nth-child(var(--col-index)) {
+    background-color: #dbeafe !important;
+}
+
+/* Enhanced table cell styling */
+.bn-block-content[data-content-type="table"] table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bn-block-content[data-content-type="table"] td,
+.bn-block-content[data-content-type="table"] th {
+    border: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    min-width: 100px;
+}
+
+.bn-block-content[data-content-type="table"] th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+/* Table cell focus state */
+.bn-block-content[data-content-type="table"] td:focus,
+.bn-block-content[data-content-type="table"] th:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+}

@@ -1,0 +1,33 @@
+/* Editor Content Enhancements */
+
+/* Ensure consistent spacing before headings */
+.bn-editor h1,
+.bn-editor h2,
+.bn-editor h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Remove top margin for first heading */
+.bn-editor h1:first-child,
+.bn-editor h2:first-child,
+.bn-editor h3:first-child {
+  margin-top: 0;
+}
+
+/* Additional spacing for better readability */
+.bn-editor p + h1,
+.bn-editor p + h2,
+.bn-editor p + h3 {
+  margin-top: 2em;
+}
+
+/* Ensure headings after lists have proper spacing */
+.bn-editor ul + h1,
+.bn-editor ul + h2,
+.bn-editor ul + h3,
+.bn-editor ol + h1,
+.bn-editor ol + h2,
+.bn-editor ol + h3 {
+  margin-top: 2em;
+}

@@ -5,6 +5,7 @@ export interface MarineTier {
     setup: number;
     description: string;
     features: string[];
+    deliverables?: string[];
 }
 
 export interface MarineAddOn {

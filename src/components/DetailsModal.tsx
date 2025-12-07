@@ -42,8 +42,8 @@ export function DetailsModal({ selectedServices, addOns }: DetailsModalProps) {
                             const tierData = service.tiers[tier];
 
                             return (
-                                <div key={key} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                                    <div className="font-semibold text-gray-900 mb-1">
+                                <div key={key} className="bg-gray-50 rounded-lg p-4 border border-[#CD8417]/20">
+                                    <div className="font-semibold text-[#050505] mb-1">
                                         {service.name} - Tier {tier} (${tierData.monthly.toLocaleString()}/mo)
                                     </div>
                                     <div className="text-gray-600 text-sm">
@@ -55,8 +55,8 @@ export function DetailsModal({ selectedServices, addOns }: DetailsModalProps) {
 
                         {/* Add-ons */}
                         {hasAddons && (
-                            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                                <div className="font-semibold text-gray-900 mb-2">Add-on Services</div>
+                            <div className="bg-gray-50 rounded-lg p-4 border border-[#CD8417]/20">
+                                <div className="font-semibold text-[#050505] mb-2">Add-on Services</div>
                                 <ul className="list-disc list-inside space-y-1 text-gray-600 text-sm">
                                     {addOns.landingPages > 0 && (
                                         <li>{addOns.landingPages} Landing Pages (${(addOns.landingPages * addOnPrices.landingPages).toLocaleString()})</li>
