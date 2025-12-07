@@ -59,6 +59,13 @@ export function Landing() {
                             <span className="text-xl font-bold text-[#050505] tracking-tight">Propodocs</span>
                         </div>
 
+                        {/* Navigation Menu */}
+                        <div className="hidden md:flex items-center gap-8">
+                            <a href="#features" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-colors">Features</a>
+                            <a href="#process" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-colors">Process</a>
+                            <a href="#for-who" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-colors">For Agencies</a>
+                        </div>
+
                         <div className="flex items-center gap-4">
                             {user ? (
                                 <button
@@ -156,7 +163,7 @@ export function Landing() {
             </div>
 
             {/* Why Use This Tool */}
-            <section className="py-24 bg-white px-6">
+            <section id="features" className="py-24 bg-white px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-black text-[#050505] mb-4">Why Propodocs?</h2>
@@ -194,7 +201,7 @@ export function Landing() {
             </section>
 
             {/* Workflow Section */}
-            <section className="py-24 bg-[#050505] text-[#FAF3CD] px-6">
+            <section id="process" className="py-24 bg-[#050505] text-[#FAF3CD] px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-black text-[#FAF3CD] mb-4">How It Works</h2>
@@ -224,7 +231,7 @@ export function Landing() {
             </section>
 
             {/* Who is this for */}
-            <section className="py-24 bg-[#FFC917] px-6">
+            <section id="for-who" className="py-24 bg-[#FFC917] px-6">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
                     <div className="md:w-1/2">
                         <h2 className="text-5xl font-black text-[#050505] mb-6 leading-tight">Built for those who value their time.</h2>

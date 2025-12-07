@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FileCheck, ArrowRight } from 'lucide-react';
 
 export function Login() {
@@ -45,12 +45,14 @@ export function Login() {
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-[#CD8417]/10 p-10 border border-[#CD8417]/20 relative z-10">
                 {/* Header */}
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#8C0000] mb-4 shadow-lg shadow-[#8C0000]/20">
-                        <FileCheck className="w-6 h-6 text-white" />
-                    </div>
-                    <h1 className="text-3xl font-black text-[#050505] mb-2 tracking-tight">
-                        Propodocs
-                    </h1>
+                    <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
+                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#8C0000] mb-4 shadow-lg shadow-[#8C0000]/20">
+                            <FileCheck className="w-6 h-6 text-white" />
+                        </div>
+                        <h1 className="text-3xl font-black text-[#050505] mb-2 tracking-tight">
+                            Propodocs
+                        </h1>
+                    </Link>
                     <p className="text-[#050505]/60 font-medium">
                         {isLogin ? 'Sign in to your account' : 'Start your 14-day free trial'}
                     </p>
@@ -114,15 +116,6 @@ export function Login() {
                             <label className="block text-sm font-bold text-[#050505]">
                                 Password
                             </label>
-                            {isLogin && (
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/forgot-password')}
-                                    className="text-xs font-semibold text-[#8C0000] hover:text-[#A00000]"
-                                >
-                                    Forgot password?
-                                </button>
-                            )}
                         </div>
                         <input
                             type="password"
@@ -132,6 +125,17 @@ export function Login() {
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent outline-none transition-all font-medium text-[#050505]"
                             placeholder="••••••••"
                         />
+                        {isLogin && (
+                            <div className="flex justify-end mt-2">
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-xs font-semibold text-[#8C0000] hover:text-[#A00000] outline-none focus:underline"
+                                    tabIndex={0}
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
+                        )}
                     </div>
 
                     <button
