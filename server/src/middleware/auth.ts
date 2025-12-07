@@ -13,6 +13,7 @@ export interface AuthRequest extends Request {
     query: any;
     headers: any;
     ip?: string;
+    file?: Express.Multer.File; // For multer file uploads
 }
 
 export function generateToken(payload: JWTPayload): string {
