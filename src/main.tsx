@@ -32,7 +32,7 @@ import { NotFound } from './pages/NotFound';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <BrowserRouter basename="/vmg-pricing-calculator">
+      <BrowserRouter>
         <AuthProvider>
           <ToastProvider>
             <Routes>
