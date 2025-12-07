@@ -153,7 +153,13 @@ function CalculatorBuilderInner() {
         <DashboardLayout>
             <div className="mb-8">
                 <button
-                    onClick={() => navigate('/calculators')}
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Navigating to /calculators');
+                        navigate('/calculators');
+                    }}
                     className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4"
                 >
                     <ArrowLeft size={16} />
