@@ -8,6 +8,11 @@ export interface JWTPayload {
 
 export interface AuthRequest extends Request {
     user?: JWTPayload;
+    body: any;
+    params: any;
+    query: any;
+    headers: any;
+    ip?: string;
 }
 
 export function generateToken(payload: JWTPayload): string {
