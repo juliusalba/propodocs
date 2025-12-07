@@ -1,3 +1,5 @@
+import { cache } from './cache';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 class APIClient {
@@ -16,6 +18,8 @@ class APIClient {
     clearToken() {
         this.token = null;
         localStorage.removeItem('auth_token');
+        // Clear all caches on logout
+        cache.clear();
     }
 
     private async request(endpoint: string, options: RequestInit = {}) {
@@ -92,7 +96,12 @@ class APIClient {
     }
 
     async getCurrentUser() {
-        return this.request('/auth/me');
+        // Cache user profile for 5 minutes (fast repeat visits)
+        return cache.getOrFetch(
+            'user:profile',
+            () => this.request('/auth/me'),
+            { ttl: 5 * 60 * 1000, useMemory: true, usePersistent: true }
+        );
     }
 
     async updateProfile(data: {
@@ -102,10 +111,13 @@ class APIClient {
         logo_url?: string;
         avatar_url?: string;
     }) {
-        return this.request('/auth/profile', {
+        const result = await this.request('/auth/profile', {
             method: 'PUT',
             body: JSON.stringify(data),
         });
+        // Invalidate user cache after update
+        cache.invalidate('user:profile');
+        return result;
     }
 
     // Proposals
@@ -118,7 +130,14 @@ class APIClient {
 
     async getProposals(params?: { trashed?: boolean }) {
         const query = params?.trashed ? '?trashed=true' : '';
-        return this.request(`/proposals${query}`);
+        const cacheKey = `proposals:list${query}`;
+
+        // Cache proposals list for 2 minutes
+        return cache.getOrFetch(
+            cacheKey,
+            () => this.request(`/proposals${query}`),
+            { ttl: 2 * 60 * 1000, useMemory: true, usePersistent: false }
+        );
     }
 
     async getProposal(id: number) {
