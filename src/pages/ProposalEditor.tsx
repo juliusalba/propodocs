@@ -86,17 +86,21 @@ export function ProposalEditor() {
     });
 
     // Auto-save hook (after editor initialization)
+    // Memoize data for auto-save to prevent unnecessary re-renders
+    const autoSaveData = useMemo(() => ({
+        content: editor?.document,
+        title: proposalTitle,
+        cover_photo_url: coverPhotoUrl,
+        calculator_data: {
+            ...proposal?.calculator_data,
+            agencySignatureUrl
+        }
+    }), [editor?.document, proposalTitle, coverPhotoUrl, proposal?.calculator_data, agencySignatureUrl]);
+
+    // Auto-save hook
     const autoSaveStatus = useAutoSave({
         key: `proposal-${id}`,
-        data: {
-            content: editor?.document,
-            title: proposalTitle,
-            cover_photo_url: coverPhotoUrl,
-            calculator_data: {
-                ...proposal?.calculator_data,
-                agencySignatureUrl
-            }
-        },
+        data: autoSaveData,
         onSave: async (data) => {
             if (!id) return;
             await api.updateProposal(Number(id), data);
