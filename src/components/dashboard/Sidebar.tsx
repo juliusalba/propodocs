@@ -46,11 +46,18 @@ export function Sidebar() {
             {/* Logo Section */}
             <div className="p-6 flex items-center gap-3 overflow-hidden border-b border-gray-100">
                 {user?.logo_url ? (
-                    <img
-                        src={user.logo_url}
-                        alt="Company Logo"
-                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0 ring-2 ring-gray-100 hover:ring-[#8C0000] transition-all"
-                    />
+                    <>
+                        <img
+                            src={user.logo_url}
+                            alt="Company Logo"
+                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0 ring-2 ring-gray-100 hover:ring-[#8C0000] transition-all"
+                            onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                        />
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#8C0000] to-[#500000] flex-shrink-0 shadow-md hidden" />
+                    </>
                 ) : (
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#8C0000] to-[#500000] flex-shrink-0 shadow-md" />
                 )}

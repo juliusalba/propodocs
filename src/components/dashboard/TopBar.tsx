@@ -201,7 +201,7 @@ export function TopBar() {
 
                     {/* Notification Dropdown */}
                     {showNotifications && (
-                        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+                        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl ring-1 ring-black/5 border border-gray-100 overflow-hidden z-[60]">
                             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-semibold text-gray-900">Notifications</h3>
@@ -315,10 +315,13 @@ export function TopBar() {
                                 src={user.avatar_url}
                                 alt={user.name}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                }}
                             />
-                        ) : (
-                            <User className="w-5 h-5 text-gray-600" />
-                        )}
+                        ) : null}
+                        <User className={`w-5 h-5 text-gray-600 ${user?.avatar_url ? 'hidden' : ''}`} />
                     </div>
                 </div>
             </div>
