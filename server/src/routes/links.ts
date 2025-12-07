@@ -61,7 +61,7 @@ router.post('/:proposalId/links', authMiddleware, async (req: AuthRequest, res) 
             .eq('status', 'draft');
 
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        const shareUrl = `${frontendUrl}/share/${token}`;
+        const shareUrl = `${frontendUrl}/p/${token}`;
 
         res.status(201).json({
             link: {
@@ -110,7 +110,7 @@ router.get('/:proposalId/links', authMiddleware, async (req: AuthRequest, res) =
 
         const linksWithUrls = links.map(link => ({
             ...link,
-            url: `${frontendUrl}/share/${link.token}`,
+            url: `${frontendUrl}/p/${link.token}`,
             hasPassword: !!link.password_hash,
             password_hash: undefined, // Don't send hash to client
         }));
