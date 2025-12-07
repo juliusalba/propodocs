@@ -410,20 +410,38 @@ export function ProposalEditor() {
         navigate(path);
     };
 
+    // Load existing share link on mount
+    useEffect(() => {
+        const loadShareLink = async () => {
+            if (!id) return;
+            try {
+                const linksData = await api.getLinks(Number(id));
+                const publicLink = linksData.links?.find((l: any) => !l.revoked_at);
+                if (publicLink) {
+                    setShareLink(`${window.location.origin}/p/${publicLink.token}`);
+                }
+            } catch (error) {
+                console.error("Failed to load share link:", error);
+            }
+        };
+        loadShareLink();
+    }, [id]);
+
     const handleShare = async () => {
         if (!id) return;
         try {
             // Check for existing links
             const linksData = await api.getLinks(Number(id));
-            let link = linksData.links?.[0];
+            let link = linksData.links?.find((l: any) => !l.revoked_at);
 
             if (!link) {
                 // Create new link
-                const result = await api.createLink(Number(id), {});
+                const result = await api.createLink(Number(id), { type: 'view' });
                 link = result.link;
             }
 
-            setShareLink(link.url);
+            const url = `${window.location.origin}/p/${link.token}`;
+            setShareLink(url);
             setShowShareModal(true);
         } catch (error) {
             console.error("Failed to generate share link:", error);
