@@ -41,6 +41,8 @@ import { ViewAnalyticsModal } from '../components/ViewAnalyticsModal';
 import { CoverPhotoUpload } from '../components/CoverPhotoUpload';
 import { DeliverablesSection } from '../components/DeliverablesSection';
 import { ScopeSection } from '../components/ScopeSection';
+import { useAutoSave } from '../hooks/useAutoSave';
+import { SaveStatus } from '../components/SaveStatus';
 
 
 export function ProposalEditor() {
@@ -81,6 +83,25 @@ export function ProposalEditor() {
             const response = await api.uploadFile(formData);
             return response.url;
         }
+    });
+
+    // Auto-save hook (after editor initialization)
+    const autoSaveStatus = useAutoSave({
+        key: `proposal-${id}`,
+        data: {
+            content: editor?.document,
+            title: proposalTitle,
+            cover_photo_url: coverPhotoUrl,
+            calculator_data: {
+                ...proposal?.calculator_data,
+                agencySignatureUrl
+            }
+        },
+        onSave: async (data) => {
+            if (!id) return;
+            await api.updateProposal(Number(id), data);
+        },
+        enabled: !!id && !!proposal,
     });
 
     // Track active block
@@ -691,6 +712,15 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                             <Share className="w-4 h-4" />
                             Share
                         </button>
+                        <div className="h-8 w-px bg-gray-100 mx-1" />
+
+                        {/* Auto-save status indicator */}
+                        <SaveStatus
+                            status={autoSaveStatus.status}
+                            lastSaved={autoSaveStatus.lastSaved}
+                            error={autoSaveStatus.error}
+                        />
+
                         <div className="h-8 w-px bg-gray-100 mx-1" />
                         <button
                             onClick={handleSave}
