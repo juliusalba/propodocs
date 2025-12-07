@@ -41,7 +41,7 @@ router.post('/', authMiddleware, upload.single('file'), (req, res) => {
         return;
     }
 
-    const baseUrl = process.env.API_URL || 'http://localhost:3001';
+    const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.API_URL || `${req.protocol}://${req.get('host')}`;
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
     res.json({ url: fileUrl });
 });

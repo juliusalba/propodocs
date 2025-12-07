@@ -33,9 +33,11 @@ router.post('/document', authMiddleware, upload.single('file'), async (req, res)
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const filePath = req.file.path;
-        const mimeType = req.file.mimetype;
+        const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.API_URL || `${req.protocol}://${req.get('host')}`;
+        const fileUrl = `${baseUrl}/uploads/audio/${req.file.filename}`;
         const originalName = req.file.originalname.toLowerCase();
+        const filePath = req.file.path; // Keep filePath as it's used later
+        const mimeType = req.file.mimetype; // Keep mimeType as it's used later
 
         log.info('Processing document', {
             fileName: originalName,
