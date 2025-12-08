@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, Send, Globe, Clock } from 'lucide-react';
 import { api } from '../lib/api';
@@ -104,7 +105,7 @@ export function ShareModal({ isOpen, onClose, proposalId, proposalTitle, clientN
         try {
             const expiresAt = calculateExpiresAt();
 
-            await api.post('/api/email/send', {
+            await api.post('/email/send', {
                 to: email,
                 subject: `Proposal: ${proposalTitle}`,
                 expiresAt,
@@ -136,7 +137,7 @@ export function ShareModal({ isOpen, onClose, proposalId, proposalTitle, clientN
     // Get minimum date for date picker (today)
     const today = new Date().toISOString().split('T')[0];
 
-    return (
+    const modalContent = (
         <AnimatePresence>
             {isOpen && (
                 <>
@@ -312,4 +313,7 @@ export function ShareModal({ isOpen, onClose, proposalId, proposalTitle, clientN
             )}
         </AnimatePresence>
     );
+
+    // Use portal to render modal at document body level to prevent DOM hierarchy issues
+    return createPortal(modalContent, document.body);
 }

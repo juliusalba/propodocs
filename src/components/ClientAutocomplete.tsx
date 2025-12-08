@@ -47,8 +47,30 @@ export function ClientAutocomplete({ onSelect, placeholder = 'Search clients...'
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await api.getClients();
-                const filtered = response.clients.filter((client: Client) =>
+                // Extract unique clients from proposals since there's no dedicated clients endpoint
+                const response = await api.getProposals();
+                const proposals = response.proposals || [];
+
+                // Build unique clients from proposals
+                const clientMap = new Map<string, Client>();
+                proposals.forEach((proposal: any, index: number) => {
+                    if (proposal.client_name) {
+                        const key = proposal.client_name.toLowerCase();
+                        if (!clientMap.has(key)) {
+                            clientMap.set(key, {
+                                id: index + 1,
+                                name: proposal.client_name,
+                                company: proposal.client_company,
+                                email: proposal.client_email,
+                                address: proposal.client_address,
+                                phone: proposal.client_phone,
+                            });
+                        }
+                    }
+                });
+
+                const allClients = Array.from(clientMap.values());
+                const filtered = allClients.filter((client: Client) =>
                     client.name.toLowerCase().includes(query.toLowerCase()) ||
                     client.company?.toLowerCase().includes(query.toLowerCase()) ||
                     client.email?.toLowerCase().includes(query.toLowerCase())

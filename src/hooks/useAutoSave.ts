@@ -27,8 +27,8 @@ export function useAutoSave({
         error: null,
     });
 
-    const timeoutRef = useRef<NodeJS.Timeout>();
-    const previousDataRef = useRef<string>();
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const previousDataRef = useRef<string | undefined>(undefined);
 
     const save = useCallback(async () => {
         if (!enabled) return;
