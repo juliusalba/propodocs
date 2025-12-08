@@ -13,7 +13,7 @@ export const marineTiers: Record<'wake' | 'harbor' | 'offshore', MarineTier> = {
             'Up to 2 ad-creative sets/quarter',
             'Speed-to-lead automations',
             'Monthly insights & suggestions',
-            'VMG Core Feed (≤50 units, 1 source)'
+            'Propodocs Core Feed (≤50 units, 1 source)'
         ]
     },
     harbor: {
@@ -28,7 +28,7 @@ export const marineTiers: Record<'wake' | 'harbor' | 'offshore', MarineTier> = {
             'Up to 4 ad-creative sets/month',
             '3–5 automated nurture flows',
             '1 BDC huddle/month',
-            'VMG Core Feed (standard)'
+            'Propodocs Core Feed (standard)'
         ]
     },
     offshore: {

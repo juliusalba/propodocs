@@ -61,7 +61,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background: linear-gradient(135deg, #7A1E1E 0%, #501010 100%); padding: 48px 40px; text-align: center;">
                             <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 28px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase;">
-                                Vogel Marketing Group
+                                Propodocs
                             </h1>
                             <p style="margin: 0; color: rgba(255, 255, 255, 0.9); font-size: 14px; font-weight: 300; letter-spacing: 0.5px;">
                                 Proposal Management System
@@ -132,7 +132,7 @@ VMG Proposal System Team
                                 Miami Beach, Florida 33139
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                © ${new Date().getFullYear()} Vogel Marketing Group. All rights reserved.
+                                © ${new Date().getFullYear()} Propodocs. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -217,7 +217,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background: linear-gradient(135deg, #7A1E1E 0%, #501010 100%); padding: 48px 40px; text-align: center;">
                             <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 28px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase;">
-                                Vogel Marketing Group
+                                Propodocs
                             </h1>
                             <p style="margin: 0; color: rgba(255, 255, 255, 0.9); font-size: 14px; font-weight: 300; letter-spacing: 0.5px;">
                                 New Proposal for ${data.clientName}
@@ -261,7 +261,7 @@ VMG Proposal System Team
                                 VOGEL MARKETING GROUP
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                © ${new Date().getFullYear()} Vogel Marketing Group. All rights reserved.
+                                © ${new Date().getFullYear()} Propodocs. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -412,7 +412,7 @@ VMG Proposal System Team
                                 VOGEL MARKETING GROUP
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                © ${new Date().getFullYear()} Vogel Marketing Group. All rights reserved.
+                                © ${new Date().getFullYear()} Propodocs. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -475,7 +475,7 @@ export async function sendContractEmail(data: ContractEmailData): Promise<void> 
     const textContent = `
 Hello ${data.clientName},
 
-You have received a contract "${data.contractTitle}" from Vogel Marketing Group.
+You have received a contract "${data.contractTitle}" from Propodocs.
 ${formattedValue ? `Contract Value: ${formattedValue}` : ''}
 
 Please review and sign the contract using the link below:
@@ -554,7 +554,7 @@ VMG Proposal System Team
                                 VOGEL MARKETING GROUP
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                © ${new Date().getFullYear()} Vogel Marketing Group. All rights reserved.
+                                © ${new Date().getFullYear()} Propodocs. All rights reserved.
                             </p>
                         </td>
                     </tr>
@@ -677,7 +677,7 @@ VMG Proposal System Team
                                 VOGEL MARKETING GROUP
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                                © ${new Date().getFullYear()} Vogel Marketing Group. All rights reserved.
+                                © ${new Date().getFullYear()} Propodocs. All rights reserved.
                             </p>
                         </td>
                     </tr>

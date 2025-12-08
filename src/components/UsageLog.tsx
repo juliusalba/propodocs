@@ -7,8 +7,8 @@ export function UsageLog() {
 
     useEffect(() => {
         // Get last used timestamp
-        const lastUsedTimestamp = localStorage.getItem('vmg-calculator-last-used');
-        const count = parseInt(localStorage.getItem('vmg-calculator-usage-count') || '0', 10);
+        const lastUsedTimestamp = localStorage.getItem('propodocs-calculator-last-used');
+        const count = parseInt(localStorage.getItem('propodocs-calculator-usage-count') || '0', 10);
 
         if (lastUsedTimestamp) {
             setLastUsed(lastUsedTimestamp);
@@ -18,8 +18,8 @@ export function UsageLog() {
 
         // Update current usage
         const now = new Date().toISOString();
-        localStorage.setItem('vmg-calculator-last-used', now);
-        localStorage.setItem('vmg-calculator-usage-count', String(count + 1));
+        localStorage.setItem('propodocs-calculator-last-used', now);
+        localStorage.setItem('propodocs-calculator-usage-count', String(count + 1));
     }, []);
 
     const formatDate = (isoString: string) => {

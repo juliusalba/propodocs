@@ -472,8 +472,8 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
             <body>
                 <div class="header">
                     <div>
-                        <div class="logo">Vogel Marketing Group</div>
-                        <div style="color: #6b7280; font-size: 14px; margin-top: 8px;">705 Washington Avenue Suite 300<br>Miami Beach, FL 33139</div>
+                        <div class="logo">Propodocs</div>
+                        <div style="color: #6b7280; font-size: 14px; margin-top: 8px;">Proposal Management Platform</div>
                     </div>
                     <div class="invoice-info">
                         <div class="invoice-number">Invoice ${invoice.invoice_number}</div>

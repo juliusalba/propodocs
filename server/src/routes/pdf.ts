@@ -345,7 +345,7 @@ function generateCustomPDFHTML(
         </head>
         <body>
             <div class="header">
-                <div class="logo">Vogel Marketing Group</div>
+                <div class="logo">Propodocs</div>
                 <div class="tagline">${calculatorName}</div>
                 ${clientName ? `<div class="client-name">Prepared for: ${clientName}</div>` : ''}
             </div>
@@ -424,9 +424,9 @@ function generateCustomPDFHTML(
 
             </div>
             <div class="footer">
-                <div class="footer-logo">Vogel Marketing Group</div>
-                <div class="footer-tagline">Driving Growth Through Strategic Marketing</div>
-                <div class="footer-contact">705 Washington Avenue Suite 300<br>Miami Beach, Florida 33139<br>Email: yourfriends@vmg7.com</div>
+                <div class="footer-logo">Propodocs</div>
+                <div class="footer-tagline">Proposal Management Platform</div>
+                <div class="footer-contact">Professional Proposal Solutions</div>
             </div>
         </body>
         </html>
@@ -578,7 +578,7 @@ function generatePDFHTML(clientName: string, selectedServices: any, addOns: any,
         </head>
         <body>
             <div class="header">
-                <div class="logo">Vogel Marketing Group</div>
+                <div class="logo">Propodocs</div>
                 <div class="tagline">Professional Marketing Solutions</div>
                 ${clientName ? `<div class="client-name">Prepared for: ${clientName}</div>` : ''}
             </div>
@@ -628,9 +628,9 @@ function generatePDFHTML(clientName: string, selectedServices: any, addOns: any,
                 </div>
             </div>
             <div class="footer">
-                <div class="footer-logo">Vogel Marketing Group</div>
-                <div class="footer-tagline">Driving Growth Through Strategic Marketing</div>
-                <div class="footer-contact">705 Washington Avenue Suite 300<br>Miami Beach, Florida 33139<br>Email: yourfriends@vmg7.com</div>
+                <div class="footer-logo">Propodocs</div>
+                <div class="footer-tagline">Proposal Management Platform</div>
+                <div class="footer-contact">Professional Proposal Solutions</div>
             </div>
         </body>
         </html>
@@ -741,7 +741,7 @@ function generateMarinePDFHTML(clientName: string, selectedTier: string, addOns:
         </head>
         <body>
             <div class="header">
-                <div class="logo">Vogel Marketing Group</div>
+                <div class="logo">Propodocs</div>
                 <div class="tagline">Marine & Powersports Growth Playbook</div>
                 <div class="subtitle">All-In Growth Solution — One monthly number. More buyers.</div>
                 ${clientName ? `<div class="client-name">Prepared for: ${clientName}</div>` : ''}
@@ -789,9 +789,9 @@ function generateMarinePDFHTML(clientName: string, selectedTier: string, addOns:
                 </div>
             </div>
             <div class="footer">
-                <div class="footer-logo">Vogel Marketing Group</div>
-                <div class="footer-tagline">Driving Growth Through Strategic Marketing</div>
-                <div class="footer-contact">705 Washington Avenue Suite 300<br>Miami Beach, Florida 33139<br>Email: yourfriends@vmg7.com</div>
+                <div class="footer-logo">Propodocs</div>
+                <div class="footer-tagline">Proposal Management Platform</div>
+                <div class="footer-contact">Professional Proposal Solutions</div>
             </div>
         </body>
         </html>

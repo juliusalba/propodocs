@@ -42,7 +42,7 @@ const CalculatorSchema = z.object({
 });
 
 // Enhanced VMG Scaffold Rule System for Calculator Generation
-const CALCULATOR_GENERATION_PROMPT = `You are a Senior Pricing Strategy Consultant for Vogel Marketing Group (VMG), a premier full-service marketing agency.
+const CALCULATOR_GENERATION_PROMPT = `You are a Senior Pricing Strategy Consultant for Propodocs, a premier proposal management platform.
 Your task is to analyze the provided service description and create a comprehensive, professional pricing calculator schema that matches VMG's premium branding.
 
 ## SCAFFOLD RULES (MUST FOLLOW):

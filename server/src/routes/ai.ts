@@ -28,7 +28,7 @@ router.post('/generate-proposal', authMiddleware, async (req: AuthRequest, res) 
             return;
         }
 
-        const systemPrompt = `You are an expert marketing proposal writer for Vogel Marketing Group (VMG)${data.calculatorType === 'marine' ? ', specializing in Marine & Powersports marketing' : ''}.
+        const systemPrompt = `You are an expert marketing proposal writer for Propodocs${data.calculatorType === 'marine' ? ', specializing in Marine & Powersports marketing' : ''}.
 Your task is to create compelling, professional proposal content based on the client information and selected services.
 
 **INTEGRATION INSTRUCTIONS (CRITICAL):**

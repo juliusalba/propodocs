@@ -8,7 +8,7 @@ interface HeaderProps {
 export function Header({ clientName, onClientNameChange }: HeaderProps) {
     return (
         <div className="relative mb-8 overflow-hidden">
-            {/* Gradient Background - VMG Maroon */}
+            {/* Gradient Background - Propodocs Maroon */}
             <div className="absolute inset-0 gradient-primary opacity-5"></div>
 
             <div className="relative text-center p-8">

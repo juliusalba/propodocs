@@ -547,7 +547,7 @@ Services: ${JSON.stringify(proposal.calculator_data, null, 2)}
 Please write a compelling, professional proposal with proper structure:
 1. Use markdown headings (# for main heading, ## for sections)
 2. Acknowledge the client's specific needs
-3. Introduce VMG's value proposition 
+3. Introduce Propodocs value proposition 
 4. Reference their selected services/solutions
 5. Set expectations for the partnership
 6. Use a warm, professional tone

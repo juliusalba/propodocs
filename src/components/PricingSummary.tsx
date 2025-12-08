@@ -12,7 +12,7 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
         const tierKey = data.selectedTier as keyof typeof marineTiers | null;
         const tier = tierKey ? marineTiers[tierKey] : null;
         const addOns = data.addOns || {};
-        
+
         // Calculate totals
         let monthlyTotal = 0;
         let setupTotal = 0;
@@ -22,7 +22,7 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
             monthlyTotal += tier.monthly;
             setupTotal += tier.setup;
         }
-        
+
         // Add-on logic (simplified for display)
         if (addOns.aiChat) monthlyTotal += 400;
         if (addOns.dmFunnels) monthlyTotal += 400;
@@ -35,7 +35,7 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
         if (addOns.spanishCreative) monthlyTotal += 500;
         if (addOns.topUps > 0) monthlyTotal += addOns.topUps * 3000;
         if (addOns.emailSms >= 4) monthlyTotal += 1500;
-        
+
         // One-time
         if (addOns.croWebSprint > 0) oneTimeTotal += addOns.croWebSprint * 3500;
         if (addOns.showBurst > 0) oneTimeTotal += addOns.showBurst * 2000;
@@ -64,10 +64,10 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Add-ons Summary */}
                         {(Object.keys(addOns).some(k => addOns[k]) && (
-                             <div className="pt-2">
+                            <div className="pt-2">
                                 <div className="text-sm font-medium text-gray-700 mb-2">Selected Add-ons</div>
                                 <div className="text-sm text-gray-600 grid grid-cols-1 md:grid-cols-2 gap-2">
                                     {addOns.aiChat && <div>• AI Chat Agent</div>}
@@ -103,18 +103,18 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
     if (type === 'vmg') {
         const totals = data.totals || { monthlyTotal: 0, setupTotal: 0 };
         const services = data.selectedServices || {};
-        
+
         return (
             <div className="my-8 border border-gray-200 rounded-xl overflow-hidden bg-white">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="font-bold text-gray-900">Investment Summary</h3>
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                        VMG Marketing
+                        Propodocs
                     </span>
                 </div>
                 <div className="p-6">
                     <div className="space-y-3 mb-4">
-                         {services.traffic && (
+                        {services.traffic && (
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-700">Traffic Driver (Tier {services.traffic})</span>
                                 <span className="text-gray-900">Included</span>
@@ -126,7 +126,7 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
                                 <span className="text-gray-900">Included</span>
                             </div>
                         )}
-                         {services.creative && (
+                        {services.creative && (
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-700">Creative Support (Tier {services.creative})</span>
                                 <span className="text-gray-900">Included</span>
@@ -139,7 +139,7 @@ export function PricingSummary({ proposal }: { proposal: Proposal | any }) {
                             <span className="text-gray-600 font-medium">Monthly Total</span>
                             <span className="font-bold text-xl text-gray-900">${totals.monthlyTotal?.toLocaleString()}</span>
                         </div>
-                         {totals.setupTotal > 0 && (
+                        {totals.setupTotal > 0 && (
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-gray-600">Setup Fee</span>
                                 <span className="font-medium text-gray-700">${totals.setupTotal?.toLocaleString()}</span>

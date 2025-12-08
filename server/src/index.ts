@@ -64,7 +64,7 @@ app.use((req, res, next) => {
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
-        message: 'VMG Proposal Server is running',
+        message: 'Propodocs Server is running',
         timestamp: new Date().toISOString(),
     });
 });
@@ -106,7 +106,7 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`\n✅ VMG Proposal Server running on http://localhost:${PORT}`);
+    console.log(`\n✅ Propodocs Server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}\n`);
 });

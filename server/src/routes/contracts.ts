@@ -664,7 +664,7 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
             </head>
             <body>
                 <div class="header">
-                    <div class="logo">Vogel Marketing Group</div>
+                    <div class="logo">Propodocs</div>
                     <div class="title">${contract.title}</div>
                     <div style="margin-top: 10px;"><span class="status status-${contract.status}">${contract.status.toUpperCase()}</span></div>
                 </div>
@@ -672,8 +672,8 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
                 <div class="parties">
                     <div class="party">
                         <div class="party-label">Service Provider</div>
-                        <div class="party-name">Vogel Marketing Group</div>
-                        <div class="party-details">705 Washington Avenue Suite 300<br>Miami Beach, FL 33139</div>
+                        <div class="party-name">Propodocs</div>
+                        <div class="party-details">Proposal Management Platform</div>
                     </div>
                     <div class="party">
                         <div class="party-label">Client</div>
@@ -724,7 +724,7 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
                     <div class="signature-block">
                         <div class="signature-line"></div>
                         <div class="signature-label">Provider Signature</div>
-                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">Vogel Marketing Group</div>
+                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">Propodocs</div>
                         ${contract.user_signed_at ? `<div style="font-size: 11px; color: #059669;">Signed: ${new Date(contract.user_signed_at).toLocaleString()}</div>` : ''}
                     </div>
                 </div>

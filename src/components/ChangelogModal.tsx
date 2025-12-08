@@ -59,7 +59,7 @@ export function ChangelogModal({ isOpen, onClose }: ChangelogModalProps) {
             features: [
                 {
                     icon: Sparkles,
-                    title: "VMG & Marine Calculators",
+                    title: "Propodocs Calculators",
                     description: "Standardized calculators for Marketing and Marine services."
                 },
                 {
