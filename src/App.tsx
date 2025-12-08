@@ -137,6 +137,12 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/invoices/new" element={
+            <ProtectedRoute>
+              <InvoiceEditor />
+            </ProtectedRoute>
+          } />
+
           <Route path="/invoices/:id" element={
             <ProtectedRoute>
               <InvoiceEditor />
@@ -146,6 +152,18 @@ function App() {
           <Route path="/contracts" element={
             <ProtectedRoute>
               <ContractsPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/contracts/new" element={
+            <ProtectedRoute>
+              <ContractEditor />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/contracts/:id" element={
+            <ProtectedRoute>
+              <ContractEditor />
             </ProtectedRoute>
           } />
 

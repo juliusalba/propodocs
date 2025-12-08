@@ -408,4 +408,161 @@ router.post('/from-proposal/:proposalId', authMiddleware, async (req: AuthReques
     }
 });
 
+// Generate Invoice PDF
+router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
+    const log = logger.child({ action: 'generate-invoice-pdf', invoiceId: req.params.id });
+    let browser;
+
+    try {
+        const userId = req.user!.userId;
+        const { id } = req.params;
+
+        // Fetch invoice
+        const { data: invoice, error } = await supabase
+            .from('invoices')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (error || !invoice) {
+            res.status(404).json({ error: 'Invoice not found' });
+            return;
+        }
+
+        // Generate HTML for PDF
+        const lineItemsHTML = (invoice.line_items || []).map((item: any) => `
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.description}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${item.unitPrice?.toLocaleString() || 0}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">$${item.amount?.toLocaleString() || 0}</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #1f2937; line-height: 1.6; padding: 40px; }
+                    .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+                    .logo { font-size: 28px; font-weight: 300; letter-spacing: 2px; color: #7A1E1E; }
+                    .invoice-info { text-align: right; }
+                    .invoice-number { font-size: 24px; font-weight: 700; color: #1f2937; }
+                    .invoice-date { color: #6b7280; font-size: 14px; }
+                    .parties { display: flex; gap: 40px; margin-bottom: 40px; }
+                    .party { flex: 1; }
+                    .party-label { font-size: 12px; text-transform: uppercase; color: #6b7280; margin-bottom: 8px; font-weight: 600; }
+                    .party-name { font-weight: 700; color: #1f2937; font-size: 16px; }
+                    .party-details { color: #6b7280; font-size: 14px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+                    th { text-align: left; padding: 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 12px; text-transform: uppercase; color: #6b7280; }
+                    .totals { margin-left: auto; width: 300px; }
+                    .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+                    .total-row.final { border-top: 2px solid #1f2937; border-bottom: none; padding-top: 16px; font-size: 20px; font-weight: 700; }
+                    .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+                    .status-paid { background: #d1fae5; color: #059669; }
+                    .status-sent { background: #fef3c7; color: #d97706; }
+                    .status-draft { background: #e5e7eb; color: #6b7280; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div>
+                        <div class="logo">Vogel Marketing Group</div>
+                        <div style="color: #6b7280; font-size: 14px; margin-top: 8px;">705 Washington Avenue Suite 300<br>Miami Beach, FL 33139</div>
+                    </div>
+                    <div class="invoice-info">
+                        <div class="invoice-number">Invoice ${invoice.invoice_number}</div>
+                        <div class="invoice-date">Date: ${new Date(invoice.created_at).toLocaleDateString()}</div>
+                        ${invoice.due_date ? `<div class="invoice-date">Due: ${new Date(invoice.due_date).toLocaleDateString()}</div>` : ''}
+                        <div style="margin-top: 8px;"><span class="status status-${invoice.status}">${invoice.status}</span></div>
+                    </div>
+                </div>
+                
+                <div class="parties">
+                    <div class="party">
+                        <div class="party-label">Bill To</div>
+                        <div class="party-name">${invoice.client_name}</div>
+                        ${invoice.client_company ? `<div class="party-details">${invoice.client_company}</div>` : ''}
+                        ${invoice.client_email ? `<div class="party-details">${invoice.client_email}</div>` : ''}
+                        ${invoice.client_address ? `<div class="party-details">${invoice.client_address}</div>` : ''}
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th style="text-align: center;">Qty</th>
+                            <th style="text-align: right;">Unit Price</th>
+                            <th style="text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lineItemsHTML}
+                    </tbody>
+                </table>
+
+                <div class="totals">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>$${(invoice.subtotal || 0).toLocaleString()}</span>
+                    </div>
+                    ${invoice.tax_rate > 0 ? `
+                    <div class="total-row">
+                        <span>Tax (${invoice.tax_rate}%)</span>
+                        <span>$${(invoice.tax_amount || 0).toLocaleString()}</span>
+                    </div>
+                    ` : ''}
+                    <div class="total-row final">
+                        <span>Total</span>
+                        <span>$${(invoice.total || 0).toLocaleString()}</span>
+                    </div>
+                </div>
+
+                ${invoice.notes ? `
+                <div style="margin-top: 40px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">Notes</div>
+                    <div style="color: #6b7280; font-size: 14px;">${invoice.notes}</div>
+                </div>
+                ` : ''}
+            </body>
+            </html>
+        `;
+
+        // Import puppeteer dynamically
+        const puppeteer = (await import('puppeteer')).default;
+
+        browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' }
+        });
+
+        await browser.close();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${invoice.invoice_number}.pdf`);
+        res.send(pdfBuffer);
+
+        log.info('Invoice PDF generated', { invoiceId: id });
+    } catch (error) {
+        log.error('Failed to generate invoice PDF', error);
+        if (browser) await browser.close();
+        res.status(500).json({ error: 'Failed to generate PDF' });
+    }
+});
+
 export default router;

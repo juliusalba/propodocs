@@ -597,4 +597,170 @@ router.post('/from-proposal/:proposalId', authMiddleware, async (req: AuthReques
     }
 });
 
+// Generate Contract PDF
+router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
+    const log = logger.child({ action: 'generate-contract-pdf', contractId: req.params.id });
+    let browser;
+
+    try {
+        const userId = req.user!.userId;
+        const { id } = req.params;
+
+        // Fetch contract
+        const { data: contract, error } = await supabase
+            .from('contracts')
+            .select('*, contract_signatures(*)')
+            .eq('id', id)
+            .eq('user_id', userId)
+            .single();
+
+        if (error || !contract) {
+            res.status(404).json({ error: 'Contract not found' });
+            return;
+        }
+
+        // Generate deliverables HTML
+        const deliverablesHTML = (contract.deliverables || []).map((d: any, i: number) => `
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${i + 1}. ${d.name}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${d.description || '-'}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${(d.price || 0).toLocaleString()}${d.priceType === 'monthly' ? '/mo' : ''}</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: Georgia, 'Times New Roman', serif; color: #1f2937; line-height: 1.8; padding: 50px; }
+                    .header { text-align: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 2px solid #7A1E1E; }
+                    .logo { font-size: 24px; font-weight: 400; letter-spacing: 3px; color: #7A1E1E; text-transform: uppercase; }
+                    .title { font-size: 28px; font-weight: 700; color: #1f2937; margin-top: 20px; }
+                    .parties { display: flex; gap: 40px; margin: 30px 0; padding: 20px; background: #f9fafb; border-radius: 8px; }
+                    .party { flex: 1; }
+                    .party-label { font-size: 12px; text-transform: uppercase; color: #7A1E1E; margin-bottom: 8px; font-weight: 600; letter-spacing: 1px; }
+                    .party-name { font-weight: 700; color: #1f2937; font-size: 16px; }
+                    .party-details { color: #6b7280; font-size: 14px; }
+                    .section { margin: 30px 0; }
+                    .section-title { font-size: 18px; font-weight: 700; color: #7A1E1E; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+                    .content { font-size: 14px; color: #374151; white-space: pre-wrap; }
+                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                    th { text-align: left; padding: 12px; background: #7A1E1E; color: white; font-size: 12px; text-transform: uppercase; }
+                    .signature-section { margin-top: 60px; display: flex; gap: 60px; }
+                    .signature-block { flex: 1; }
+                    .signature-line { border-bottom: 1px solid #1f2937; height: 60px; margin-bottom: 8px; }
+                    .signature-label { font-size: 12px; color: #6b7280; }
+                    .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+                    .status-signed { background: #d1fae5; color: #059669; }
+                    .status-sent { background: #fef3c7; color: #d97706; }
+                    .status-draft { background: #e5e7eb; color: #6b7280; }
+                    .value-box { background: #7A1E1E; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+                    .value-label { font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+                    .value-amount { font-size: 32px; font-weight: 700; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="logo">Vogel Marketing Group</div>
+                    <div class="title">${contract.title}</div>
+                    <div style="margin-top: 10px;"><span class="status status-${contract.status}">${contract.status.toUpperCase()}</span></div>
+                </div>
+                
+                <div class="parties">
+                    <div class="party">
+                        <div class="party-label">Service Provider</div>
+                        <div class="party-name">Vogel Marketing Group</div>
+                        <div class="party-details">705 Washington Avenue Suite 300<br>Miami Beach, FL 33139</div>
+                    </div>
+                    <div class="party">
+                        <div class="party-label">Client</div>
+                        <div class="party-name">${contract.client_name}</div>
+                        ${contract.client_company ? `<div class="party-details">${contract.client_company}</div>` : ''}
+                        ${contract.client_email ? `<div class="party-details">${contract.client_email}</div>` : ''}
+                    </div>
+                </div>
+
+                ${contract.total_value ? `
+                <div class="value-box">
+                    <div class="value-label">Total Contract Value</div>
+                    <div class="value-amount">$${contract.total_value.toLocaleString()}</div>
+                    ${contract.contract_term ? `<div style="font-size: 14px; opacity: 0.9; margin-top: 8px;">Term: ${contract.contract_term}</div>` : ''}
+                </div>
+                ` : ''}
+
+                ${deliverablesHTML ? `
+                <div class="section">
+                    <div class="section-title">Deliverables</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Description</th>
+                                <th style="text-align: right;">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${deliverablesHTML}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                <div class="section">
+                    <div class="section-title">Terms & Conditions</div>
+                    <div class="content">${contract.content}</div>
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Client Signature</div>
+                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${contract.client_name}</div>
+                        ${contract.client_signed_at ? `<div style="font-size: 11px; color: #059669;">Signed: ${new Date(contract.client_signed_at).toLocaleString()}</div>` : ''}
+                    </div>
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Provider Signature</div>
+                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">Vogel Marketing Group</div>
+                        ${contract.user_signed_at ? `<div style="font-size: 11px; color: #059669;">Signed: ${new Date(contract.user_signed_at).toLocaleString()}</div>` : ''}
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Import puppeteer dynamically
+        const puppeteer = (await import('puppeteer')).default;
+
+        browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' }
+        });
+
+        await browser.close();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=contract-${contract.id}.pdf`);
+        res.send(pdfBuffer);
+
+        log.info('Contract PDF generated', { contractId: id });
+    } catch (error) {
+        log.error('Failed to generate contract PDF', error);
+        if (browser) await browser.close();
+        res.status(500).json({ error: 'Failed to generate PDF' });
+    }
+});
+
 export default router;
