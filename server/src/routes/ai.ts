@@ -13,7 +13,7 @@ const generateProposalSchema = z.object({
     clientName: z.string(),
     clientCompany: z.string().optional(),
     clientIndustry: z.string().optional(),
-    calculatorType: z.enum(['vmg', 'marine', 'custom']),
+    calculatorType: z.enum(['marketing', 'custom']),
     calculatorData: z.object({}).passthrough(),
     additionalContext: z.string().optional(),
 });
@@ -28,7 +28,7 @@ router.post('/generate-proposal', authMiddleware, async (req: AuthRequest, res) 
             return;
         }
 
-        const systemPrompt = `You are an expert marketing proposal writer for Propodocs${data.calculatorType === 'marine' ? ', specializing in Marine & Powersports marketing' : ''}.
+        const systemPrompt = `You are an expert marketing proposal writer for Propodocs.
 Your task is to create compelling, professional proposal content based on the client information and selected services.
 
 **INTEGRATION INSTRUCTIONS (CRITICAL):**
@@ -37,7 +37,7 @@ Your task is to create compelling, professional proposal content based on the cl
 3. **Specifics**: Do not just say "We will provide marketing." Say "We will provide [Specific Service Name] to achieve [Specific Goal]."
 4. **Scope Integration**: If a "Scope of Work" was provided in the context, refer to it.
 
-${data.calculatorType === 'marine' ? 'For Marine clients, focus on dealership growth, inventory turnover, and local market dominance.' : ''}
+
 ${data.calculatorType === 'custom' ? 'For this custom proposal, STRONGLY align the content with the specific line items and prices in the calculator data. The proposal must feel bespoke to the calculated quote.' : ''}
 
 CRITICAL: You must return ONLY a valid JSON object with a "blocks" property containing an array of BlockNote-compatible blocks.

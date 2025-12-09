@@ -7,7 +7,6 @@ import { ToastProvider } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Landing } from './pages/Landing';
 import MarketingCalculator from './pages/MarketingCalculator';
-import { MarineCalculator } from './pages/MarineCalculator';
 import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
@@ -38,10 +37,7 @@ createRoot(document.getElementById('root')!).render(
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/marketing" element={<MarketingCalculator />} />
-              <Route path="/marine" element={<MarineCalculator />} />
-              <Route path="/calculator/vmg" element={<MarketingCalculator />} />
               <Route path="/calculator/marketing" element={<MarketingCalculator />} />
-              <Route path="/calculator/marine" element={<MarineCalculator />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />

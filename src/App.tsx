@@ -17,7 +17,6 @@ const Landing = lazy(() => import('./pages/Landing').then(m => ({ default: m.Lan
 const AcceptanceSuccess = lazy(() => import('./pages/AcceptanceSuccess').then(m => ({ default: m.AcceptanceSuccess })));
 const CalculatorBuilder = lazy(() => import('./pages/CalculatorBuilder').then(m => ({ default: m.CalculatorBuilder })));
 const CalculatorsList = lazy(() => import('./pages/CalculatorsList').then(m => ({ default: m.CalculatorsList })));
-const MarineCalculator = lazy(() => import('./pages/MarineCalculator').then(m => ({ default: m.MarineCalculator })));
 const MarketingCalculator = lazy(() => import('./pages/MarketingCalculator'));
 const CustomCalculatorUsage = lazy(() => import('./pages/CustomCalculatorUsage').then(m => ({ default: m.CustomCalculatorUsage })));
 const Templates = lazy(() => import('./pages/Templates').then(m => ({ default: m.Templates })));
@@ -111,12 +110,6 @@ function App() {
             <Route path="/calculators/:id" element={
               <ProtectedRoute>
                 <CalculatorBuilder />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/calculator/marine" element={
-              <ProtectedRoute>
-                <MarineCalculator />
               </ProtectedRoute>
             } />
 

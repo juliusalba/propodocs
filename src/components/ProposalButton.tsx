@@ -11,7 +11,7 @@ import type { ClientDetails } from '../types';
 interface ProposalButtonProps {
     clientName: string;
     clientDetails?: ClientDetails;
-    calculatorType: 'vmg' | 'marine' | 'marketing' | 'custom';
+    calculatorType: 'marketing' | 'custom';
     calculatorData: any;
     totals: any;
     onValidate?: () => boolean;

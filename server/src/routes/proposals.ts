@@ -13,7 +13,7 @@ const createProposalSchema = z.object({
     clientCompany: z.string().optional(),
     clientPhone: z.string().optional(),
     clientAddress: z.string().optional(),
-    calculatorType: z.enum(['vmg', 'marine', 'custom']),
+    calculatorType: z.enum(['marketing', 'custom']),
     calculatorData: z.object({}).passthrough(),
     content: z.any().optional(),
     templateId: z.number().optional(),

@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import { api } from '../lib/api';
-import { marineTiers } from '../data/marinePricingData';
 import { PricingSummary } from '../components/PricingSummary';
 import { EmailGate } from '../components/EmailGate';
 import { DeliverablesSection } from '../components/DeliverablesSection';
@@ -313,14 +312,14 @@ export function ProposalView() {
         if (!proposal) return;
 
         try {
-            const endpoint = proposal.calculator_type === 'marine' ? 'generate-marine-pdf' : 'generate-pdf';
-            const response = await fetch(`http://localhost:3001/${endpoint}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/pdf/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     clientName: proposal.client_name,
                     ...proposal.calculator_data,
-                    coverPhotoUrl: proposal.cover_photo_url
+                    coverPhotoUrl: proposal.cover_photo_url,
+                    calculatorType: proposal.calculator_type
                 }),
             });
 
@@ -691,21 +690,20 @@ export function ProposalView() {
 
                                 <div className="space-y-2">
                                     <h4 className="font-semibold text-gray-900 text-xs uppercase tracking-wider">Included Services</h4>
-                                    {proposal.calculator_type === 'vmg' ? (
-                                        <ul className="space-y-1.5 text-sm text-gray-600">
-                                            {data.selectedServices?.traffic && <li>- Traffic Driver (Tier {data.selectedServices.traffic})</li>}
-                                            {data.selectedServices?.retention && <li>- Retention & CRM (Tier {data.selectedServices.retention})</li>}
-                                            {data.selectedServices?.creative && <li>- Creative Support (Tier {data.selectedServices.creative})</li>}
-                                            {data.addOns?.landingPages > 0 && <li>- {data.addOns.landingPages} Landing Pages</li>}
-                                            {data.addOns?.funnels > 0 && <li>- {data.addOns.funnels} Funnels</li>}
-                                        </ul>
-                                    ) : (
-                                        <ul className="space-y-1.5 text-sm text-gray-600">
-                                            {data.selectedTier && <li>- {marineTiers[data.selectedTier as keyof typeof marineTiers]?.name} Tier</li>}
-                                            {data.addOns?.aiChat && <li>- AI Chat</li>}
-                                            {data.addOns?.dmFunnels && <li>- DM Funnels</li>}
-                                        </ul>
-                                    )}
+                                    <ul className="space-y-1.5 text-sm text-gray-600">
+                                        {proposal.calculator_type === 'marketing' && (
+                                            <>
+                                                {data.selectedServices?.traffic && <li>- Traffic Driver (Tier {data.selectedServices.traffic})</li>}
+                                                {data.selectedServices?.retention && <li>- Retention & CRM (Tier {data.selectedServices.retention})</li>}
+                                                {data.selectedServices?.creative && <li>- Creative Support (Tier {data.selectedServices.creative})</li>}
+                                                {data.addOns?.landingPages > 0 && <li>- {data.addOns.landingPages} Landing Pages</li>}
+                                                {data.addOns?.funnels > 0 && <li>- {data.addOns.funnels} Funnels</li>}
+                                            </>
+                                        )}
+                                        {proposal.calculator_type === 'custom' && (
+                                            <li>Custom pricing package</li>
+                                        )}
+                                    </ul>
                                 </div>
                             </div>
 

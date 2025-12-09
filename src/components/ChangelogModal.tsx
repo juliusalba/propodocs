@@ -60,7 +60,7 @@ export function ChangelogModal({ isOpen, onClose }: ChangelogModalProps) {
                 {
                     icon: Sparkles,
                     title: "Propodocs Calculators",
-                    description: "Standardized calculators for Marketing and Marine services."
+                    description: "Standardized calculators for Marketing services and custom pricing."
                 },
                 {
                     icon: LayoutTemplate,
