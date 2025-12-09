@@ -569,6 +569,26 @@ class APIClient {
         });
     }
 
+    // Contract Comments
+    async getContractComments(contractId: number) {
+        return this.request(`/contracts/${contractId}/comments`);
+    }
+
+    async addContractComment(contractId: number, data: { author_name?: string; content: string; parent_comment_id?: number; is_internal?: boolean }) {
+        return this.request(`/contracts/${contractId}/comments`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async resolveContractComment(contractId: number, commentId: number, isResolved = true) {
+        return this.request(`/contracts/${contractId}/comments/${commentId}/resolve`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_resolved: isResolved }),
+        });
+    }
+
+
     async countersignContract(id: number, data: { signature_data: string }) {
         return this.request(`/contracts/${id}/countersign`, {
             method: 'POST',

@@ -395,7 +395,12 @@ router.post('/:id/accept', async (req, res) => {
         // For now, we'll just log it to the console
         console.log(`Proposal ${proposalId} accepted via token ${token}. Triggering notifications.`);
 
-        res.json({ message: 'Proposal accepted' });
+        // Return with suggestion to create contract
+        res.json({
+            message: 'Proposal accepted',
+            suggestContract: true,
+            proposalId: proposalId
+        });
     } catch (error) {
         console.error('Accept proposal error:', error);
         res.status(500).json({ error: 'Failed to accept proposal' });

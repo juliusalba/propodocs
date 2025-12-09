@@ -798,4 +798,102 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
+// ===========================================
+// CONTRACT COMMENTS ENDPOINTS
+// ===========================================
+
+// Add comment to contract
+router.post('/:id/comments', async (req, res) => {
+    const log = logger.child({ action: 'add-contract-comment', contractId: req.params.id });
+
+    try {
+        const contractId = parseInt(req.params.id);
+        const { author_name, content, parent_comment_id, is_internal } = req.body;
+
+        if (!content) {
+            return res.status(400).json({ error: 'Content is required' });
+        }
+
+        // Verify contract exists
+        const { data: contract } = await supabase
+            .from('contracts')
+            .select('id')
+            .eq('id', contractId)
+            .single();
+
+        if (!contract) {
+            return res.status(404).json({ error: 'Contract not found' });
+        }
+
+        const { data: comment, error } = await supabase
+            .from('contract_comments')
+            .insert({
+                contract_id: contractId,
+                author_name: author_name || 'Anonymous',
+                content,
+                parent_comment_id: parent_comment_id || null,
+                is_internal: is_internal || false,
+                is_resolved: false
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        log.info('Comment added to contract', { contractId, commentId: comment.id });
+        return res.status(201).json({ comment });
+    } catch (error) {
+        log.error('Failed to add contract comment', error);
+        return res.status(500).json({ error: 'Failed to add comment' });
+    }
+});
+
+// Get comments for contract
+router.get('/:id/comments', async (req, res) => {
+    const log = logger.child({ action: 'get-contract-comments', contractId: req.params.id });
+
+    try {
+        const contractId = parseInt(req.params.id);
+
+        const { data: comments, error } = await supabase
+            .from('contract_comments')
+            .select('*')
+            .eq('contract_id', contractId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        log.info('Contract comments fetched', { contractId, count: comments?.length || 0 });
+        return res.json({ comments: comments || [] });
+    } catch (error) {
+        log.error('Failed to get contract comments', error);
+        return res.status(500).json({ error: 'Failed to get comments' });
+    }
+});
+
+// Resolve/unresolve comment
+router.patch('/:id/comments/:commentId/resolve', authMiddleware, async (req: AuthRequest, res) => {
+    const log = logger.child({ action: 'resolve-contract-comment', commentId: req.params.commentId });
+
+    try {
+        const commentId = parseInt(req.params.commentId);
+        const { is_resolved } = req.body;
+
+        const { data: comment, error } = await supabase
+            .from('contract_comments')
+            .update({ is_resolved: is_resolved ?? true })
+            .eq('id', commentId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        log.info('Comment resolved', { commentId, isResolved: is_resolved });
+        return res.json({ comment });
+    } catch (error) {
+        log.error('Failed to resolve comment', error);
+        return res.status(500).json({ error: 'Failed to resolve comment' });
+    }
+});
+
 export default router;

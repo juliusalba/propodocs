@@ -32,6 +32,7 @@ const LineItemSchema = z.object({
 
 const CreateInvoiceSchema = z.object({
     proposal_id: z.number().optional(),
+    contract_id: z.number().optional(),
     client_name: z.string().min(1, 'Client name is required').max(200),
     client_company: z.string().max(200).optional(),
     client_email: z.string().email('Invalid email format').max(254).optional().or(z.literal('')),
@@ -57,7 +58,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 
     try {
         const userId = req.user!.userId;
-        const { status, proposalId } = req.query;
+        const { status, proposalId, contractId } = req.query;
 
         let query = supabase
             .from('invoices')
@@ -70,6 +71,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
         }
         if (proposalId) {
             query = query.eq('proposal_id', parseInt(proposalId as string));
+        }
+        if (contractId) {
+            query = query.eq('contract_id', parseInt(contractId as string));
         }
 
         const { data, error } = await query;
@@ -152,6 +156,7 @@ router.post('/', authMiddleware, standardRateLimiter, async (req: AuthRequest, r
             .insert({
                 user_id: userId,
                 proposal_id: input.proposal_id,
+                contract_id: input.contract_id,
                 invoice_number: invoiceNumber,
                 client_name: input.client_name,
                 client_company: input.client_company,
