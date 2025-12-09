@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Package, CheckCircle } from 'lucide-react';
-import { marineTiers } from '../data/marinePricingData';
 
 interface DeliverablesSectionProps {
     proposal: any;
@@ -12,9 +11,9 @@ export function DeliverablesSection({ proposal }: DeliverablesSectionProps) {
     if (!proposal?.calculator_data) return null;
 
     const data = proposal.calculator_data;
-    const isVMG = proposal.calculator_type === 'vmg';
+    const isMarketing = proposal.calculator_type === 'marketing';
 
-    const renderVMGDeliverables = () => {
+    const renderMarketingDeliverables = () => {
         const deliverables: { title: string; items: string[] }[] = [];
 
         // Traffic Driver Deliverables
@@ -169,38 +168,25 @@ export function DeliverablesSection({ proposal }: DeliverablesSectionProps) {
         return deliverables;
     };
 
-    const renderMarineDeliverables = () => {
+    const renderCustomDeliverables = () => {
         const deliverables: { title: string; items: string[] }[] = [];
 
-        if (data.selectedTier) {
-            const tier = marineTiers[data.selectedTier as keyof typeof marineTiers];
-            if (tier) {
-                deliverables.push({
-                    title: `${tier.name} Tier`,
-                    items: tier.deliverables || [
-                        'Social media management and content creation',
-                        'Paid advertising campaigns',
-                        'Website optimization',
-                        'Monthly performance reports',
-                        'Dedicated account support'
-                    ]
-                });
-            }
+        // For custom calculators, extract deliverables from calculator_data if available
+        if (data.deliverables && Array.isArray(data.deliverables)) {
+            deliverables.push({
+                title: 'Included Services',
+                items: data.deliverables
+            });
         }
 
-        // Marine Add-ons
-        if (data.addOns) {
+        // Add-ons from custom calculator
+        if (data.selectedAddOns && Object.keys(data.selectedAddOns).length > 0) {
             const addOnItems: string[] = [];
-            if (data.addOns.aiChat) {
-                addOnItems.push('AI Chat Integration - 24/7 automated customer support');
-            }
-            if (data.addOns.dmFunnels) {
-                addOnItems.push('DM Funnels - Automated Instagram/Facebook messaging campaigns');
-            }
-            if (data.addOns.videoProduction) {
-                addOnItems.push('Video Production - Professional marine industry video content');
-            }
-
+            Object.entries(data.selectedAddOns).forEach(([key, value]) => {
+                if (value) {
+                    addOnItems.push(key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+                }
+            });
             if (addOnItems.length > 0) {
                 deliverables.push({
                     title: 'Add-on Services',
@@ -212,7 +198,7 @@ export function DeliverablesSection({ proposal }: DeliverablesSectionProps) {
         return deliverables;
     };
 
-    const deliverables = isVMG ? renderVMGDeliverables() : renderMarineDeliverables();
+    const deliverables = isMarketing ? renderMarketingDeliverables() : renderCustomDeliverables();
 
     if (deliverables.length === 0) return null;
 

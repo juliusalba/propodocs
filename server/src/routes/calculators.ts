@@ -41,9 +41,9 @@ const CalculatorSchema = z.object({
     schema: z.record(z.any()),
 });
 
-// Enhanced VMG Scaffold Rule System for Calculator Generation
+// Enhanced Propodocs Scaffold Rule System for Calculator Generation
 const CALCULATOR_GENERATION_PROMPT = `You are a Senior Pricing Strategy Consultant for Propodocs, a premier proposal management platform.
-Your task is to analyze the provided service description and create a comprehensive, professional pricing calculator schema that matches VMG's premium branding.
+Your task is to analyze the provided service description and create a comprehensive, professional pricing calculator schema that matches Propodocs' premium branding.
 
 ## SCAFFOLD RULES (MUST FOLLOW):
 
@@ -66,7 +66,7 @@ Each tier MUST include:
 - Minimum 4-6 features per tier
 
 ### Rule 3: Add-On Categories
-Group ALL add-ons into logical categories. Common VMG categories:
+Group ALL add-ons into logical categories. Common Propodocs categories:
 - "Conversational & Capture" (chatbots, AI chat, DM funnels)
 - "Email/SMS & Enablement" (email campaigns, SMS, automation)
 - "Creative/CRO/Inventory" (creative assets, website optimization, feed management)

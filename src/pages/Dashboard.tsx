@@ -8,7 +8,6 @@ import {
     MoreVertical,
     Calendar,
     ArrowRight,
-    Waves,
     XCircle,
     MessageSquare,
     Bell,
@@ -684,13 +683,9 @@ export function Dashboard() {
                                         </td>
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-2">
-                                                {proposal.calculator_type === 'marine' ? (
-                                                    <Waves className="w-4 h-4 text-blue-500" />
-                                                ) : (
-                                                    <TrendingUp className="w-4 h-4 text-red-500" />
-                                                )}
+                                                <TrendingUp className="w-4 h-4 text-blue-500" />
                                                 <span className="text-sm text-gray-600 capitalize">
-                                                    {proposal.calculator_type === 'vmg' ? 'Marketing' : 'Marine'}
+                                                    {proposal.calculator_type === 'marketing' ? 'Marketing' : 'Custom'}
                                                 </span>
                                             </div>
                                         </td>

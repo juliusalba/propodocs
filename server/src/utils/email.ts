@@ -5,7 +5,7 @@ dotenv.config();
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-const FROM_NAME = process.env.FROM_NAME || 'VMG Proposal System';
+const FROM_NAME = process.env.FROM_NAME || 'Propodocs';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Initialize Resend if API key is available
@@ -18,12 +18,12 @@ interface PasswordResetEmailData {
 }
 
 export async function sendPasswordResetEmail(data: PasswordResetEmailData): Promise<void> {
-    const resetLink = `${FRONTEND_URL}/vmg-pricing-calculator/reset-password?token=${data.resetToken}`;
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${data.resetToken}`;
 
     const textContent = `
 Hello ${data.name},
 
-You requested to reset your password for your VMG Proposal System account.
+You requested to reset your password for your Propodocs account.
 
 Click the link below to reset your password:
 ${resetLink}
@@ -33,7 +33,7 @@ This link will expire in 1 hour.
 If you didn't request this password reset, please ignore this email.
 
 Best regards,
-VMG Proposal System Team
+Propodocs Team
     `.trim();
 
     const htmlContent = `
@@ -81,7 +81,7 @@ VMG Proposal System Team
                             </p>
                             
                             <p style="margin: 0 0 32px 0; color: #6b7280; font-size: 15px; line-height: 1.6;">
-                                We received a request to reset the password for your VMG Proposal System account. Click the button below to choose a new password.
+                                We received a request to reset the password for your Propodocs account. Click the button below to choose a new password.
                             </p>
                             
                             <!-- CTA Button -->
@@ -125,7 +125,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background-color: #f9fafb; padding: 32px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
-                                VOGEL MARKETING GROUP
+                                PROPODOCS
                             </p>
                             <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 13px; line-height: 1.6;">
                                 705 Washington Avenue Suite 300<br>
@@ -151,7 +151,7 @@ VMG Proposal System Team
             const { data: emailData, error } = await resend.emails.send({
                 from: `${FROM_NAME} <${FROM_EMAIL}>`,
                 to: [data.to],
-                subject: 'Reset Your Password - VMG Proposal System',
+                subject: 'Reset Your Password - Propodocs',
                 text: textContent,
                 html: htmlContent,
             });
@@ -170,7 +170,7 @@ VMG Proposal System Team
         // Fallback: Log to console for development
         console.log('\n📧 ===== PASSWORD RESET EMAIL (Resend not configured) =====');
         console.log(`To: ${data.to}`);
-        console.log('Subject: Reset Your Password - VMG Proposal System');
+        console.log('Subject: Reset Your Password - Propodocs');
         console.log('\n--- Email Content ---');
         console.log(textContent);
         console.log('\n--- Reset Link ---');
@@ -190,7 +190,7 @@ export async function sendProposalLinkEmail(data: ProposalLinkEmailData): Promis
     const textContent = `
 Hello ${data.clientName},
 
-You have received a new proposal from VMG Proposal System.
+You have received a new proposal from Propodocs.
 
 Click the link below to view your proposal:
 ${data.link}
@@ -198,7 +198,7 @@ ${data.link}
 ${data.message ? `Message from sender:\n${data.message}\n` : ''}
 
 Best regards,
-VMG Proposal System Team
+Propodocs Team
     `.trim();
 
     const htmlContent = `
@@ -258,7 +258,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background-color: #f9fafb; padding: 32px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
-                                VOGEL MARKETING GROUP
+                                PROPODOCS
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                                 © ${new Date().getFullYear()} Propodocs. All rights reserved.
@@ -278,7 +278,7 @@ VMG Proposal System Team
             const { data: emailData, error } = await resend.emails.send({
                 from: `${FROM_NAME} <${FROM_EMAIL}>`,
                 to: [data.to],
-                subject: `New Proposal for ${data.clientName} - VMG`,
+                subject: `New Proposal for ${data.clientName} - Propodocs`,
                 text: textContent,
                 html: htmlContent,
             });
@@ -296,7 +296,7 @@ VMG Proposal System Team
     } else {
         console.log('\n📧 ===== PROPOSAL EMAIL (Resend not configured) =====');
         console.log(`To: ${data.to}`);
-        console.log(`Subject: New Proposal for ${data.clientName} - VMG`);
+        console.log(`Subject: New Proposal for ${data.clientName} - Propodocs`);
         console.log('\n--- Email Content ---');
         console.log(textContent);
         console.log('\n--- Link ---');
@@ -409,7 +409,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background-color: #f9fafb; padding: 32px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
-                                VOGEL MARKETING GROUP
+                                PROPODOCS
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                                 © ${new Date().getFullYear()} Propodocs. All rights reserved.
@@ -551,7 +551,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background-color: #f9fafb; padding: 32px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
-                                VOGEL MARKETING GROUP
+                                PROPODOCS
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                                 © ${new Date().getFullYear()} Propodocs. All rights reserved.
@@ -571,7 +571,7 @@ VMG Proposal System Team
             const { data: emailData, error } = await resend.emails.send({
                 from: `${FROM_NAME} <${FROM_EMAIL}>`,
                 to: [data.to],
-                subject: `Contract Ready: ${data.contractTitle} - VMG`,
+                subject: `Contract Ready: ${data.contractTitle} - Propodocs`,
                 text: textContent,
                 html: htmlContent,
             });
@@ -589,7 +589,7 @@ VMG Proposal System Team
     } else {
         console.log('\n📧 ===== CONTRACT EMAIL (Resend not configured) =====');
         console.log(`To: ${data.to}`);
-        console.log(`Subject: Contract Ready: ${data.contractTitle} - VMG`);
+        console.log(`Subject: Contract Ready: ${data.contractTitle} - Propodocs`);
         console.log('\n--- Email Content ---');
         console.log(textContent);
         console.log('=====================================================\n');
@@ -674,7 +674,7 @@ VMG Proposal System Team
                     <tr>
                         <td style="background-color: #f9fafb; padding: 32px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
-                                VOGEL MARKETING GROUP
+                                PROPODOCS
                             </p>
                             <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                                 © ${new Date().getFullYear()} Propodocs. All rights reserved.

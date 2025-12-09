@@ -11,9 +11,9 @@ export function ScopeSection({ proposal }: ScopeSectionProps) {
     if (!proposal?.calculator_data) return null;
 
     const data = proposal.calculator_data;
-    const isVMG = proposal.calculator_type === 'vmg';
+    const isMarketing = proposal.calculator_type === 'marketing';
 
-    const renderVMGScope = () => {
+    const renderMarketingScope = () => {
         const inclusions: string[] = [
             'Strategic planning and campaign development',
             'Regular performance monitoring and optimization',
@@ -49,33 +49,27 @@ export function ScopeSection({ proposal }: ScopeSectionProps) {
         return { inclusions, exclusions };
     };
 
-    const renderMarineScope = () => {
+    const renderCustomScope = () => {
         const inclusions: string[] = [
-            'Marine industry-specific marketing strategy',
-            'Social media content creation and management',
-            'Paid advertising campaign setup and optimization',
-            'Monthly performance reports',
-            'Dedicated marine marketing specialist'
+            'Selected services and deliverables',
+            'Regular progress updates and communication',
+            'Performance tracking and reporting',
+            'Dedicated project management',
+            'Quality assurance and revisions'
         ];
 
         const exclusions: string[] = [
-            'Advertising spend (billed separately)',
-            'Professional photography/videography shoots',
-            'Website hosting and domain fees',
-            'Third-party software subscriptions',
-            'Services not included in selected tier'
+            'Third-party costs and fees',
+            'Additional services not specified',
+            'Rush fees for expedited timelines',
+            'Out-of-scope requests',
+            'Third-party tool subscriptions'
         ];
-
-        if (data.selectedTier === 'offshore') {
-            inclusions.push('Premium content production');
-            inclusions.push('Advanced analytics and attribution');
-            inclusions.push('Priority support and strategy sessions');
-        }
 
         return { inclusions, exclusions };
     };
 
-    const { inclusions, exclusions } = isVMG ? renderVMGScope() : renderMarineScope();
+    const { inclusions, exclusions } = isMarketing ? renderMarketingScope() : renderCustomScope();
 
     return (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6">
