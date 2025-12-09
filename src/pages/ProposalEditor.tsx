@@ -389,11 +389,7 @@ export function ProposalEditor() {
         if (!proposal) return;
 
         let path: string;
-        if (proposal.calculator_type === 'marine') {
-            path = `/calculator/marine?id=${proposal.id}`;
-        } else if (proposal.calculator_type === 'vmg') {
-            path = `/calculator/vmg?id=${proposal.id}`;
-        } else if (proposal.calculator_type === 'custom') {
+        if (proposal.calculator_type === 'custom') {
             // For custom calculators, we need the calculator definition ID
             const calculatorDefId = proposal.calculator_data?.calculatorDefinitionId;
             if (calculatorDefId) {
@@ -403,8 +399,8 @@ export function ProposalEditor() {
                 return;
             }
         } else {
-            toast.error('Unknown calculator type');
-            return;
+            // Default to marketing calculator
+            path = `/calculator/marketing?id=${proposal.id}`;
         }
 
         navigate(path);

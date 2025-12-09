@@ -21,7 +21,7 @@ interface Proposal {
     title: string;
     client_name: string;
     client_company?: string;
-    calculator_type: 'vmg' | 'marine' | 'marketing' | 'custom';
+    calculator_type: 'marketing' | 'custom';
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
     calculator_data: any;
     created_at: string;
@@ -208,13 +208,11 @@ export function ProposalCard({ proposal, onDelete, onShare }: ProposalCardProps)
                         <p className="text-sm text-gray-500 truncate max-w-[60%]">
                             {proposal.client_name}
                         </p>
-                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded border ${proposal.calculator_type === 'vmg'
-                            ? 'bg-red-50 text-red-700 border-red-100'
-                            : proposal.calculator_type === 'marine'
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded border ${proposal.calculator_type === 'marketing'
                                 ? 'bg-blue-50 text-blue-700 border-blue-100'
                                 : 'bg-emerald-50 text-emerald-700 border-emerald-100'
                             }`}>
-                            {proposal.calculator_type === 'vmg' ? 'Marketing' : proposal.calculator_type === 'marine' ? 'Marine' : 'Custom'}
+                            {proposal.calculator_type === 'marketing' ? 'Marketing' : 'Custom'}
                         </span>
                     </div>
                 </div>

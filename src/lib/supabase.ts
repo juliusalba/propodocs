@@ -25,7 +25,7 @@ export interface Proposal {
     user_id: number;
     title: string;
     client_name: string;
-    calculator_type: 'vmg' | 'marine' | 'marketing' | 'custom';
+    calculator_type: 'marketing' | 'custom';
     calculator_data: Record<string, unknown>;
     content?: Record<string, unknown>;
     theme?: Record<string, unknown>;

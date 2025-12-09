@@ -97,7 +97,7 @@ export interface Proposal {
     client_email?: string;
     client_phone?: string;
     client_address?: string;
-    calculator_type: 'vmg' | 'marine' | 'marketing' | 'custom';
+    calculator_type: 'marketing' | 'custom';
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
     created_at: string;
     updated_at: string;

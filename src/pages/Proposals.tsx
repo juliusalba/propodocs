@@ -15,7 +15,6 @@ import {
     Clock,
     FileText,
     Calculator,
-    Anchor,
     ChevronDown,
     X,
     RefreshCw,
@@ -35,7 +34,7 @@ interface Proposal {
     title: string;
     client_name: string;
     client_company?: string;
-    calculator_type: 'vmg' | 'marine' | 'marketing' | 'custom';
+    calculator_type: 'marketing' | 'custom';
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
     calculator_data: Record<string, unknown>;
     created_at: string;
@@ -141,9 +140,7 @@ export function Proposals() {
 
     const handleView = (proposal: Proposal) => {
         let path: string;
-        if (proposal.calculator_type === 'marine') {
-            path = `/calculator/marine?id=${proposal.id}`;
-        } else if (proposal.calculator_type === 'custom') {
+        if (proposal.calculator_type === 'custom') {
             // For custom calculators, we need the calculator definition ID
             const calculatorDefinitionId = (proposal.calculator_data as any)?.calculatorDefinitionId;
             if (calculatorDefinitionId) {
@@ -153,7 +150,8 @@ export function Proposals() {
                 return;
             }
         } else {
-            path = `/calculator/vmg?id=${proposal.id}`;
+            // Default to marketing calculator
+            path = `/calculator/marketing?id=${proposal.id}`;
         }
         navigate(path);
     };
@@ -273,8 +271,7 @@ export function Proposals() {
                                             className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/10 outline-none appearance-none cursor-pointer transition-all"
                                         >
                                             <option value="all">All Types</option>
-                                            <option value="vmg">Marketing</option>
-                                            <option value="marine">Marine</option>
+                                            <option value="marketing">Marketing</option>
                                             <option value="custom">Custom</option>
                                         </select>
                                         <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -392,13 +389,11 @@ export function Proposals() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`inline-flex items-center px-2 py-1 rounded text-[11px] font-medium border ${proposal.calculator_type === 'vmg'
-                                                            ? 'bg-red-50 text-red-700 border-red-100'
-                                                            : proposal.calculator_type === 'marine'
-                                                                ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                                                : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded text-[11px] font-medium border ${proposal.calculator_type === 'marketing'
+                                                            ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                                            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
                                                             }`}>
-                                                            {proposal.calculator_type === 'vmg' ? 'Marketing' : proposal.calculator_type === 'marine' ? 'Marine' : 'Custom'}
+                                                            {proposal.calculator_type === 'marketing' ? 'Marketing' : 'Custom'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -573,17 +568,17 @@ export function Proposals() {
                                         <button
                                             onClick={() => {
                                                 setShowCreateModal(false);
-                                                navigate('/calculator/vmg');
+                                                navigate('/calculator/marketing');
                                             }}
-                                            className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#3b82f6] hover:bg-red-50/30 transition-all text-left group"
+                                            className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#3b82f6] hover:bg-blue-50/30 transition-all text-left group"
                                         >
                                             <div className="flex items-start gap-4">
-                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] text-white flex items-center justify-center shadow-lg shadow-red-900/20">
+                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] text-white flex items-center justify-center shadow-lg shadow-blue-900/20">
                                                     <Calculator className="w-6 h-6" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <h3 className="font-bold text-gray-900 mb-1 group-hover:text-[#3b82f6] transition-colors">Marketing Calculator</h3>
-                                                    <p className="text-sm text-gray-500">Create proposals for digital marketing services including traffic, retention, and creative</p>
+                                                    <p className="text-sm text-gray-500">Create proposals for digital marketing services</p>
                                                 </div>
                                             </div>
                                         </button>
@@ -591,17 +586,17 @@ export function Proposals() {
                                         <button
                                             onClick={() => {
                                                 setShowCreateModal(false);
-                                                navigate('/calculator/marine');
+                                                navigate('/calculators');
                                             }}
-                                            className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all text-left group"
+                                            className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/30 transition-all text-left group"
                                         >
                                             <div className="flex items-start gap-4">
-                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-900/20">
-                                                    <Anchor className="w-6 h-6" />
+                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 text-white flex items-center justify-center shadow-lg shadow-emerald-900/20">
+                                                    <Calculator className="w-6 h-6" />
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h3 className="font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">Marine Calculator</h3>
-                                                    <p className="text-sm text-gray-500">Create proposals for marine industry marketing with specialized tiers and add-ons</p>
+                                                    <h3 className="font-bold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">Custom Calculator</h3>
+                                                    <p className="text-sm text-gray-500">Create or use your own custom pricing calculators</p>
                                                 </div>
                                             </div>
                                         </button>
