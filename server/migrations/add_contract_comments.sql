@@ -18,31 +18,5 @@ CREATE INDEX IF NOT EXISTS idx_contract_comments_contract_id ON contract_comment
 CREATE INDEX IF NOT EXISTS idx_contract_comments_parent ON contract_comments(parent_comment_id);
 CREATE INDEX IF NOT EXISTS idx_contract_comments_created ON contract_comments(created_at);
 
--- Add RLS policies
-ALTER TABLE contract_comments ENABLE ROW LEVEL SECURITY;
-
--- Allow all authenticated users to read comments on contracts they own
-CREATE POLICY "Users can read own contract comments" ON contract_comments
-    FOR SELECT
-    USING (
-        contract_id IN (
-            SELECT id FROM contracts WHERE user_id = auth.uid()::integer
-        )
-    );
-
--- Allow inserting comments (for both internal users and external clients via token)
-CREATE POLICY "Allow inserting contract comments" ON contract_comments
-    FOR INSERT
-    WITH CHECK (true);
-
--- Allow users to update their own contract comments
-CREATE POLICY "Users can update own contract comments" ON contract_comments
-    FOR UPDATE
-    USING (
-        contract_id IN (
-            SELECT id FROM contracts WHERE user_id = auth.uid()::integer
-        )
-    );
-
--- Add comment counts to contracts queries
+-- Add comment for documentation
 COMMENT ON TABLE contract_comments IS 'Comments on contracts for collaboration between users and clients';

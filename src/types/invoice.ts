@@ -12,6 +12,7 @@ export interface Invoice {
     id: number;
     user_id: number;
     proposal_id?: number;
+    contract_id?: number;
 
     // Client Details
     client_name: string;
@@ -53,6 +54,7 @@ export interface Invoice {
 
 export interface CreateInvoiceRequest {
     proposal_id?: number;
+    contract_id?: number;
     client_name: string;
     client_company?: string;
     client_email?: string;

@@ -64,6 +64,25 @@ export function InvoiceEditor() {
     const [milestoneCount, setMilestoneCount] = useState(1);
     const [currentMilestone, setCurrentMilestone] = useState(1);
 
+    // Contracts
+    const [contracts, setContracts] = useState<any[]>([]);
+    const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
+
+    useEffect(() => {
+        loadContracts();
+    }, []);
+
+    const loadContracts = async () => {
+        try {
+            const response = await api.getContracts();
+            if (response && response.contracts) {
+                setContracts(response.contracts);
+            }
+        } catch (error) {
+            console.error('Failed to load contracts:', error);
+        }
+    };
+
     useEffect(() => {
         // Handle both 'new' and undefined (from /invoices/new route which doesn't have :id param)
         const isNewInvoice = id === 'new' || !id;
@@ -111,6 +130,7 @@ export function InvoiceEditor() {
             setMilestoneCount(data.milestone_total || 1);
             setCurrentMilestone(data.milestone_number || 1);
             setSelectedPaymentPlatform(data.payment_platform || null);
+            setSelectedContractId(data.contract_id || null);
         } catch (error) {
             toast.error('Failed to load invoice');
             navigate('/invoices');
@@ -200,6 +220,7 @@ export function InvoiceEditor() {
                     milestone_number: currentMilestone,
                     milestone_total: milestoneCount,
                     payment_platform: selectedPaymentPlatform,
+                    contract_id: selectedContractId || undefined,
                     status: 'draft'
                 });
 
@@ -213,6 +234,7 @@ export function InvoiceEditor() {
                 await api.updateInvoice(invoice.id, {
                     title,
                     client_name: clientName,
+                    contract_id: selectedContractId || undefined,
                     client_email: clientEmail,
                     client_company: clientCompany,
                     client_address: clientAddress,
@@ -556,6 +578,36 @@ export function InvoiceEditor() {
                                     Bill To
                                 </h3>
                                 <div className="space-y-4">
+                                    {/* Contract Selector */}
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">Link to Contract (Optional)</label>
+                                        <select
+                                            value={selectedContractId || ''}
+                                            onChange={(e) => {
+                                                const contractId = e.target.value ? parseInt(e.target.value) : null;
+                                                setSelectedContractId(contractId);
+                                                // Optional: auto-fill client details from contract if selected
+                                                if (contractId) {
+                                                    const contract = contracts.find(c => c.id === contractId);
+                                                    if (contract) {
+                                                        setClientName(contract.client_name);
+                                                        setClientEmail(contract.client_email || '');
+                                                        setClientCompany(contract.client_company || '');
+                                                    }
+                                                }
+                                            }}
+                                            disabled={!isEditable}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm disabled:bg-gray-50"
+                                        >
+                                            <option value="">No Contract Linked</option>
+                                            {contracts.map(contract => (
+                                                <option key={contract.id} value={contract.id}>
+                                                    {contract.title} ({new Date(contract.created_at).toLocaleDateString()})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
                                     <div>
                                         <label className="block text-sm text-gray-600 mb-1">Name</label>
                                         <input

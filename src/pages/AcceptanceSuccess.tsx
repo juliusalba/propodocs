@@ -158,6 +158,24 @@ export function AcceptanceSuccess() {
                         </ul>
                     </div>
 
+                    {/* Create Contract Suggestion */}
+                    {location.state?.suggestContract && location.state?.proposalId && (
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="font-semibold text-gray-900 mb-1">Ready to formalize the agreement?</h3>
+                                    <p className="text-sm text-gray-600">Create a contract from this accepted proposal.</p>
+                                </div>
+                                <button
+                                    onClick={() => navigate(`/contracts/new?from_proposal=${location.state.proposalId}`)}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-600/20"
+                                >
+                                    Create Contract
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button

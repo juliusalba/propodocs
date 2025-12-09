@@ -20,6 +20,7 @@ import {
 import { api } from '../lib/api';
 import { useToast } from '../components/Toast';
 import { SignaturePad } from '../components/SignaturePad';
+import { ContractComments } from '../components/ContractComments';
 import type { Contract } from '../types/contract';
 
 const statusConfig = {
@@ -486,6 +487,13 @@ export function ContractEditor() {
                                             </li>
                                         ))}
                                     </ul>
+                                </div>
+                            )}
+
+                            {/* Comments */}
+                            {id !== 'new' && (
+                                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden h-96 flex flex-col">
+                                    <ContractComments contractId={contract.id} />
                                 </div>
                             )}
                         </div>
