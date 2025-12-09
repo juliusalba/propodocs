@@ -12,15 +12,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Request schemas
 const CreateTemplateSchema = z.object({
-    name: z.string().min(1),
-    description: z.string().optional(),
-    content: z.string().min(1),
+    name: z.string().min(1, 'Template name is required').max(200),
+    description: z.string().max(1000).optional(),
+    content: z.string().min(1, 'Template content is required'),
     placeholders: z.array(z.object({
         key: z.string(),
         label: z.string(),
         type: z.enum(['text', 'email', 'date', 'currency', 'textarea', 'number']),
     })).optional(),
-    category: z.string().optional(),
+    offer_type: z.string().max(100).optional(),  // e.g., 'marine', 'social_media', 'seo'
+    category: z.string().max(100).optional().default('service_agreement'),  // e.g., 'service_agreement', 'nda', 'sow'
     is_default: z.boolean().optional(),
 });
 
@@ -30,18 +31,33 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 
     try {
         const userId = req.user!.userId;
+        const { offer_type, category } = req.query;
 
         // Get user's templates and system templates (user_id is null)
-        const { data, error } = await supabase
+        let query = supabase
             .from('contract_templates')
             .select('*')
-            .or(`user_id.eq.${userId},user_id.is.null`)
+            .or(`user_id.eq.${userId},user_id.is.null`);
+
+        // Filter by offer_type if provided
+        if (offer_type && offer_type !== 'all') {
+            query = query.eq('offer_type', offer_type);
+        }
+
+        // Filter by category if provided
+        if (category && category !== 'all') {
+            query = query.eq('category', category);
+        }
+
+        query = query
             .order('is_default', { ascending: false })
             .order('created_at', { ascending: false });
 
+        const { data, error } = await query;
+
         if (error) throw error;
 
-        log.info('Contract templates fetched', { count: data?.length || 0 });
+        log.info('Contract templates fetched', { count: data?.length || 0, offer_type, category });
         res.json({ templates: data || [] });
     } catch (error) {
         log.error('Failed to fetch contract templates', error);
@@ -93,7 +109,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
                 description: input.description,
                 content: input.content,
                 placeholders: input.placeholders || [],
-                category: input.category,
+                offer_type: input.offer_type || null,
+                category: input.category || 'service_agreement',
                 is_default: input.is_default || false,
             })
             .select()
@@ -159,6 +176,32 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
     } catch (error) {
         log.error('Failed to delete template', error);
         res.status(500).json({ error: 'Failed to delete template' });
+    }
+});
+
+// Get templates by offer type (for contract generation)
+router.get('/by-offer/:offerType', authMiddleware, async (req: AuthRequest, res) => {
+    const log = logger.child({ action: 'get-templates-by-offer', offerType: req.params.offerType });
+
+    try {
+        const userId = req.user!.userId;
+        const { offerType } = req.params;
+
+        const { data, error } = await supabase
+            .from('contract_templates')
+            .select('*')
+            .eq('offer_type', offerType)
+            .or(`user_id.eq.${userId},user_id.is.null`)
+            .order('is_default', { ascending: false })
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        log.info('Templates by offer type fetched', { offerType, count: data?.length || 0 });
+        res.json({ templates: data || [] });
+    } catch (error) {
+        log.error('Failed to fetch templates by offer type', error);
+        res.status(500).json({ error: 'Failed to fetch templates' });
     }
 });
 

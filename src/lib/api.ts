@@ -600,12 +600,20 @@ class APIClient {
     // CONTRACT TEMPLATES
     // ======================
 
-    async getContractTemplates() {
-        return this.request('/contract-templates');
+    async getContractTemplates(filters?: { offer_type?: string; category?: string }) {
+        const params = new URLSearchParams();
+        if (filters?.offer_type) params.append('offer_type', filters.offer_type);
+        if (filters?.category) params.append('category', filters.category);
+        const query = params.toString();
+        return this.request(`/contract-templates${query ? `?${query}` : ''}`);
     }
 
     async getContractTemplate(id: number) {
         return this.request(`/contract-templates/${id}`);
+    }
+
+    async getContractTemplatesByOffer(offerType: string) {
+        return this.request(`/contract-templates/by-offer/${offerType}`);
     }
 
     async createContractTemplate(data: any) {
