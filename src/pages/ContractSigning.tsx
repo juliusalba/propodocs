@@ -330,7 +330,7 @@ export function ContractSigning() {
             {/* Footer */}
             <footer className="bg-white border-t border-gray-100 mt-12">
                 <div className="max-w-4xl mx-auto px-6 py-4 text-center text-sm text-gray-400">
-                    Secured by Proposal Studio • E-Signature Platform
+                    Secured by Propodocs • E-Signature Platform
                 </div>
             </footer>
         </div>

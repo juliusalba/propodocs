@@ -117,7 +117,7 @@ export function Landing() {
                             variants={itemVariants}
                             className="text-xl text-[#050505]/80 max-w-2xl mx-auto mb-12 leading-relaxed font-medium"
                         >
-                            Stop wrestling with formatting. Document your value and close deals faster with our intelligent proposal generator built for modern agencies.
+                            Stop wrestling with formatting. Document your value and close deals faster with our intelligent proposal management platform built for modern agencies.
                         </motion.p>
 
                         <motion.div

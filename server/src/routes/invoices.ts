@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { logger } from '../utils/logger.js';
+import { standardRateLimiter } from '../middleware/rateLimiter.js';
+import { sanitizeInvoiceData } from '../utils/sanitize.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -20,27 +22,33 @@ function generateInvoiceNumber(): string {
     return `INV-${year}${month}-${random}`;
 }
 
-// Request schemas
+// Request schemas - Using snake_case to match frontend
+const LineItemSchema = z.object({
+    description: z.string().min(1, 'Description is required').max(500),
+    quantity: z.number().int().min(1, 'Quantity must be at least 1').max(10000),
+    unit_price: z.number().min(0, 'Unit price cannot be negative').max(10000000),
+    amount: z.number().min(0).max(10000000),
+});
+
 const CreateInvoiceSchema = z.object({
     proposal_id: z.number().optional(),
-    client_name: z.string().min(1),
-    client_company: z.string().optional(),
-    client_email: z.string().email().optional(),
-    client_address: z.string().optional(),
-    title: z.string().min(1),
-    line_items: z.array(z.object({
-        id: z.string(),
-        description: z.string(),
-        quantity: z.number(),
-        unitPrice: z.number(),
-        amount: z.number(),
-    })),
-    tax_rate: z.number().optional(),
-    due_date: z.string().optional(),
+    client_name: z.string().min(1, 'Client name is required').max(200),
+    client_company: z.string().max(200).optional(),
+    client_email: z.string().email('Invalid email format').max(254).optional().or(z.literal('')),
+    client_address: z.string().max(500).optional(),
+    title: z.string().min(1, 'Invoice title is required').max(300),
+    line_items: z.array(LineItemSchema).min(1, 'At least one line item is required'),
+    tax_rate: z.number().min(0).max(100).optional(),
+    tax_amount: z.number().min(0).max(10000000).optional(),
+    subtotal: z.number().min(0).max(10000000).optional(),
+    total: z.number().min(0).max(10000000).optional(),
+    due_date: z.string().optional().nullable(),
     payment_terms: z.enum(['net_30', 'net_15', 'due_on_receipt']).optional(),
-    milestone_number: z.number().optional(),
-    milestone_total: z.number().optional(),
-    notes: z.string().optional(),
+    payment_platform: z.string().max(50).optional().nullable(),
+    milestone_number: z.number().int().min(1).optional(),
+    milestone_total: z.number().int().min(1).optional(),
+    notes: z.string().max(2000).optional(),
+    status: z.enum(['draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled']).optional(),
 });
 
 // List invoices
@@ -71,7 +79,10 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
         log.info('Invoices fetched', { count: data?.length || 0 });
         res.json({ invoices: data || [] });
     } catch (error) {
-        log.error('Failed to fetch invoices', error);
+        log.error('Failed to fetch invoices', {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
+        });
         res.status(500).json({ error: 'Failed to fetch invoices' });
     }
 });
@@ -104,19 +115,35 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
-// Create invoice
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+// Create invoice - with rate limiting and sanitization
+router.post('/', authMiddleware, standardRateLimiter, async (req: AuthRequest, res) => {
     const log = logger.child({ action: 'create-invoice', userId: req.user?.userId?.toString() });
 
     try {
         const userId = req.user!.userId;
-        const input = CreateInvoiceSchema.parse(req.body);
 
-        // Calculate totals
-        const subtotal = input.line_items.reduce((sum, item) => sum + item.amount, 0);
-        const taxRate = input.tax_rate || 0;
-        const taxAmount = subtotal * (taxRate / 100);
-        const total = subtotal + taxAmount;
+        // Sanitize input data first
+        const sanitizedData = sanitizeInvoiceData(req.body);
+
+        // Log incoming request (sanitized)
+        log.info('Creating invoice', {
+            title: sanitizedData.title,
+            client_name: sanitizedData.client_name,
+            line_items_count: sanitizedData.line_items?.length || 0
+        });
+
+        // Validate with Zod
+        const input = CreateInvoiceSchema.parse(sanitizedData);
+
+        // Server-side calculation verification
+        const calculatedSubtotal = input.line_items.reduce((sum, item) => sum + item.amount, 0);
+        const calculatedTaxAmount = calculatedSubtotal * ((input.tax_rate || 0) / 100);
+        const calculatedTotal = calculatedSubtotal + calculatedTaxAmount;
+
+        // Use server calculations to prevent manipulation
+        const subtotal = calculatedSubtotal;
+        const taxAmount = calculatedTaxAmount;
+        const total = calculatedTotal;
 
         const invoiceNumber = generateInvoiceNumber();
 
@@ -128,31 +155,53 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
                 invoice_number: invoiceNumber,
                 client_name: input.client_name,
                 client_company: input.client_company,
-                client_email: input.client_email,
+                client_email: input.client_email || null,
                 client_address: input.client_address,
                 title: input.title,
                 line_items: input.line_items,
                 subtotal,
-                tax_rate: taxRate,
+                tax_rate: input.tax_rate || 0,
                 tax_amount: taxAmount,
                 total,
-                due_date: input.due_date,
+                due_date: input.due_date || null,
                 payment_terms: input.payment_terms || 'net_30',
+                payment_platform: input.payment_platform || null,
                 milestone_number: input.milestone_number || 1,
                 milestone_total: input.milestone_total || 1,
                 notes: input.notes,
-                status: 'draft',
+                status: input.status || 'draft',
             })
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            log.error('Supabase error creating invoice', { error, code: error.code, message: error.message });
+            throw error;
+        }
 
-        log.info('Invoice created', { invoiceId: data.id, invoiceNumber });
+        log.info('Invoice created successfully', { invoiceId: data.id, invoiceNumber });
         res.json(data);
     } catch (error) {
-        log.error('Failed to create invoice', error);
-        res.status(500).json({ error: 'Failed to create invoice' });
+        if (error instanceof z.ZodError) {
+            log.error('Validation error creating invoice', { errors: error.errors });
+            res.status(400).json({
+                error: 'Validation failed',
+                details: error.errors.map(e => ({
+                    field: e.path.join('.'),
+                    message: e.message
+                }))
+            });
+            return;
+        }
+
+        log.error('Failed to create invoice', {
+            error,
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
@@ -314,7 +363,7 @@ router.post('/from-proposal/:proposalId', authMiddleware, async (req: AuthReques
                 id: crypto.randomUUID(),
                 description: `${calcData.selectedTier.name} - Monthly Retainer`,
                 quantity: 1,
-                unitPrice: calcData.selectedTier.monthlyPrice || 0,
+                unit_price: calcData.selectedTier.monthlyPrice || 0,
                 amount: calcData.selectedTier.monthlyPrice || 0,
             });
             if (calcData.selectedTier.setupFee > 0) {
@@ -322,7 +371,7 @@ router.post('/from-proposal/:proposalId', authMiddleware, async (req: AuthReques
                     id: crypto.randomUUID(),
                     description: `${calcData.selectedTier.name} - Setup Fee`,
                     quantity: 1,
-                    unitPrice: calcData.selectedTier.setupFee,
+                    unit_price: calcData.selectedTier.setupFee,
                     amount: calcData.selectedTier.setupFee,
                 });
             }
@@ -337,7 +386,7 @@ router.post('/from-proposal/:proposalId', authMiddleware, async (req: AuthReques
                         id: crypto.randomUUID(),
                         description: addon.name || key,
                         quantity: qty,
-                        unitPrice: addon.price || 0,
+                        unit_price: addon.price || 0,
                         amount: (addon.price || 0) * qty,
                     });
                 }
@@ -350,7 +399,7 @@ router.post('/from-proposal/:proposalId', authMiddleware, async (req: AuthReques
                 id: crypto.randomUUID(),
                 description: 'Marketing Services',
                 quantity: 1,
-                unitPrice: calcData.totals.monthlyTotal || 0,
+                unit_price: calcData.totals.monthlyTotal || 0,
                 amount: calcData.totals.monthlyTotal || 0,
             });
         }
@@ -435,7 +484,7 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
             <tr>
                 <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.description}</td>
                 <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${item.unitPrice?.toLocaleString() || 0}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${item.unit_price?.toLocaleString() || 0}</td>
                 <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">$${item.amount?.toLocaleString() || 0}</td>
             </tr>
         `).join('');

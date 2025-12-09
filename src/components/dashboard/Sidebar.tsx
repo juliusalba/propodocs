@@ -69,7 +69,7 @@ export function Sidebar() {
                             exit={{ opacity: 0, x: -10 }}
                             className="font-bold text-xl text-gray-900 whitespace-nowrap"
                         >
-                            {user?.company || 'Proposal Studio'}
+                            {user?.company || 'Propodocs'}
                         </motion.span>
                     )}
                 </AnimatePresence>

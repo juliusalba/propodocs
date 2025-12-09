@@ -42,6 +42,7 @@ export function InvoiceEditor() {
     const navigate = useNavigate();
     const toast = useToast();
 
+
     const [invoice, setInvoice] = useState<Invoice | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -64,7 +65,10 @@ export function InvoiceEditor() {
     const [currentMilestone, setCurrentMilestone] = useState(1);
 
     useEffect(() => {
-        if (id === 'new') {
+        // Handle both 'new' and undefined (from /invoices/new route which doesn't have :id param)
+        const isNewInvoice = id === 'new' || !id;
+
+        if (isNewInvoice) {
             setInvoice({
                 id: 0, // Placeholder
                 user_id: 0,
@@ -86,7 +90,7 @@ export function InvoiceEditor() {
                 updated_at: new Date().toISOString()
             });
             setLoading(false);
-        } else if (id) {
+        } else {
             loadInvoice();
         }
     }, [id]);
@@ -145,12 +149,41 @@ export function InvoiceEditor() {
 
     const handleSave = async () => {
         if (!invoice) return;
+
+        // Validation
+        if (!clientName.trim()) {
+            toast.error('Client name is required');
+            return;
+        }
+
+        if (lineItems.length === 0) {
+            toast.error('Please add at least one line item');
+            return;
+        }
+
+        // Validate line items
+        const invalidItems = lineItems.filter(item =>
+            !item.description.trim() || item.quantity <= 0 || item.unit_price < 0
+        );
+        if (invalidItems.length > 0) {
+            toast.error('Please fill in all line item details with valid values');
+            return;
+        }
+
         const { subtotal, taxAmount, total } = calculateTotals();
 
         setSaving(true);
         try {
             if (id === 'new') {
                 // Create new invoice
+                console.log('Creating new invoice with data:', {
+                    title,
+                    client_name: clientName,
+                    client_email: clientEmail,
+                    line_items_count: lineItems.length,
+                    total
+                });
+
                 const newInvoice = await api.createInvoice({
                     title,
                     client_name: clientName,
@@ -169,10 +202,14 @@ export function InvoiceEditor() {
                     payment_platform: selectedPaymentPlatform,
                     status: 'draft'
                 });
-                toast.success('Invoice created');
+
+                console.log('Invoice created successfully:', newInvoice);
+                toast.success('Invoice created successfully!');
                 navigate(`/invoices/${newInvoice.id}`);
             } else {
                 // Update existing invoice
+                console.log('Updating invoice:', invoice.id);
+
                 await api.updateInvoice(invoice.id, {
                     title,
                     client_name: clientName,
@@ -190,11 +227,15 @@ export function InvoiceEditor() {
                     milestone_total: milestoneCount,
                     payment_platform: selectedPaymentPlatform,
                 });
-                toast.success('Invoice saved');
+
+                console.log('Invoice updated successfully');
+                toast.success('Invoice saved successfully!');
                 loadInvoice();
             }
         } catch (error) {
-            toast.error('Failed to save invoice');
+            console.error('Failed to save invoice:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            toast.error(`Failed to save invoice: ${errorMessage}`);
         } finally {
             setSaving(false);
         }
@@ -388,7 +429,7 @@ export function InvoiceEditor() {
                                     {isEditable && (
                                         <button
                                             onClick={addLineItem}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-red-50 rounded-lg font-medium"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#3b82f6] hover:bg-blue-50 rounded-lg font-medium"
                                         >
                                             <Plus className="w-4 h-4" />
                                             Add Item

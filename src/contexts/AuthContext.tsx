@@ -46,18 +46,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         initializeAuth();
+    }, []); // This useEffect is for initial auth check
 
-        // Listen for unauthorized events (401) from API
+    // Listen for unauthorized events (401) from API
+    useEffect(() => {
         const handleUnauthorized = () => {
+            console.log('Received auth:unauthorized event - forcing logout');
+            localStorage.removeItem('user'); // Assuming 'user' might also be stored
             localStorage.removeItem('auth_token');
             setUser(null);
+            // Force redirect to login to ensure clean state
+            window.location.href = '/login?expired=true';
         };
-        window.addEventListener('auth:unauthorized', handleUnauthorized);
 
-        return () => {
-            window.removeEventListener('auth:unauthorized', handleUnauthorized);
-        };
-    }, []);
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    }, []); // This useEffect is for listening to unauthorized events
 
     const login = async (email: string, password: string) => {
         const data = await api.login({ email, password });

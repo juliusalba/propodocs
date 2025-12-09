@@ -52,7 +52,10 @@ export function ContractEditor() {
     const [clientAddress, setClientAddress] = useState('');
 
     useEffect(() => {
-        if (id === 'new') {
+        // Handle both 'new' and undefined (from /contracts/new route which doesn't have :id param)
+        const isNewContract = id === 'new' || !id;
+
+        if (isNewContract) {
             setContract({
                 id: 0,
                 user_id: 0,
@@ -66,7 +69,7 @@ export function ContractEditor() {
                 updated_at: new Date().toISOString()
             });
             setLoading(false);
-        } else if (id) {
+        } else {
             loadContract();
         }
     }, [id]);
@@ -91,9 +94,33 @@ export function ContractEditor() {
 
     const handleSave = async () => {
         if (!contract) return;
+
+        // Validation
+        if (!clientName.trim()) {
+            toast.error('Client name is required');
+            return;
+        }
+
+        if (!title.trim()) {
+            toast.error('Contract title is required');
+            return;
+        }
+
+        if (!content.trim()) {
+            toast.error('Contract content is required');
+            return;
+        }
+
         setSaving(true);
         try {
             if (id === 'new') {
+                console.log('Creating new contract with data:', {
+                    title,
+                    client_name: clientName,
+                    client_email: clientEmail,
+                    content_length: content.length
+                });
+
                 const newContract = await api.createContract({
                     title,
                     content,
@@ -102,9 +129,13 @@ export function ContractEditor() {
                     client_email: clientEmail,
                     client_address: clientAddress,
                 });
-                toast.success('Contract created');
+
+                console.log('Contract created successfully:', newContract);
+                toast.success('Contract created successfully!');
                 navigate(`/contracts/${newContract.id}`);
             } else {
+                console.log('Updating contract:', contract.id);
+
                 await api.updateContract(contract.id, {
                     title,
                     content,
@@ -113,11 +144,15 @@ export function ContractEditor() {
                     client_email: clientEmail,
                     client_address: clientAddress,
                 });
-                toast.success('Contract saved');
+
+                console.log('Contract updated successfully');
+                toast.success('Contract saved successfully!');
                 loadContract();
             }
         } catch (error) {
-            toast.error('Failed to save contract');
+            console.error('Failed to save contract:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            toast.error(`Failed to save contract: ${errorMessage}`);
         } finally {
             setSaving(false);
         }

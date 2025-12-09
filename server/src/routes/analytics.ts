@@ -258,14 +258,16 @@ router.get('/pipeline', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.userId;
 
-    // Fetch all active proposals (not trashed)
+    // Fetch all proposals for the user
     const { data: proposals, error } = await supabase
       .from('proposals')
       .select('status, calculator_data')
-      .eq('user_id', userId)
-      .not('theme', 'cs', '{"isArchived": true}');
+      .eq('user_id', userId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error fetching proposals:', error);
+      throw error;
+    }
 
     const pipelineStats = {
       totalPipelineValue: 0,
@@ -295,7 +297,10 @@ router.get('/pipeline', authMiddleware, async (req: AuthRequest, res) => {
 
     res.json(pipelineStats);
   } catch (error) {
-    console.error('Get pipeline analytics error:', error);
+    console.error('Get pipeline analytics error:', {
+      message: error instanceof Error ? error.message : String(error),
+      details: error instanceof Error ? error.stack : String(error)
+    });
     res.status(500).json({ error: 'Failed to get pipeline analytics' });
   }
 });

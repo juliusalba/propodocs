@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { FileCheck, ArrowRight } from 'lucide-react';
@@ -13,6 +13,14 @@ export function Login() {
     const [loading, setLoading] = useState(false);
     const { login, register } = useAuth();
     const navigate = useNavigate();
+    const location = window.location; // Use window.location as fallback for URLSearchParams
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('expired')) {
+            setError('Session expired. Please sign in again.');
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { logger } from '../utils/logger.js';
+import { standardRateLimiter } from '../middleware/rateLimiter.js';
+import { sanitizeContractData } from '../utils/sanitize.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -30,20 +32,20 @@ function fillPlaceholders(content: string, values: Record<string, string>): stri
 const CreateContractSchema = z.object({
     proposal_id: z.number().optional(),
     template_id: z.number().optional(),
-    client_name: z.string().min(1),
-    client_company: z.string().optional(),
-    client_email: z.string().email().optional(),
-    client_address: z.string().optional(),
-    title: z.string().min(1),
-    content: z.string().min(1),
+    client_name: z.string().min(1, 'Client name is required').max(200),
+    client_company: z.string().max(200).optional(),
+    client_email: z.string().email('Invalid email format').max(254).optional().or(z.literal('')),
+    client_address: z.string().max(500).optional(),
+    title: z.string().min(1, 'Contract title is required').max(300),
+    content: z.string().min(1, 'Contract content is required').max(100000),
     deliverables: z.array(z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        price: z.number().optional(),
-        priceType: z.string().optional(),
+        name: z.string().min(1).max(200),
+        description: z.string().max(1000).optional(),
+        price: z.number().min(0).max(10000000).optional(),
+        priceType: z.string().max(50).optional(),
     })).optional(),
-    total_value: z.number().optional(),
-    contract_term: z.string().optional(),
+    total_value: z.number().min(0).max(10000000).optional(),
+    contract_term: z.string().max(100).optional(),
     expires_at: z.string().optional(),
 });
 
@@ -153,13 +155,25 @@ router.get('/view/:token', async (req, res) => {
     }
 });
 
-// Create contract
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+// Create contract - with rate limiting and sanitization
+router.post('/', authMiddleware, standardRateLimiter, async (req: AuthRequest, res) => {
     const log = logger.child({ action: 'create-contract', userId: req.user?.userId?.toString() });
 
     try {
         const userId = req.user!.userId;
-        const input = CreateContractSchema.parse(req.body);
+
+        // Sanitize input data first
+        const sanitizedData = sanitizeContractData(req.body);
+
+        // Log incoming request (sanitized)
+        log.info('Creating contract', {
+            title: sanitizedData.title,
+            client_name: sanitizedData.client_name,
+            has_content: !!sanitizedData.content
+        });
+
+        // Validate with Zod
+        const input = CreateContractSchema.parse(sanitizedData);
 
         const accessToken = generateAccessToken();
 
@@ -171,7 +185,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
                 template_id: input.template_id,
                 client_name: input.client_name,
                 client_company: input.client_company,
-                client_email: input.client_email,
+                client_email: input.client_email || null,
                 client_address: input.client_address,
                 title: input.title,
                 content: input.content,
@@ -185,13 +199,34 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            log.error('Supabase error creating contract', { error, code: error.code, message: error.message });
+            throw error;
+        }
 
-        log.info('Contract created', { contractId: data.id });
+        log.info('Contract created successfully', { contractId: data.id });
         res.json(data);
     } catch (error) {
-        log.error('Failed to create contract', error);
-        res.status(500).json({ error: 'Failed to create contract' });
+        if (error instanceof z.ZodError) {
+            log.error('Validation error creating contract', { errors: error.errors });
+            res.status(400).json({
+                error: 'Validation failed',
+                details: error.errors.map(e => ({
+                    field: e.path.join('.'),
+                    message: e.message
+                }))
+            });
+            return;
+        }
+
+        log.error('Failed to create contract', {
+            error,
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create contract';
+        res.status(500).json({ error: errorMessage });
     }
 });
 
