@@ -331,4 +331,126 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// Google OAuth
+router.get('/google', (req, res) => {
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+    const REDIRECT_URI = `${BACKEND_URL}/api/auth/google/callback`;
+
+    if (!GOOGLE_CLIENT_ID) {
+        return res.status(500).json({ error: 'Google Auth not configured' });
+    }
+
+    const params = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+        response_type: 'code',
+        scope: 'email profile',
+        access_type: 'offline',
+        prompt: 'consent'
+    });
+
+    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+});
+
+router.get('/google/callback', async (req, res) => {
+    try {
+        const { code } = req.query;
+        const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+        const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+        const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+        const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const REDIRECT_URI = `${BACKEND_URL}/api/auth/google/callback`;
+
+        if (!code || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+            return res.redirect(`${FRONTEND_URL}/login?error=google_config_error`);
+        }
+
+        // 1. Exchange code for tokens
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                code,
+                grant_type: 'authorization_code',
+                redirect_uri: REDIRECT_URI
+            })
+        });
+
+        const tokenData = await tokenResponse.json() as any;
+
+        if (!tokenData.access_token) {
+            console.error('Failed to get access token:', tokenData);
+            return res.redirect(`${FRONTEND_URL}/login?error=token_exchange_failed`);
+        }
+
+        // 2. Get user info
+        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` }
+        });
+
+        const userData = await userResponse.json() as any;
+
+        if (!userData.email) {
+            return res.redirect(`${FRONTEND_URL}/login?error=no_email`);
+        }
+
+        // 3. Find or Create User
+        // Check if user exists
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', userData.email)
+            .single();
+
+        let userId = existingUser?.id;
+
+        if (!existingUser) {
+            // Create new user with random password (since they use Google)
+            const crypto = await import('crypto');
+            const randomPassword = crypto.randomBytes(16).toString('hex');
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+            const { data: newUser, error: createError } = await supabase
+                .from('users')
+                .insert({
+                    email: userData.email,
+                    name: userData.name || userData.email.split('@')[0],
+                    password: hashedPassword,
+                    avatar_url: userData.picture,
+                    company: null
+                })
+                .select()
+                .single();
+
+            if (createError || !newUser) {
+                console.error('Error creating user:', createError);
+                return res.redirect(`${FRONTEND_URL}/login?error=creation_failed`);
+            }
+            userId = newUser.id;
+        } else {
+            // Update avatar if not set
+            if (!existingUser.avatar_url && userData.picture) {
+                await supabase
+                    .from('users')
+                    .update({ avatar_url: userData.picture })
+                    .eq('id', userId);
+            }
+        }
+
+        // 4. Generate Token
+        const token = generateToken({ userId, email: userData.email });
+
+        // 5. Redirect to frontend with token
+        res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}`);
+
+    } catch (error) {
+        console.error('Google callback error:', error);
+        const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${FRONTEND_URL}/login?error=server_error`);
+    }
+});
+
 export default router;

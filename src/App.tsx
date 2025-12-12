@@ -9,6 +9,7 @@ const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login }
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
 const ResetPassword = lazy(() => import('./pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const AuthCallback = lazy(() => import('./pages/AuthCallback').then(m => ({ default: m.AuthCallback })));
 const Pipeline = lazy(() => import('./pages/Pipeline').then(m => ({ default: m.Pipeline })));
 const Proposals = lazy(() => import('./pages/Proposals').then(m => ({ default: m.Proposals })));
 const ProposalEditor = lazy(() => import('./pages/ProposalEditor').then(m => ({ default: m.ProposalEditor })));
@@ -30,7 +31,7 @@ const Clients = lazy(() => import('./pages/Clients').then(m => ({ default: m.Cli
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 
 // Loading fallback component
-const LoadingFallback = () => (
+export const LoadingFallback = () => (
   <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
     <div className="text-white text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
@@ -75,6 +76,7 @@ const ThemedApp = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           <Route path="/dashboard" element={
             <ProtectedRoute>
