@@ -86,6 +86,13 @@ Structure the proposal with these sections:
 5. Value & Investment (Heading level 2) - Reinforce the ROI of these specific services.
 6. Next Steps (Heading level 2) - Clear call to action
 
+**COPYWRITING RULES (STRICT):**
+- **Voice:** Use ACTIVE voice. (e.g., "We designed this..." NOT "This was designed...")
+- **Sentences:** Keep sentences SHORT and punchy. Aim for under 20 words where possible.
+- **Jargon:** Avoid corporate jargon like "leverage", "synergy", "best-in-class". Be specific.
+- **Clichés:** Avoid clichés.
+- **Tone:** Professional, confident, yet human and warm.
+
 Keep the tone professional, confident, and action-oriented. Make it personalized to the client.`;
 
         const userPrompt = `Create a proposal for:
@@ -161,6 +168,66 @@ Maintain a professional, persuasive tone. Return only the content, no additional
     } catch (error) {
         console.error('AI enhancement error:', error);
         res.status(500).json({ error: 'Failed to enhance content' });
+    }
+});
+
+// Extract bank details from image
+router.post('/extract-bank-details', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { imageBase64 } = req.body;
+
+        if (!openai) {
+            res.status(503).json({ error: 'OpenAI API key not configured' });
+            return;
+        }
+
+        if (!imageBase64) {
+            res.status(400).json({ error: 'Image data is required' });
+            return;
+        }
+
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are an intelligent data extraction assistant. 
+Extract bank account details from the provided image. 
+Return ONLY a valid JSON object with the following keys:
+- bankName
+- accountName
+- accountNumber
+- routingNumber (or sort code)
+- swiftBic
+- iban
+- address
+
+If a field is not found, return an empty string for that field. Do not include markdown formatting or explanations.`
+                },
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: 'Extract bank details from this image:' },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageBase64,
+                            },
+                        },
+                    ],
+                },
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0,
+        });
+
+        const content = completion.choices[0].message.content;
+        const details = JSON.parse(content || '{}');
+
+        res.json({ details });
+    } catch (error) {
+        console.error('Bank details extraction error:', error);
+        res.status(500).json({ error: 'Failed to extract bank details' });
     }
 });
 

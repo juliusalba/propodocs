@@ -86,7 +86,7 @@ export function Login() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent outline-none transition-all font-medium text-[#050505]"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent hover:border-gray-300 outline-none transition-all font-medium text-[#050505]"
                                     placeholder="John Doe"
                                 />
                             </div>
@@ -98,7 +98,7 @@ export function Login() {
                                     type="text"
                                     value={company}
                                     onChange={(e) => setCompany(e.target.value)}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent outline-none transition-all font-medium text-[#050505]"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent hover:border-gray-300 outline-none transition-all font-medium text-[#050505]"
                                     placeholder="Acme Inc."
                                 />
                             </div>
@@ -114,7 +114,7 @@ export function Login() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent outline-none transition-all font-medium text-[#050505]"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent hover:border-gray-300 outline-none transition-all font-medium text-[#050505]"
                             placeholder="you@company.com"
                         />
                     </div>
@@ -130,7 +130,7 @@ export function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent outline-none transition-all font-medium text-[#050505]"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#8C0000] focus:border-transparent hover:border-gray-300 outline-none transition-all font-medium text-[#050505]"
                             placeholder="••••••••"
                         />
                         {isLogin && (
@@ -149,7 +149,7 @@ export function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-4 bg-[#8C0000] text-white rounded-xl font-bold text-lg hover:bg-[#A00000] transition-all shadow-lg shadow-[#8C0000]/20 flex items-center justify-center gap-2 hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0"
+                        className="w-full py-4 bg-[#8C0000] text-white rounded-xl font-bold text-lg hover:bg-[#A00000] active:scale-95 transition-all shadow-lg shadow-[#8C0000]/20 hover:shadow-[#8C0000]/30 flex items-center justify-center gap-2 hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0"
                     >
                         {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
                         {!loading && <ArrowRight className="w-5 h-5" />}

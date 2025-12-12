@@ -505,19 +505,38 @@ export function ProposalEditor() {
     };
 
     const getFullText = () => {
-        if (!editor) return '';
         let text = '';
-        // Simple traversal to get text from blocks
-        editor.document.forEach(block => {
-            if (Array.isArray(block.content)) {
-                block.content.forEach(inline => {
-                    if (inline.type === 'text') {
-                        text += inline.text;
+
+        // 1. Get editor content
+        if (editor) {
+            editor.document.forEach(block => {
+                if (Array.isArray(block.content)) {
+                    block.content.forEach(inline => {
+                        if (inline.type === 'text') {
+                            text += inline.text;
+                        }
+                    });
+                    text += '\n';
+                }
+            });
+        }
+
+        // 2. Add Scope of Work content if available
+        if (proposal?.calculator_data?.scopeOfWork) {
+            text += '\nScope of Work:\n';
+            // Handle array of strings or array of objects
+            const scope = proposal.calculator_data.scopeOfWork;
+            if (Array.isArray(scope)) {
+                scope.forEach((item: any) => {
+                    if (typeof item === 'string') {
+                        text += item + '\n';
+                    } else if (item.description) {
+                        text += item.description + '\n';
                     }
                 });
-                text += '\n';
             }
-        });
+        }
+
         return text;
     };
 
@@ -764,10 +783,10 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                 </div>
 
                 {/* Editor Area with Sidebar */}
-                <div className="flex-1 flex overflow-hidden bg-white min-h-0 relative">
+                <div className="flex-1 flex overflow-hidden bg-white min-h-0 relative flex-col lg:flex-row">
                     {/* Main Editor */}
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        <div className="max-w-4xl mx-auto py-16 px-12 min-h-full bg-white">
+                        <div className="max-w-4xl mx-auto py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-12 min-h-full bg-white">
                             {/* Cover Photo Upload */}
                             <div className="mb-8">
                                 <CoverPhotoUpload
@@ -821,12 +840,12 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                             </div>
 
                             {/* E-Signature Block */}
-                            <div className="mt-16 pt-12 border-t border-gray-100">
-                                <div className="flex items-center gap-2 mb-8 text-gray-900 font-semibold text-sm uppercase tracking-wider">
-                                    <PenTool className="w-4 h-4" />
+                            <div className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-100">
+                                <div className="flex items-center gap-2 mb-6 sm:mb-8 text-gray-900 font-semibold text-xs sm:text-sm uppercase tracking-wider">
+                                    <PenTool className="w-3 h-3 sm:w-4 sm:h-4" />
                                     Signatures
                                 </div>
-                                <div className="grid grid-cols-2 gap-16">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
                                     <div className="space-y-4">
                                         <div className="h-24 border-b border-gray-200 border-dashed flex items-end pb-2">
                                             <span className="text-gray-300 text-sm italic">Client signs here</span>
@@ -882,14 +901,14 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                     </div>
 
                     {/* Right Sidebar - Comments & Version History */}
-                    <div className="w-96 border-l border-gray-100 bg-white flex flex-col">
+                    <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l border-gray-100 bg-white flex flex-col max-h-96 lg:max-h-none">
                         {/* Tabs */}
                         {/* Tabs */}
                         <div className="flex border-b border-gray-100">
                             <button
                                 onClick={() => setActiveSidebarTab('comments')}
-                                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeSidebarTab === 'comments'
-                                    ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]'
+                                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${activeSidebarTab === 'comments'
+                                    ? 'text-[#8C0000] border-b-2 border-[#8C0000]'
                                     : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >
@@ -897,8 +916,8 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                             </button>
                             <button
                                 onClick={() => setActiveSidebarTab('versions')}
-                                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeSidebarTab === 'versions'
-                                    ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]'
+                                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${activeSidebarTab === 'versions'
+                                    ? 'text-[#8C0000] border-b-2 border-[#8C0000]'
                                     : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >
@@ -906,8 +925,8 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                             </button>
                             <button
                                 onClick={() => setActiveSidebarTab('scanner')}
-                                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeSidebarTab === 'scanner'
-                                    ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]'
+                                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${activeSidebarTab === 'scanner'
+                                    ? 'text-[#8C0000] border-b-2 border-[#8C0000]'
                                     : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >

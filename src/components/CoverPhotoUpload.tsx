@@ -90,19 +90,20 @@ export function CoverPhotoUpload({ currentPhotoUrl, onPhotoChange }: CoverPhotoU
     if (currentPhotoUrl) {
         return (
             <div className="relative group">
-                <div className="relative h-64 rounded-2xl overflow-hidden border-2 border-gray-100">
+                <div className="relative h-48 sm:h-56 md:h-64 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-100">
                     <img
                         src={currentPhotoUrl}
                         alt="Proposal cover"
                         className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
                         <button
                             onClick={handleRemove}
-                            className="px-4 py-2 bg-white text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors flex items-center gap-2"
+                            className="px-3 py-2 sm:px-4 sm:py-2 bg-white text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors flex items-center gap-2 text-sm sm:text-base"
                         >
                             <X className="w-4 h-4" />
-                            Remove Cover Photo
+                            <span className="hidden sm:inline">Remove Cover Photo</span>
+                            <span className="sm:hidden">Remove</span>
                         </button>
                     </div>
                 </div>
@@ -111,29 +112,29 @@ export function CoverPhotoUpload({ currentPhotoUrl, onPhotoChange }: CoverPhotoU
     }
 
     return (
-        <div className="border-2 border-gray-200 rounded-2xl overflow-hidden">
+        <div className="border-2 border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden">
             {/* Tab Switcher */}
             {unsplashEnabled && (
                 <div className="flex border-b border-gray-200 bg-gray-50">
                     <button
                         onClick={() => setActiveTab('upload')}
-                        className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'upload'
-                                ? 'bg-white text-[#3b82f6] border-b-2 border-[#3b82f6]'
+                        className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${activeTab === 'upload'
+                                ? 'bg-white text-[#8C0000] border-b-2 border-[#8C0000]'
                                 : 'text-gray-600 hover:text-gray-900'
                             }`}
                     >
-                        <Upload className="w-4 h-4 inline-block mr-2" />
-                        Upload
+                        <Upload className="w-3 h-3 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Upload</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('unsplash')}
-                        className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'unsplash'
-                                ? 'bg-white text-[#3b82f6] border-b-2 border-[#3b82f6]'
+                        className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${activeTab === 'unsplash'
+                                ? 'bg-white text-[#8C0000] border-b-2 border-[#8C0000]'
                                 : 'text-gray-600 hover:text-gray-900'
                             }`}
                     >
-                        <ImageIcon className="w-4 h-4 inline-block mr-2" />
-                        Unsplash
+                        <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Unsplash</span>
                     </button>
                 </div>
             )}
@@ -141,7 +142,7 @@ export function CoverPhotoUpload({ currentPhotoUrl, onPhotoChange }: CoverPhotoU
             {/* Content Area */}
             {activeTab === 'upload' ? (
                 <div
-                    className={`p-8 transition-all ${dragActive ? 'bg-blue-50' : 'bg-gray-50/50'
+                    className={`p-4 sm:p-6 md:p-8 transition-all ${dragActive ? 'bg-blue-50' : 'bg-gray-50/50'
                         }`}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
@@ -157,40 +158,40 @@ export function CoverPhotoUpload({ currentPhotoUrl, onPhotoChange }: CoverPhotoU
 
                     <div className="flex flex-col items-center justify-center text-center">
                         <div
-                            className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${dragActive ? 'bg-blue-100' : 'bg-gray-100'
+                            className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 ${dragActive ? 'bg-blue-100' : 'bg-gray-100'
                                 }`}
                         >
                             {uploading ? (
-                                <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <ImageIcon
-                                    className={`w-8 h-8 ${dragActive ? 'text-blue-600' : 'text-gray-400'
+                                    className={`w-6 h-6 sm:w-8 sm:h-8 ${dragActive ? 'text-blue-600' : 'text-gray-400'
                                         }`}
                                 />
                             )}
                         </div>
 
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
                             {uploading ? 'Uploading...' : 'Add Cover Photo'}
                         </h3>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 px-4">
                             Drag and drop an image, or click to browse
                         </p>
 
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploading}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                         >
-                            <Upload className="w-4 h-4" />
+                            <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
                             Choose File
                         </button>
 
-                        <p className="text-xs text-gray-400 mt-3">PNG, JPG up to 5MB</p>
+                        <p className="text-xs text-gray-400 mt-2 sm:mt-3">PNG, JPG up to 5MB</p>
                     </div>
                 </div>
             ) : (
-                <div className="h-[500px]">
+                <div className="h-[400px] sm:h-[500px]">
                     <UnsplashPicker onSelect={handleUnsplashSelect} />
                 </div>
             )}

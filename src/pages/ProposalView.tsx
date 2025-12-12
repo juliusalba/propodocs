@@ -531,52 +531,53 @@ export function ProposalView() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="font-bold text-xl text-gray-900 truncate">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+                    <div className="font-bold text-base sm:text-xl text-gray-900 truncate min-w-0">
                         {proposal.title}
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <button
                             onClick={handleDownloadPDF}
-                            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                             title="Download PDF"
                         >
-                            <Download className="w-5 h-5" />
+                            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                         {accepted ? (
-                            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg font-medium">
-                                <CheckCircle className="w-5 h-5" />
-                                Accepted
+                            <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-100 text-emerald-700 rounded-lg font-medium text-xs sm:text-sm">
+                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="hidden sm:inline">Accepted</span>
                             </div>
                         ) : (
                             <button
                                 onClick={handleAccept}
                                 disabled={accepting}
-                                className="px-6 py-2 bg-[#3b82f6] text-white rounded-lg font-semibold hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 flex items-center gap-2"
+                                className="px-3 sm:px-6 py-1.5 sm:py-2 bg-[#8C0000] text-white rounded-lg font-semibold hover:bg-[#A00000] transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                             >
-                                {accepting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                                Accept Proposal
+                                {accepting ? <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" /> : <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />}
+                                <span className="hidden sm:inline">Accept Proposal</span>
+                                <span className="sm:hidden">Accept</span>
                             </button>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col lg:flex-row gap-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+                <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
                     <div className="flex-1 min-w-0">
                         {/* Cover Photo */}
                         {proposal.cover_photo_url && (
-                            <div className="mb-8 -mx-4 sm:-mx-6 lg:-mx-8 -mt-8">
+                            <div className="mb-6 sm:mb-8 -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
                                 <img
                                     src={proposal.cover_photo_url}
                                     alt="Proposal Cover"
-                                    className="w-full h-64 object-cover"
+                                    className="w-full h-48 sm:h-56 md:h-64 object-cover"
                                 />
                             </div>
                         )}
 
-                        <div className="mb-8"><PricingSummary proposal={proposal} /></div>
+                        <div className="mb-6 sm:mb-8"><PricingSummary proposal={proposal} /></div>
 
                         {/* Deliverables Section */}
                         <DeliverablesSection proposal={proposal} />
@@ -584,16 +585,16 @@ export function ProposalView() {
                         {/* Scope Section */}
                         <ScopeSection proposal={proposal} />
 
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 min-h-[500px]">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 min-h-[400px] sm:min-h-[500px]">
                             <BlockNoteView editor={editor} theme="light" editable={false} />
                         </div>
 
-                        <div id="signature-section" className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mt-8">
-                            <div className="flex items-center gap-2 mb-8 text-gray-900 font-semibold text-sm uppercase tracking-wider">
-                                <PenTool className="w-4 h-4" />
+                        <div id="signature-section" className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 mt-6 sm:mt-8">
+                            <div className="flex items-center gap-2 mb-6 sm:mb-8 text-gray-900 font-semibold text-xs sm:text-sm uppercase tracking-wider">
+                                <PenTool className="w-3 h-3 sm:w-4 sm:h-4" />
                                 Signatures
                             </div>
-                            <div className="grid grid-cols-2 gap-16">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
                                 {/* Client Signature */}
                                 <div className="space-y-4">
                                     <div className="h-48 border-b border-gray-200 border-dashed flex flex-col justify-end pb-2 relative">
@@ -669,22 +670,22 @@ export function ProposalView() {
                     </div>
 
                     <div className="w-full lg:w-80 flex-shrink-0">
-                        <div className="lg:sticky lg:top-24 space-y-6">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <h3 className="text-lg font-bold text-gray-900 mb-4">Investment Summary</h3>
+                        <div className="lg:sticky lg:top-24 space-y-4 sm:space-y-6">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Investment Summary</h3>
 
-                                <div className="space-y-3 mb-6">
+                                <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span className="text-gray-600 text-sm">Monthly Investment</span>
-                                        <span className="font-bold text-gray-900">${Math.round(totals.monthlyTotal || 0).toLocaleString()}</span>
+                                        <span className="text-gray-600 text-xs sm:text-sm">Monthly Investment</span>
+                                        <span className="font-bold text-gray-900 text-sm sm:text-base">${Math.round(totals.monthlyTotal || 0).toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span className="text-gray-600 text-sm">Setup Fee</span>
-                                        <span className="font-bold text-gray-900">${(totals.setupTotal || 0).toLocaleString()}</span>
+                                        <span className="text-gray-600 text-xs sm:text-sm">Setup Fee</span>
+                                        <span className="font-bold text-gray-900 text-sm sm:text-base">${(totals.setupTotal || 0).toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center py-2">
-                                        <span className="text-gray-600 text-sm">Annual Value</span>
-                                        <span className="font-bold text-[#3b82f6]">${Math.round(totals.annualTotal || 0).toLocaleString()}</span>
+                                        <span className="text-gray-600 text-xs sm:text-sm">Annual Value</span>
+                                        <span className="font-bold text-[#8C0000] text-sm sm:text-base">${Math.round(totals.annualTotal || 0).toLocaleString()}</span>
                                     </div>
                                 </div>
 

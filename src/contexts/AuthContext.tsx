@@ -10,6 +10,12 @@ interface UserProfile {
     signature_url?: string;
     logo_url?: string;
     avatar_url?: string;
+    bank_details?: Record<string, any>;
+    payment_preferences?: Record<string, any>;
+    appearance?: {
+        theme?: 'light' | 'dark' | 'system';
+        accentColor?: string;
+    };
 }
 
 interface AuthContextType {

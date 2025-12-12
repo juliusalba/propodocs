@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { ClientSelector } from '../components/ClientSelector';
 import {
     ArrowLeft,
     Save,
@@ -15,7 +16,8 @@ import {
     AlertCircle,
     Copy,
     ExternalLink,
-    Sparkles
+    Sparkles,
+    Receipt
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useToast } from '../components/Toast';
@@ -51,6 +53,7 @@ export function ContractEditor() {
     const [clientCompany, setClientCompany] = useState('');
     const [clientEmail, setClientEmail] = useState('');
     const [clientAddress, setClientAddress] = useState('');
+    const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
     useEffect(() => {
         // Handle both 'new' and undefined (from /contracts/new route which doesn't have :id param)
@@ -125,6 +128,7 @@ export function ContractEditor() {
                 const newContract = await api.createContract({
                     title,
                     content,
+                    client_id: selectedClientId || undefined,
                     client_name: clientName,
                     client_company: clientCompany,
                     client_email: clientEmail,
@@ -140,6 +144,7 @@ export function ContractEditor() {
                 await api.updateContract(contract.id, {
                     title,
                     content,
+                    client_id: selectedClientId || undefined,
                     client_name: clientName,
                     client_company: clientCompany,
                     client_email: clientEmail,
@@ -209,6 +214,18 @@ export function ContractEditor() {
             URL.revokeObjectURL(url);
         } catch (error) {
             toast.error('Failed to generate PDF');
+        }
+    };
+
+    const handleCreateInvoice = async () => {
+        if (!contract) return;
+        try {
+            const result = await api.createInvoiceFromContract(contract.id);
+            toast.success('Invoice created! Redirecting...');
+            navigate(`/invoices/${result.invoice.id}`);
+        } catch (error) {
+            console.error('Failed to create invoice:', error);
+            toast.error('Failed to create invoice');
         }
     };
 
@@ -294,7 +311,7 @@ export function ContractEditor() {
                                     <button
                                         onClick={handleSend}
                                         disabled={sending}
-                                        className="flex items-center gap-2 px-5 py-2 bg-[#3b82f6] text-white rounded-xl font-medium hover:bg-[#1d4ed8] disabled:opacity-50"
+                                        className="flex items-center gap-2 px-5 py-2 bg-[#8C0000] text-white rounded-xl font-medium hover:bg-[#A00000] disabled:opacity-50 transition-all shadow-lg shadow-[#8C0000]/20 hover:shadow-[#8C0000]/30"
                                     >
                                         {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                                         Send to Client
@@ -304,10 +321,21 @@ export function ContractEditor() {
                                 {canCountersign && (
                                     <button
                                         onClick={() => setShowSignPad(true)}
-                                        className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700"
+                                        className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30"
                                     >
                                         <FileSignature className="w-4 h-4" />
                                         Countersign
+                                    </button>
+                                )}
+
+                                {/* Create Invoice button for signed/completed contracts */}
+                                {['signed', 'countersigned', 'completed'].includes(contract.status) && (
+                                    <button
+                                        onClick={handleCreateInvoice}
+                                        className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30"
+                                    >
+                                        <Receipt className="w-4 h-4" />
+                                        Create Invoice
                                     </button>
                                 )}
                             </div>
@@ -358,16 +386,24 @@ export function ContractEditor() {
                                     Client Details
                                 </h3>
                                 <div className="space-y-4">
+                                    {/* Client Selector */}
                                     <div>
-                                        <label className="block text-sm text-gray-600 mb-1">Name</label>
-                                        <input
-                                            type="text"
-                                            value={clientName}
-                                            onChange={(e) => setClientName(e.target.value)}
-                                            disabled={!isEditable}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm disabled:bg-gray-50"
+                                        <label className="block text-sm text-gray-600 mb-1">Client</label>
+                                        <ClientSelector
+                                            selectedClientId={selectedClientId}
+                                            clientName={clientName}
+                                            onClientSelect={(client) => {
+                                                setSelectedClientId(client?.id || null);
+                                            }}
+                                            onClientDataChange={(data) => {
+                                                setClientName(data.name);
+                                                setClientEmail(data.email);
+                                                setClientCompany(data.company);
+                                                setClientAddress(data.address);
+                                            }}
                                         />
                                     </div>
+
                                     <div>
                                         <label className="block text-sm text-gray-600 mb-1">Company</label>
                                         <input
@@ -457,7 +493,7 @@ export function ContractEditor() {
                                     </p>
                                     <button
                                         onClick={copySigningLink}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700"
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30"
                                     >
                                         <Copy className="w-4 h-4" />
                                         Copy Signing Link

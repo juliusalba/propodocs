@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* Vogel Brand Color Palette */
-  --color-vogel-black: 5 5 5;
+  /* Propodocs Brand Color Palette */
+  --color-propodocs-black: 5 5 5;
   /* #050505 */
-  --color-vogel-red: 140 0 0;
+  --color-propodocs-red: 140 0 0;
   /* #8C0000 */
-  --color-vogel-cream: 250 243 205;
+  --color-propodocs-cream: 250 243 205;
   /* #FAF3CD */
-  --color-vogel-yellow: 255 201 23;
+  --color-propodocs-yellow: 255 201 23;
   /* #FFC917 */
-  --color-vogel-gold: 205 132 23;
+  --color-propodocs-gold: 205 132 23;
   /* #CD8417 */
 
   /* Semantic Mappings */
-  --color-background: var(--color-vogel-cream);
-  --color-foreground: var(--color-vogel-black);
+  --color-background: var(--color-propodocs-cream);
+  --color-foreground: var(--color-propodocs-black);
 
   --color-primary: 140 0 0;
   --color-primary-foreground: 255 255 255;
@@ -24,10 +24,10 @@
   --color-secondary-foreground: 255 255 255;
 
   --color-card: 255 255 255;
-  --color-card-foreground: var(--color-vogel-black);
+  --color-card-foreground: var(--color-propodocs-black);
 
   --color-popover: 255 255 255;
-  --color-popover-foreground: var(--color-vogel-black);
+  --color-popover-foreground: var(--color-propodocs-black);
 
   --color-muted: 243 244 246;
   /* Keep standard gray for muted areas */

@@ -64,6 +64,11 @@ router.post('/register', async (req, res) => {
                 email: newUser.email,
                 name: newUser.name,
                 company: newUser.company,
+                logo_url: newUser.logo_url,
+                signature_url: newUser.signature_url,
+                avatar_url: newUser.avatar_url,
+                bank_details: newUser.bank_details,
+                payment_preferences: newUser.payment_preferences
             },
         });
     } catch (error) {
@@ -111,6 +116,11 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 company: user.company,
+                logo_url: user.logo_url,
+                signature_url: user.signature_url,
+                avatar_url: user.avatar_url,
+                bank_details: user.bank_details,
+                payment_preferences: user.payment_preferences
             },
         });
     } catch (error) {
@@ -128,7 +138,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { data: user, error } = await supabase
             .from('users')
-            .select('id, email, name, company, signature_url, logo_url, avatar_url, created_at')
+            .select('id, email, name, company, signature_url, logo_url, avatar_url, bank_details, payment_preferences, created_at')
             .eq('id', req.user!.userId)
             .single();
 
@@ -153,6 +163,9 @@ router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
             signature_url: z.string().optional(),
             logo_url: z.string().optional(),
             avatar_url: z.string().optional(),
+            bank_details: z.record(z.any()).optional(),
+            payment_preferences: z.record(z.any()).optional(),
+            appearance: z.record(z.any()).optional(),
         });
 
         const data = updateSchema.parse(req.body);
@@ -165,7 +178,7 @@ router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
                 updated_at: new Date().toISOString()
             })
             .eq('id', userId)
-            .select('id, email, name, company, signature_url, logo_url, avatar_url')
+            .select('id, email, name, company, signature_url, logo_url, avatar_url, bank_details, payment_preferences, appearance')
             .single();
 
         if (error || !updatedUser) {

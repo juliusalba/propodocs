@@ -99,6 +99,10 @@ export interface Proposal {
     client_address?: string;
     calculator_type: 'marketing' | 'custom';
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
+    pipeline_stage?: 'lead' | 'contacted' | 'proposal_sent' | 'negotiation' | 'closed_won' | 'closed_lost';
+    notes?: string;
+    last_contact_at?: string;
+    last_contact_method?: string;
     created_at: string;
     updated_at: string;
     view_count: number;

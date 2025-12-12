@@ -896,4 +896,77 @@ router.patch('/:id/comments/:commentId/resolve', authMiddleware, async (req: Aut
     }
 });
 
+// Create invoice from contract (workflow automation)
+router.post('/:id/create-invoice', authMiddleware, async (req: AuthRequest, res) => {
+    const log = logger.child({ action: 'create-invoice-from-contract', contractId: req.params.id });
+
+    try {
+        const userId = req.user!.userId;
+        const contractId = parseInt(req.params.id);
+
+        // Get the contract
+        const { data: contract, error: contractError } = await supabase
+            .from('contracts')
+            .select('*')
+            .eq('id', contractId)
+            .eq('user_id', userId)
+            .single();
+
+        if (contractError || !contract) {
+            return res.status(404).json({ error: 'Contract not found' });
+        }
+
+        // Build line items from deliverables
+        const lineItems = (contract.deliverables || []).map((d: any) => ({
+            description: d.name || 'Service',
+            quantity: 1,
+            unit_price: d.price || 0,
+            amount: d.price || 0
+        }));
+
+        // Generate invoice number
+        const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
+
+        // Calculate totals
+        const subtotal = lineItems.reduce((sum: number, item: any) => sum + (item.amount || 0), 0);
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 30); // 30 days from now
+
+        // Create the invoice
+        const { data: invoice, error: invoiceError } = await supabase
+            .from('invoices')
+            .insert({
+                user_id: userId,
+                contract_id: contractId,
+                client_id: contract.client_id,
+                invoice_number: invoiceNumber,
+                title: `Invoice - ${contract.client_name || 'Client'}`,
+                client_name: contract.client_name || '',
+                client_email: contract.client_email || '',
+                client_company: contract.client_company || '',
+                client_address: contract.client_address || '',
+                line_items: lineItems,
+                subtotal: subtotal,
+                tax_rate: 0,
+                tax_amount: 0,
+                total: subtotal,
+                due_date: dueDate.toISOString().split('T')[0],
+                status: 'draft',
+                notes: `Invoice generated from Contract: ${contract.title}`
+            })
+            .select()
+            .single();
+
+        if (invoiceError || !invoice) {
+            throw invoiceError || new Error('Failed to create invoice');
+        }
+
+        log.info('Invoice created from contract', { contractId, invoiceId: invoice.id });
+        res.status(201).json({ invoice });
+    } catch (error) {
+        log.error('Create invoice from contract error:', error);
+        res.status(500).json({ error: 'Failed to create invoice' });
+    }
+});
+
 export default router;

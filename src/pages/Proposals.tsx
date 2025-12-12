@@ -203,7 +203,7 @@ export function Proposals() {
                         </div>
                         <button
                             onClick={() => setShowCreateModal(true)}
-                            className="bg-[#8C0000] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[#A00000] transition-all shadow-lg shadow-[#8C0000]/20 flex items-center gap-2"
+                            className="bg-[#8C0000] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[#A00000] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#8C0000]/20 hover:shadow-[#8C0000]/30 flex items-center gap-2"
                         >
                             <Plus className="w-5 h-5" />
                             Create Proposal
@@ -237,13 +237,13 @@ export function Proposals() {
                             {/* Search & Filters Group */}
                             <div className="flex flex-1 w-full md:w-auto items-center gap-3">
                                 <div className="relative flex-1 md:max-w-xs group">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#3b82f6] transition-colors" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#8C0000] transition-colors pointer-events-none" />
                                     <input
                                         type="text"
                                         placeholder="Search proposals..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#3b82f6]/10 focus:border-[#3b82f6] transition-all outline-none text-sm placeholder:text-gray-400"
+                                        className="w-full pl-10 pr-4 py-2 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8C0000]/10 focus:border-[#8C0000] hover:border-gray-300 transition-all outline-none text-sm placeholder:text-gray-400"
                                     />
                                 </div>
 
@@ -252,7 +252,7 @@ export function Proposals() {
                                         <select
                                             value={statusFilter}
                                             onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/10 outline-none appearance-none cursor-pointer transition-all"
+                                            className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 focus:border-[#8C0000] focus:ring-2 focus:ring-[#8C0000]/10 outline-none appearance-none cursor-pointer transition-all"
                                         >
                                             <option value="all">All Status</option>
                                             <option value="draft">Draft</option>
@@ -268,7 +268,7 @@ export function Proposals() {
                                         <select
                                             value={typeFilter}
                                             onChange={(e) => setTypeFilter(e.target.value)}
-                                            className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/10 outline-none appearance-none cursor-pointer transition-all"
+                                            className="pl-3 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 focus:border-[#8C0000] focus:ring-2 focus:ring-[#8C0000]/10 outline-none appearance-none cursor-pointer transition-all"
                                         >
                                             <option value="all">All Types</option>
                                             <option value="marketing">Marketing</option>
@@ -354,7 +354,7 @@ export function Proposals() {
                             </AnimatePresence>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl border border-gray-200/75 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+                        <div className="bg-white rounded-2xl border border-gray-200/75 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                             <table className="w-full">
                                 <thead className="bg-gray-50/50 border-b border-gray-100">
                                     <tr>

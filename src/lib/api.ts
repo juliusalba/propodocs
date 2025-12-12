@@ -110,6 +110,9 @@ class APIClient {
         signature_url?: string;
         logo_url?: string;
         avatar_url?: string;
+        bank_details?: Record<string, any>;
+        payment_preferences?: Record<string, any>;
+        appearance?: Record<string, any>;
     }) {
         const result = await this.request('/auth/profile', {
             method: 'PUT',
@@ -300,6 +303,24 @@ class APIClient {
             method: 'POST',
             body: JSON.stringify({ content, instruction }),
         });
+    }
+
+    async extractBankDetails(imageBase64: string): Promise<{ details: any }> {
+        const token = this.token;
+        const response = await fetch(`${API_BASE_URL}/ai/extract-bank-details`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ imageBase64 }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to extract bank details');
+        }
+
+        return response.json();
     }
 
     // Upload
@@ -569,6 +590,19 @@ class APIClient {
         });
     }
 
+    // Workflow Automation
+    async createContractFromProposal(proposalId: number) {
+        return this.request(`/proposals/${proposalId}/create-contract`, {
+            method: 'POST',
+        });
+    }
+
+    async createInvoiceFromContract(contractId: number) {
+        return this.request(`/contracts/${contractId}/create-invoice`, {
+            method: 'POST',
+        });
+    }
+
     // Contract Comments
     async getContractComments(contractId: number) {
         return this.request(`/contracts/${contractId}/comments`);
@@ -689,6 +723,57 @@ class APIClient {
 
     async getProposalViewers(proposalId: number) {
         return this.request(`/proposals/${proposalId}/viewers`);
+    }
+    // Clients
+    async getClients(params?: { status?: string; search?: string }) {
+        const query = new URLSearchParams();
+        if (params?.status) query.set('status', params.status);
+        if (params?.search) query.set('search', params.search);
+        const queryString = query.toString() ? `?${query.toString()}` : '';
+        return this.request(`/clients${queryString}`);
+    }
+
+    async getClient(id: number) {
+        return this.request(`/clients/${id}`);
+    }
+
+    async createClient(data: {
+        name: string;
+        email?: string;
+        company?: string;
+        phone?: string;
+        address?: string;
+        notes?: string;
+        tags?: string[];
+    }) {
+        return this.request('/clients', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateClient(id: number, data: any) {
+        return this.request(`/clients/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteClient(id: number) {
+        return this.request(`/clients/${id}`, { method: 'DELETE' });
+    }
+
+    async findOrCreateClient(data: {
+        name: string;
+        email?: string;
+        company?: string;
+        phone?: string;
+        address?: string;
+    }) {
+        return this.request('/clients/find-or-create', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
     }
 }
 

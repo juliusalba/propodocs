@@ -14,7 +14,8 @@ import {
     Key,
     Eye,
     EyeOff,
-    Upload
+    Upload,
+    CreditCard
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
@@ -22,7 +23,7 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { api } from '../lib/api';
 
-type TabType = 'profile' | 'company' | 'notifications' | 'security' | 'appearance';
+type TabType = 'profile' | 'company' | 'notifications' | 'security' | 'appearance' | 'payments';
 
 export function Settings() {
     const navigate = useNavigate();
@@ -62,6 +63,19 @@ export function Settings() {
                 logo: user.logo_url || '',
                 signature: user.signature_url || ''
             }));
+            if (user.bank_details || user.payment_preferences) {
+                setPaymentDetails(prev => ({
+                    ...prev,
+                    ...user.bank_details,
+                    ...user.payment_preferences
+                }));
+            }
+            if (user.appearance) {
+                setAppearance(prev => ({
+                    ...prev,
+                    ...user.appearance
+                }));
+            }
         }
     }, [user]);
 
@@ -95,9 +109,23 @@ export function Settings() {
         accentColor: '#3b82f6'
     });
 
+    const [paymentDetails, setPaymentDetails] = useState({
+        bankName: '',
+        accountName: '',
+        accountNumber: '',
+        routingNumber: '', // Sort Code
+        swiftBic: '',
+        iban: '',
+        address: '',
+        stripeLink: '',
+        paypalLink: '',
+        manualLink: ''
+    });
+
     const tabs = [
         { id: 'profile' as TabType, label: 'Profile', icon: User },
         { id: 'company' as TabType, label: 'Company', icon: Building },
+        { id: 'payments' as TabType, label: 'Payments', icon: CreditCard },
         { id: 'notifications' as TabType, label: 'Notifications', icon: Bell },
         { id: 'security' as TabType, label: 'Security', icon: Shield },
         { id: 'appearance' as TabType, label: 'Appearance', icon: Palette }
@@ -145,6 +173,24 @@ export function Settings() {
                 signature_url: signatureUrl,
                 logo_url: logoUrl,
                 avatar_url: avatarUrl,
+                bank_details: {
+                    bankName: paymentDetails.bankName,
+                    accountName: paymentDetails.accountName,
+                    accountNumber: paymentDetails.accountNumber,
+                    routingNumber: paymentDetails.routingNumber,
+                    swiftBic: paymentDetails.swiftBic,
+                    iban: paymentDetails.iban,
+                    address: paymentDetails.address
+                },
+                payment_preferences: {
+                    stripeLink: paymentDetails.stripeLink,
+                    paypalLink: paymentDetails.paypalLink,
+                    manualLink: paymentDetails.manualLink
+                },
+                appearance: {
+                    theme: appearance.theme,
+                    accentColor: appearance.accentColor
+                }
             });
 
             // Force reload user data to update context
@@ -594,6 +640,151 @@ export function Settings() {
                                                         style={{ backgroundColor: color }}
                                                     />
                                                 ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Payments Tab */}
+                            {activeTab === 'payments' && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold text-gray-900">Payment Settings</h2>
+                                    <p className="text-sm text-gray-500">
+                                        Save your banking details and payment links to auto-fill them on invoices.
+                                    </p>
+
+                                    {/* Bank Details */}
+                                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Building className="w-4 h-4 text-gray-500" />
+                                            Bank Account Details
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Account Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.accountName}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, accountName: e.target.value })}
+                                                    placeholder="e.g. Acme Corp Inc."
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Bank Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.bankName}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, bankName: e.target.value })}
+                                                    placeholder="e.g. Chase Bank"
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Account Number
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.accountNumber}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, accountNumber: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Routing / Sort Code
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.routingNumber}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, routingNumber: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    SWIFT / BIC
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.swiftBic}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, swiftBic: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    IBAN
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.iban}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, iban: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Bank Address (Optional)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.address}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, address: e.target.value })}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Payment Links */}
+                                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Globe className="w-4 h-4 text-gray-500" />
+                                            Default Payment Links
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    General Payment Link (Default)
+                                                </label>
+                                                <input
+                                                    type="url"
+                                                    value={paymentDetails.manualLink}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, manualLink: e.target.value })}
+                                                    placeholder="https://pay.example.com/me"
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Stripe Detail / Link
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.stripeLink}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, stripeLink: e.target.value })}
+                                                    placeholder="Stripe payment link or ID"
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    PayPal Link
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={paymentDetails.paypalLink}
+                                                    onChange={(e) => setPaymentDetails({ ...paymentDetails, paypalLink: e.target.value })}
+                                                    placeholder="paypal.me/username"
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                                                />
                                             </div>
                                         </div>
                                     </div>

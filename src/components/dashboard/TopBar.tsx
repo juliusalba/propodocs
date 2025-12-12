@@ -175,11 +175,11 @@ export function TopBar() {
         <div className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10">
             {/* Search */}
             <div className="relative w-96">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 <input
                     type="text"
                     placeholder="Search proposals..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8C0000]/20 focus:border-[#8C0000] hover:border-gray-300 transition-all"
                 />
             </div>
 
@@ -206,7 +206,7 @@ export function TopBar() {
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-semibold text-gray-900">Notifications</h3>
                                     {unreadCount > 0 && (
-                                        <span className="px-2 py-0.5 bg-[#3b82f6] text-white text-xs rounded-full font-medium">
+                                        <span className="px-2 py-0.5 bg-[#8C0000] text-white text-xs rounded-full font-medium">
                                             {unreadCount}
                                         </span>
                                     )}
@@ -270,7 +270,7 @@ export function TopBar() {
                                             {/* Archive Button - Visible on Hover */}
                                             <button
                                                 onClick={(e) => archiveNotification(notification.id, e)}
-                                                className="absolute right-2 top-2 p-1.5 text-gray-400 hover:text-[#3b82f6] hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0"
+                                                className="absolute right-2 top-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0"
                                                 title="Archive"
                                             >
                                                 <span className="sr-only">Archive</span>
@@ -281,7 +281,7 @@ export function TopBar() {
 
                                             {/* Unread Indicator */}
                                             {!notification.read && (
-                                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#3b82f6] rounded-r-full" />
+                                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#8C0000] rounded-r-full" />
                                             )}
                                         </div>
                                     ))

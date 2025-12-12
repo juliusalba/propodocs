@@ -72,18 +72,18 @@ export function ScopeSection({ proposal }: ScopeSectionProps) {
     const { inclusions, exclusions } = isMarketing ? renderMarketingScope() : renderCustomScope();
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden mb-4 sm:mb-6">
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 transition-all"
+                className="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 transition-all"
             >
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                        <FileCheck className="w-5 h-5 text-green-600" />
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                        <FileCheck className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     </div>
-                    <div className="text-left">
-                        <h3 className="text-lg font-bold text-gray-900">Scope of Work</h3>
-                        <p className="text-sm text-gray-500">What's included and excluded</p>
+                    <div className="text-left min-w-0">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">Scope of Work</h3>
+                        <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">What's included and excluded</p>
                     </div>
                 </div>
                 {isExpanded ? (
@@ -94,34 +94,34 @@ export function ScopeSection({ proposal }: ScopeSectionProps) {
             </button>
 
             {isExpanded && (
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     {/* Inclusions */}
-                    <div className="bg-green-50 rounded-xl p-5">
-                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            Included in Scope
+                    <div className="bg-green-50 rounded-xl p-4 sm:p-5">
+                        <h4 className="font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                            <span>Included in Scope</span>
                         </h4>
-                        <ul className="space-y-2.5">
+                        <ul className="space-y-2 sm:space-y-2.5">
                             {inclusions.map((item, index) => (
-                                <li key={index} className="flex items-start gap-3 text-sm text-gray-700">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 flex-shrink-0 mt-2" />
-                                    <span>{item}</span>
+                                <li key={index} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 flex-shrink-0 mt-1.5 sm:mt-2" />
+                                    <span className="break-words">{item}</span>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
                     {/* Exclusions */}
-                    <div className="bg-red-50 rounded-xl p-5">
-                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <XCircle className="w-5 h-5 text-red-600" />
-                            Not Included
+                    <div className="bg-red-50 rounded-xl p-4 sm:p-5">
+                        <h4 className="font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                            <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
+                            <span>Not Included</span>
                         </h4>
-                        <ul className="space-y-2.5">
+                        <ul className="space-y-2 sm:space-y-2.5">
                             {exclusions.map((item, index) => (
-                                <li key={index} className="flex items-start gap-3 text-sm text-gray-700">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0 mt-2" />
-                                    <span>{item}</span>
+                                <li key={index} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0 mt-1.5 sm:mt-2" />
+                                    <span className="break-words">{item}</span>
                                 </li>
                             ))}
                         </ul>

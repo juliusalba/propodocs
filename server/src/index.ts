@@ -17,6 +17,7 @@ import invoiceRoutes from './routes/invoices.js';
 import contractRoutes from './routes/contracts.js';
 import contractTemplateRoutes from './routes/contract-templates.js';
 import paymentRoutes from './routes/payments.js';
+import clientRoutes from './routes/clients.js';
 import db from './db/index.js';
 import path from 'path';
 
@@ -84,6 +85,7 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use('/api/contract-templates', contractTemplateRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/clients', clientRoutes);
 app.use('/', pdfRoutes);
 
 // Serve uploaded files

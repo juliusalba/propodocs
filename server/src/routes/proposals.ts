@@ -829,4 +829,95 @@ router.get('/:id/viewers', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
+// Create contract from proposal (workflow automation)
+router.post('/:id/create-contract', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const proposalId = parseInt(req.params.id);
+        const userId = req.user!.userId;
+
+        // Get the proposal with its data
+        const { data: proposal, error: proposalError } = await supabase
+            .from('proposals')
+            .select('*')
+            .eq('id', proposalId)
+            .eq('user_id', userId)
+            .single();
+
+        if (proposalError || !proposal) {
+            return res.status(404).json({ error: 'Proposal not found' });
+        }
+
+        // Extract client info and value from calculator_data
+        const calcData = proposal.calculator_data as any || {};
+        const totals = calcData.totals || {};
+        const selectedServices = calcData.selectedServices || [];
+
+        // Build deliverables from selected services
+        const deliverables = selectedServices.map((s: any) => ({
+            name: s.name || s.service || 'Service',
+            description: s.description || '',
+            price: s.price || s.monthlyPrice || 0,
+            priceType: 'mo'
+        }));
+
+        // Generate contract content from proposal
+        const contractContent = `
+# Service Agreement
+
+This Service Agreement ("Agreement") is entered into between ${proposal.client_name || 'Client'} ("Client") and the service provider ("Provider").
+
+## Scope of Services
+
+The Provider agrees to deliver the following services as outlined in Proposal #${proposal.id}:
+
+${deliverables.map((d: any) => `- **${d.name}**: $${d.price}/mo`).join('\n')}
+
+## Term
+
+This Agreement shall commence upon signature and continue for an initial term of ${calcData.contractTerm || '12 months'}.
+
+## Payment Terms
+
+Total Monthly Value: $${totals.monthlyTotal?.toLocaleString() || '0'}
+Payment is due upon receipt of invoice.
+
+## General Terms
+
+Both parties agree to the standard terms and conditions as discussed in the proposal.
+
+---
+*Contract generated from Proposal #${proposal.id}*
+        `.trim();
+
+        // Create the contract
+        const { data: contract, error: contractError } = await supabase
+            .from('contracts')
+            .insert({
+                user_id: userId,
+                proposal_id: proposalId,
+                client_id: proposal.client_id,
+                title: `Contract - ${proposal.client_name || 'Client'}`,
+                client_name: proposal.client_name || '',
+                client_email: proposal.client_email || '',
+                client_company: proposal.client_company || '',
+                content: contractContent,
+                deliverables: deliverables,
+                total_value: totals.monthlyTotal || 0,
+                contract_term: calcData.contractTerm || '12 months',
+                status: 'draft'
+            })
+            .select()
+            .single();
+
+        if (contractError || !contract) {
+            throw contractError || new Error('Failed to create contract');
+        }
+
+        res.status(201).json({ contract });
+    } catch (error) {
+        console.error('Create contract from proposal error:', error);
+        res.status(500).json({ error: 'Failed to create contract' });
+    }
+});
+
 export default router;

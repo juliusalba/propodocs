@@ -50,7 +50,7 @@ export function PipelineChart({ data, loading, timePeriod = 'all', onPeriodChang
     const getBarColor = (status: string) => {
         switch (status) {
             case 'draft': return '#9ca3af'; // gray-400
-            case 'sent': return '#CD8417'; // Vogel Gold
+            case 'sent': return '#CD8417'; // Propodocs Gold
             case 'viewed': return '#f59e0b'; // amber-500
             case 'accepted': return '#10b981'; // emerald-500
             case 'rejected': return '#ef4444'; // red-500

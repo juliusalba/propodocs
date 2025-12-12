@@ -189,7 +189,7 @@ export function Dashboard() {
                         proposalTitle: proposal.title,
                         timestamp: updatedTime,
                         icon: Activity,
-                        color: 'bg-[#CD8417]' // Vogel Orange
+                        color: 'bg-[#CD8417]' // Propodocs Gold
                     });
                 }
             }
@@ -208,7 +208,7 @@ export function Dashboard() {
                         proposalTitle: proposal.title,
                         timestamp: new Date(latestView.viewed_at),
                         icon: Eye,
-                        color: 'bg-[#FFC917]' // Vogel Yellow
+                        color: 'bg-[#FFC917]' // Propodocs Yellow
                     });
                 }
             }
@@ -627,7 +627,7 @@ export function Dashboard() {
                     <h2 className="text-lg font-bold text-gray-900">Recent Proposals</h2>
                     <button
                         onClick={() => navigate('/proposals')}
-                        className="text-sm text-[#3b82f6] font-medium hover:text-[#1d4ed8]"
+                        className="text-sm text-[#8C0000] font-medium hover:text-[#A00000] transition-colors"
                     >
                         View All
                     </button>
@@ -705,7 +705,7 @@ export function Dashboard() {
                                                     e.stopPropagation();
                                                     setSelectedProposalForAnalytics(proposal.id);
                                                 }}
-                                                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                                                className="flex items-center gap-2 text-[#8C0000] hover:text-[#A00000] font-medium transition-colors"
                                             >
                                                 <Eye className="w-4 h-4" />
                                                 <span className="text-sm">{proposal.view_count || 0}</span>

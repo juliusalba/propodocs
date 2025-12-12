@@ -14,8 +14,8 @@ export function Header({ clientName, onClientNameChange }: HeaderProps) {
             <div className="relative text-center p-8">
                 {/* Title */}
                 <div className="mb-6">
-                    <h1 className="text-4xl font-light tracking-wide" style={{ color: '#3b82f6' }}>
-                        VOGEL MARKETING GROUP
+                    <h1 className="text-4xl font-light tracking-wide text-[#8C0000]">
+                        PROPODOCS
                     </h1>
                     <p className="text-sm text-gray-600 font-light tracking-wider mt-1">PRICING CALCULATOR</p>
                 </div>
@@ -28,7 +28,7 @@ export function Header({ clientName, onClientNameChange }: HeaderProps) {
                             value={clientName}
                             onChange={(e) => onClientNameChange(e.target.value)}
                             placeholder="Client Name (Optional)"
-                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#3b82f6] focus:ring-4 focus:ring-red-100 transition-all outline-none shadow-sm"
+                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#8C0000] focus:ring-4 focus:ring-[#8C0000]/10 hover:border-gray-300 transition-all outline-none shadow-sm"
                         />
                     </div>
                 </div>

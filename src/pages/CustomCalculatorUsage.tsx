@@ -278,7 +278,7 @@ export function CustomCalculatorUsage() {
 
     if (!calculator) {
         return (
-            <DashboardLayout>
+            <DashboardLayout disablePadding>
                 <div className="flex items-center justify-center h-full">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b82f6]"></div>
                 </div>
@@ -287,7 +287,7 @@ export function CustomCalculatorUsage() {
     }
 
     return (
-        <DashboardLayout>
+        <DashboardLayout disablePadding>
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="max-w-7xl mx-auto px-6 py-8">
                     {/* Header */}
@@ -404,47 +404,49 @@ export function CustomCalculatorUsage() {
                         </div>
 
                         {/* Right Column - Quote Summary */}
-                        <div>
-                            <QuoteSummaryEnhanced
-                                selectedTier={selectedTier}
-                                lineItems={lineItems}
-                                totals={calculatorTotals}
-                                contractTerm={contractTerm}
-                                onExportPDF={handleExportPDF}
-                                onSaveDraft={() => handleSave('draft')}
-                                proposalButton={
-                                    <ProposalButton
-                                        clientName={clientDetails.name}
-                                        clientDetails={clientDetails}
-                                        calculatorType="custom"
-                                        calculatorData={{
-                                            calculatorDefinitionId: calculator.id,
-                                            rows,
-                                            discount: discountData,
-                                            totals: calculatorTotals,
-                                            scope: generatedScope,
-                                            selectedTier,
-                                            addOnStates,
-                                            contractTerm,
-                                            lineItems,
-                                            detailedBreakdown: {
-                                                tier: selectedTier ? getServiceDetails(selectedTier.name, selectedTier.description) : null,
-                                                addOns: lineItems
-                                                    .filter(item => item.priceType === 'monthly' || item.priceType === 'one-time')
-                                                    .map(addon => getServiceDetails(addon.name, addon.description))
-                                            }
-                                        }}
-                                        totals={calculatorTotals}
-                                        onValidate={() => {
-                                            if (!clientDetails.name) {
-                                                toast.error('Please enter a client name');
-                                                return false;
-                                            }
-                                            return true;
-                                        }}
-                                    />
-                                }
-                            />
+                        <div className="lg:col-span-1">
+                            <div className="lg:sticky lg:top-6 space-y-6">
+                                <QuoteSummaryEnhanced
+                                    selectedTier={selectedTier}
+                                    lineItems={lineItems}
+                                    totals={calculatorTotals}
+                                    contractTerm={contractTerm}
+                                    onExportPDF={handleExportPDF}
+                                    onSaveDraft={() => handleSave('draft')}
+                                    proposalButton={
+                                        <ProposalButton
+                                            clientName={clientDetails.name}
+                                            clientDetails={clientDetails}
+                                            calculatorType="custom"
+                                            calculatorData={{
+                                                calculatorDefinitionId: calculator.id,
+                                                rows,
+                                                discount: discountData,
+                                                totals: calculatorTotals,
+                                                scope: generatedScope,
+                                                selectedTier,
+                                                addOnStates,
+                                                contractTerm,
+                                                lineItems,
+                                                detailedBreakdown: {
+                                                    tier: selectedTier ? getServiceDetails(selectedTier.name, selectedTier.description) : null,
+                                                    addOns: lineItems
+                                                        .filter(item => item.priceType === 'monthly' || item.priceType === 'one-time')
+                                                        .map(addon => getServiceDetails(addon.name, addon.description))
+                                                }
+                                            }}
+                                            totals={calculatorTotals}
+                                            onValidate={() => {
+                                                if (!clientDetails.name) {
+                                                    toast.error('Please enter a client name');
+                                                    return false;
+                                                }
+                                                return true;
+                                            }}
+                                        />
+                                    }
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

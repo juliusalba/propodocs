@@ -28,6 +28,7 @@ export function Sidebar() {
 
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+        { icon: Users, label: 'Pipeline', path: '/pipeline' },
         { icon: FileText, label: 'Proposals', path: '/proposals' },
         { icon: Receipt, label: 'Invoices', path: '/invoices' },
         { icon: FileSignature, label: 'Contracts', path: '/contracts' },
@@ -84,8 +85,8 @@ export function Sidebar() {
                         className={({ isActive }) => `
               flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                             ${isActive
-                                ? 'bg-[#8C0000] text-white shadow-md shadow-[#8C0000]/20'
-                                : 'text-[#050505]/70 hover:bg-[#FAF3CD] hover:text-[#050505]'
+                                ? 'bg-[#8C0000] text-white shadow-md shadow-[#8C0000]/20 scale-[1.02]'
+                                : 'text-[#050505]/70 hover:bg-[#FAF3CD] hover:text-[#050505] hover:scale-[1.01]'
                             }
             `}
                     >
@@ -97,19 +98,24 @@ export function Sidebar() {
                 ))}
             </nav>
 
-            {/* Collapse Toggle */}
-            <button
-                onClick={() => setCollapsed(!collapsed)}
-                className="absolute -right-3 top-20 bg-white border border-gray-200 rounded-full p-1 shadow-md hover:bg-gray-50 transition-colors"
-            >
-                {collapsed ? <ChevronRight className="w-4 h-4 text-gray-600" /> : <ChevronLeft className="w-4 h-4 text-gray-600" />}
-            </button>
 
             {/* User & Logout */}
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 space-y-1">
+                <button
+                    onClick={() => setCollapsed(!collapsed)}
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                >
+                    {collapsed ? (
+                        <ChevronRight className="w-5 h-5 flex-shrink-0" />
+                    ) : (
+                        <ChevronLeft className="w-5 h-5 flex-shrink-0" />
+                    )}
+                    {!collapsed && <span className="font-medium">Collapse</span>}
+                </button>
+
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-500 hover:bg-red-50 hover:text-red-700 transition-colors"
                 >
                     <LogOut className="w-5 h-5 flex-shrink-0" />
                     {!collapsed && <span className="font-medium">Sign Out</span>}

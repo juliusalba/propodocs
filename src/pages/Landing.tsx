@@ -37,7 +37,7 @@ export function Landing() {
     };
 
     return (
-        // Vogel Palette: Background Cream (#FAF3CD), Text Black (#050505)
+        // Propodocs Palette: Background Cream (#FAF3CD), Text Black (#050505)
         <div className="min-h-screen bg-[#FAF3CD] text-[#050505] selection:bg-[#8C0000] selection:text-white overflow-hidden font-sans">
 
             {/* Grain Texture */}
@@ -61,9 +61,9 @@ export function Landing() {
 
                         {/* Navigation Menu */}
                         <div className="hidden md:flex items-center gap-8">
-                            <a href="#features" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-colors">Features</a>
-                            <a href="#process" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-colors">Process</a>
-                            <a href="#for-who" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-colors">For Agencies</a>
+                            <a href="#features" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-all hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#8C0000] hover:after:w-full after:transition-all">Features</a>
+                            <a href="#process" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-all hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#8C0000] hover:after:w-full after:transition-all">Process</a>
+                            <a href="#for-who" className="text-sm font-semibold text-[#050505]/70 hover:text-[#8C0000] transition-all hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#8C0000] hover:after:w-full after:transition-all">For Agencies</a>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -78,7 +78,7 @@ export function Landing() {
                             ) : (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="flex items-center gap-2 px-5 py-2 bg-transparent text-[#050505] border-2 border-[#050505] rounded-xl font-bold hover:bg-[#050505] hover:text-white transition-all text-sm"
+                                    className="flex items-center gap-2 px-5 py-2 bg-transparent text-[#050505] border-2 border-[#050505] rounded-xl font-bold hover:bg-[#050505] hover:text-white transition-all text-sm hover:scale-105 active:scale-95"
                                 >
                                     <LogIn className="w-4 h-4" />
                                     Sign In
@@ -126,12 +126,12 @@ export function Landing() {
                         >
                             <button
                                 onClick={() => navigate(user ? '/dashboard' : '/login')}
-                                className="px-8 py-4 bg-[#8C0000] text-white rounded-xl font-bold text-lg hover:bg-[#A00000] hover:-translate-y-1 transition-all shadow-xl shadow-[#8C0000]/20 flex items-center gap-2 w-full sm:w-auto justify-center"
+                                className="px-8 py-4 bg-[#8C0000] text-white rounded-xl font-bold text-lg hover:bg-[#A00000] hover:-translate-y-1 transition-all shadow-xl shadow-[#8C0000]/20 hover:shadow-2xl hover:shadow-[#8C0000]/30 flex items-center gap-2 w-full sm:w-auto justify-center active:scale-95"
                             >
                                 Start Creating for Free
                                 <ArrowRight className="w-5 h-5" />
                             </button>
-                            <button className="px-8 py-4 bg-white text-[#050505] border-2 border-[#050505] rounded-xl font-bold text-lg hover:bg-gray-50 transition-all w-full sm:w-auto">
+                            <button className="px-8 py-4 bg-white text-[#050505] border-2 border-[#050505] rounded-xl font-bold text-lg hover:bg-gray-50 hover:scale-105 transition-all w-full sm:w-auto active:scale-95">
                                 View Sample Proposal
                             </button>
                         </motion.div>
