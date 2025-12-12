@@ -34,6 +34,8 @@ app.use(cors({
             'http://localhost:5173',
             'http://localhost:3000',
             'https://propodocs.vercel.app',
+            'https://propodocs.online',
+            'https://www.propodocs.online',
             process.env.FRONTEND_URL
         ].filter(Boolean);
 
