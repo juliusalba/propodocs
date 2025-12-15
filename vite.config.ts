@@ -21,7 +21,7 @@ export default defineConfig({
           // Split Ant Design
           'antd': ['antd'],
           // Split other large libraries
-          'vendor': ['framer-motion', 'lucide-react', 'date-fns'],
+          'vendor': ['framer-motion', 'lucide-react'],
         },
       },
     },
