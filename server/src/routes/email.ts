@@ -23,7 +23,7 @@ router.post('/send', async (req, res) => {
         }
 
         const data = await resend.emails.send({
-            from: 'VMG Proposals <proposals@vmg7.com>', // Ideally this should be verified domain
+            from: `${process.env.FROM_NAME || 'Propodocs'} <${process.env.FROM_EMAIL || 'onboarding@resend.dev'}>`,
             to,
             subject,
             html,

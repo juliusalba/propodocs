@@ -1,5 +1,5 @@
 /**
- * Structured logging utility for the VMG Proposal Server
+ * Structured logging utility for the Propodocs Server
  * Provides consistent, searchable log output for debugging
  */
 

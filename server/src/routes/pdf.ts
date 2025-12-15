@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer';
 
 const router = express.Router();
 
-// VMG PDF Generation
+// Propodocs PDF Generation
 router.post('/generate-pdf', async (req, res) => {
     console.log('PDF generation request received');
     let browser;
@@ -33,7 +33,7 @@ router.post('/generate-pdf', async (req, res) => {
         console.log('PDF generated successfully');
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=VMG-Quote-${clientName || 'Client'}.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=Propodocs-Quote-${clientName || 'Client'}.pdf`);
         res.send(pdfBuffer);
     } catch (error: any) {
         console.error('Error generating PDF:', error);
@@ -481,7 +481,7 @@ function generatePDFHTML(clientName: string, selectedServices: any, addOns: any,
     ` : '';
 
     // Generate Deliverables
-    const deliverables = generateVMGDeliverables(selectedServices, addOns);
+    const deliverables = generateDeliverables(selectedServices, addOns);
     const deliverablesHTML = deliverables.map(section => `
         <div style="margin-bottom: 20px;">
             <div style="font-weight: 700; color: #1f2937; margin-bottom: 8px; font-size: 15px;">${section.title}</div>
@@ -492,7 +492,7 @@ function generatePDFHTML(clientName: string, selectedServices: any, addOns: any,
     `).join('');
 
     // Generate Scope
-    const scope = generateVMGScope(selectedServices);
+    const scope = generateScope(selectedServices);
     const scopeHTML = `
         <div style="display: flex; gap: 20px;">
             <div style="flex: 1; background: #f0fdf4; padding: 16px; border-radius: 8px;">
@@ -600,7 +600,7 @@ function generatePDFHTML(clientName: string, selectedServices: any, addOns: any,
 
 // Logic Helpers
 
-function generateVMGDeliverables(selectedServices: any, addOns: any) {
+function generateDeliverables(selectedServices: any, addOns: any) {
     const deliverables: { title: string; items: string[] }[] = [];
 
     // Traffic Driver
@@ -755,7 +755,7 @@ function generateVMGDeliverables(selectedServices: any, addOns: any) {
     return deliverables;
 }
 
-function generateVMGScope(selectedServices: any) {
+function generateScope(selectedServices: any) {
     const inclusions: string[] = [
         'Strategic planning and campaign development',
         'Regular performance monitoring and optimization',

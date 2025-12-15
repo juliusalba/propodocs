@@ -342,7 +342,7 @@ ${data.paymentLink ? `Pay now: ${data.paymentLink}` : ''}
 ${data.message ? `Message from sender:\n${data.message}\n` : ''}
 
 Best regards,
-VMG Proposal System Team
+Propodocs Team
     `.trim();
 
     const htmlContent = `
@@ -484,7 +484,7 @@ ${data.signingLink}
 ${data.message ? `Message from sender:\n${data.message}\n` : ''}
 
 Best regards,
-VMG Proposal System Team
+Propodocs Team
     `.trim();
 
     const htmlContent = `
@@ -626,7 +626,7 @@ ${data.paymentMethod ? `Payment Method: ${data.paymentMethod}` : ''}
 ${data.receiptLink ? `View Receipt: ${data.receiptLink}` : ''}
 
 Best regards,
-VMG Proposal System Team
+Propodocs Team
     `.trim();
 
     const htmlContent = `
