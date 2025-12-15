@@ -72,8 +72,13 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
             .select()
             .single();
 
-        if (error || !proposal) {
-            throw error || new Error('Failed to create proposal');
+        if (error) {
+            console.error('Supabase insert error details:', JSON.stringify(error, null, 2));
+            throw error;
+        }
+        if (!proposal) {
+            console.error('No proposal returned after insert');
+            throw new Error('Failed to create proposal - no data returned');
         }
 
         res.status(201).json({ proposal });
@@ -82,8 +87,11 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
             res.status(400).json({ error: 'Invalid input', details: error.errors });
             return;
         }
-        console.error('Create proposal error:', error);
-        res.status(500).json({ error: 'Failed to create proposal' });
+        console.error('Create proposal error (full):', error);
+        res.status(500).json({
+            error: 'Failed to create proposal',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
 });
 

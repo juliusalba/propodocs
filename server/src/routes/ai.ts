@@ -231,4 +231,110 @@ If a field is not found, return an empty string for that field. Do not include m
     }
 });
 
+// Import proposal from extracted text (PDF, DOCX content, or image OCR result)
+router.post('/import-proposal', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { extractedText, imageBase64 } = req.body;
+
+        if (!openai) {
+            res.status(503).json({ error: 'OpenAI API key not configured' });
+            return;
+        }
+
+        if (!extractedText && !imageBase64) {
+            res.status(400).json({ error: 'Either extractedText or imageBase64 is required' });
+            return;
+        }
+
+        let contentToProcess = extractedText || '';
+
+        // If image provided, use Vision API to extract text
+        if (imageBase64 && !extractedText) {
+            const visionResponse = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'text',
+                                text: 'Extract ALL text content from this proposal/document image. Include everything: headings, paragraphs, bullet points, pricing, terms, etc. Maintain the structure as much as possible.',
+                            },
+                            {
+                                type: 'image_url',
+                                image_url: { url: imageBase64 },
+                            },
+                        ],
+                    },
+                ],
+                max_tokens: 4000,
+            });
+            contentToProcess = visionResponse.choices[0].message.content || '';
+        }
+
+        if (!contentToProcess.trim()) {
+            res.status(400).json({ error: 'No content could be extracted from the document' });
+            return;
+        }
+
+        // Convert extracted text to BlockNote blocks
+        const systemPrompt = `You are an expert document converter for Propodocs.
+Your task is to convert raw extracted text from a proposal/document into structured BlockNote-compatible blocks.
+
+CRITICAL: Return ONLY a valid JSON object with a "blocks" property containing an array of blocks.
+Each block MUST follow this exact structure:
+
+For headings (use level 1 for main sections, level 2 for subsections, level 3 for sub-subsections):
+{
+  "type": "heading",
+  "props": { "level": 1 },
+  "content": [{ "type": "text", "text": "Your Heading Text" }]
+}
+
+For paragraphs:
+{
+  "type": "paragraph",
+  "content": [{ "type": "text", "text": "Your paragraph text here." }]
+}
+
+For bullet list items:
+{
+  "type": "bulletListItem",
+  "content": [{ "type": "text", "text": "List item text" }]
+}
+
+For numbered list items:
+{
+  "type": "numberedListItem",
+  "content": [{ "type": "text", "text": "Numbered item text" }]
+}
+
+RULES:
+1. Preserve the document structure (headings, paragraphs, lists)
+2. Clean up any OCR artifacts or formatting issues
+3. Maintain professional formatting
+4. Group related content logically
+5. If there are pricing tables, describe them in text form (we'll handle tables separately)
+6. Do NOT add any content that wasn't in the original - just restructure what's there`;
+
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Convert this extracted document content into BlockNote blocks:\n\n${contentToProcess}` },
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.3,
+        });
+
+        const response = JSON.parse(completion.choices[0].message.content || '{}');
+        const blocks = response.blocks || [];
+
+        res.json({ blocks, extractedText: contentToProcess });
+    } catch (error) {
+        console.error('Import proposal error:', error);
+        res.status(500).json({ error: 'Failed to import proposal' });
+    }
+});
+
 export default router;

@@ -22,7 +22,10 @@ import {
     Upload,
     Copy,
     ExternalLink,
-    ScanSearch
+    ScanSearch,
+    FileUp,
+    FileText,
+    Image
 } from 'lucide-react';
 import { useToast } from '../components/Toast';
 
@@ -74,6 +77,8 @@ export function ProposalEditor() {
     const [isInTable, setIsInTable] = useState(false);
     const [selectedProposalForAnalytics, setSelectedProposalForAnalytics] = useState<number | null>(null);
     const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importing, setImporting] = useState(false);
 
     // Initialize the editor
     const editor = useCreateBlockNote({
@@ -444,6 +449,33 @@ export function ProposalEditor() {
         navigate(path);
     };
 
+    const handleImportFile = async (file: File) => {
+        try {
+            setImporting(true);
+
+            const result = await api.importProposal(file);
+
+            if (result.blocks && result.blocks.length > 0) {
+                // Replace editor content with imported blocks
+                const currentBlocks = editor.document;
+                editor.replaceBlocks(currentBlocks, result.blocks);
+
+                toast.success('Proposal imported successfully!');
+                setShowImportModal(false);
+
+                // Auto-save after import
+                await handleSave();
+            } else {
+                toast.error('No content could be extracted from the file');
+            }
+        } catch (error) {
+            console.error('Import failed:', error);
+            toast.error('Failed to import proposal. Please try again.');
+        } finally {
+            setImporting(false);
+        }
+    };
+
     // Load existing share link on mount
     useEffect(() => {
         const loadShareLink = async () => {
@@ -740,6 +772,14 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setShowImportModal(true)}
+                            className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium text-sm"
+                        >
+                            <FileUp className="w-4 h-4" />
+                            Import
+                        </button>
+
                         <button
                             onClick={handleEditServices}
                             className="flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium text-sm"
@@ -1102,6 +1142,77 @@ Keep it concise but impactful - around 300-400 words with proper headings and se
                     isOpen={!!selectedProposalForAnalytics}
                     onClose={() => setSelectedProposalForAnalytics(null)}
                 />
+            )}
+
+            {/* Import Proposal Modal */}
+            {showImportModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Import Proposal</h2>
+                            <button
+                                onClick={() => setShowImportModal(false)}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
+                        </div>
+
+                        <p className="text-gray-500 mb-6">
+                            Upload an existing proposal (PDF, DOCX) or a screenshot, and AI will recreate it in the editor.
+                        </p>
+
+                        <div
+                            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${importing ? 'border-[#8C0000] bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}
+                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onDrop={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const file = e.dataTransfer.files[0];
+                                if (file) await handleImportFile(file);
+                            }}
+                        >
+                            {importing ? (
+                                <div className="flex flex-col items-center gap-3">
+                                    <Loader2 className="w-10 h-10 text-[#8C0000] animate-spin" />
+                                    <p className="text-gray-600 font-medium">AI is processing your document...</p>
+                                    <p className="text-sm text-gray-400">This may take a few seconds</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <FileUp className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                                    <p className="text-gray-600 mb-2">Drag and drop your file here</p>
+                                    <p className="text-sm text-gray-400 mb-4">or</p>
+                                    <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl font-medium cursor-pointer hover:bg-black transition-colors">
+                                        <Upload className="w-4 h-4" />
+                                        Choose File
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.docx,.png,.jpg,.jpeg"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleImportFile(file);
+                                            }}
+                                        />
+                                    </label>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full text-xs text-gray-500">
+                                <FileText className="w-3.5 h-3.5" /> PDF
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full text-xs text-gray-500">
+                                <FileText className="w-3.5 h-3.5" /> DOCX
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full text-xs text-gray-500">
+                                <Image className="w-3.5 h-3.5" /> PNG / JPEG
+                            </span>
+                        </div>
+                    </div>
+                </div>
             )}
         </DashboardLayout >
     );

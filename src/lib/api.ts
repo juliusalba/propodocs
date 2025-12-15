@@ -323,6 +323,73 @@ class APIClient {
         return response.json();
     }
 
+    // Import proposal from file (PDF, DOCX, or image)
+    async importProposal(file: File): Promise<{ blocks: any[]; extractedText: string }> {
+        const token = this.token;
+        const fileName = file.name.toLowerCase();
+        const isImage = file.type.startsWith('image/') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+
+        if (isImage) {
+            // For images, convert to base64 and send directly to AI
+            const base64 = await this.fileToBase64(file);
+            const response = await fetch(`${API_BASE_URL}/ai/import-proposal`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ imageBase64: base64 }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to import proposal from image');
+            }
+            return response.json();
+        } else {
+            // For PDF/DOCX, first extract text using uploads endpoint
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const extractResponse = await fetch(`${API_BASE_URL}/uploads/document`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData,
+            });
+
+            if (!extractResponse.ok) {
+                throw new Error('Failed to extract document content');
+            }
+
+            const { extractedText } = await extractResponse.json();
+
+            // Then convert to BlockNote blocks
+            const response = await fetch(`${API_BASE_URL}/ai/import-proposal`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ extractedText }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to convert proposal content');
+            }
+            return response.json();
+        }
+    }
+
+    private async fileToBase64(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
     // Upload
     async uploadFile(data: FormData) {
         const token = this.token;
