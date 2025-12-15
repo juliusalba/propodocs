@@ -246,31 +246,31 @@ export function Pipeline() {
                 </div>
 
                 {/* Kanban Board */}
-                <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-                    <div className="flex gap-6 h-full min-w-max pb-4">
+                <div className="flex-1 overflow-x-auto overflow-y-hidden p-4 sm:p-6">
+                    <div className="flex gap-4 sm:gap-6 h-full min-w-max pb-4">
                         {PIPELINE_STAGES.map(stage => (
                             <div
                                 key={stage.id}
-                                className="w-80 flex flex-col bg-gray-100/50 rounded-2xl border border-gray-200/60 max-h-full"
+                                className="w-64 sm:w-72 lg:w-80 flex flex-col bg-gray-100/50 rounded-xl sm:rounded-2xl border border-gray-200/60 max-h-full"
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, stage.id)}
                             >
                                 {/* Column Header */}
-                                <div className={`p-4 border-b border-gray-200/60 flex items-center justify-between sticky top-0 bg-gray-50/90 backdrop-blur-sm rounded-t-2xl z-10`}>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-3 h-3 rounded-full ${stage.color.split(' ')[0].replace('bg-', 'bg-')}`}></div>
-                                        <h3 className="font-semibold text-gray-700">{stage.label}</h3>
-                                        <span className="bg-white px-2 py-0.5 rounded-full text-xs font-medium text-gray-500 border border-gray-200">
+                                <div className={`p-3 sm:p-4 border-b border-gray-200/60 flex items-center justify-between sticky top-0 bg-gray-50/90 backdrop-blur-sm rounded-t-xl sm:rounded-t-2xl z-10`}>
+                                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                        <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${stage.color.split(' ')[0].replace('bg-', 'bg-')} flex-shrink-0`}></div>
+                                        <h3 className="font-semibold text-gray-700 text-xs sm:text-sm truncate">{stage.label}</h3>
+                                        <span className="bg-white px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium text-gray-500 border border-gray-200 flex-shrink-0">
                                             {getStageCount(stage.id)}
                                         </span>
                                     </div>
-                                    <div className="text-xs font-medium text-gray-500">
+                                    <div className="text-[10px] sm:text-xs font-medium text-gray-500 ml-2 flex-shrink-0">
                                         {formatCurrency(getStageTotal(stage.id))}
                                     </div>
                                 </div>
 
                                 {/* Cards Container */}
-                                <div className="p-3 space-y-3 overflow-y-auto flex-1 custom-scrollbar">
+                                <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 overflow-y-auto flex-1 custom-scrollbar">
                                     {filteredProposals
                                         .filter(p => (p.pipeline_stage || mapStatusToStage(p.status)) === stage.id)
                                         .map(proposal => (
@@ -279,43 +279,43 @@ export function Pipeline() {
                                                 key={proposal.id}
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, proposal.id)}
-                                                className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing group transition-all"
+                                                className="bg-white p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing group transition-all touch-manipulation"
                                                 onClick={() => setSelectedProposal(proposal)}
                                             >
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                                <div className="flex justify-between items-start mb-1.5 sm:mb-2">
+                                                    <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-[#8C0000] transition-colors text-xs sm:text-sm pr-2">
                                                         {proposal.client_name}
                                                     </h4>
-                                                    <button className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <MoreVertical className="w-4 h-4" />
+                                                    <button className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                                        <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
                                                     </button>
                                                 </div>
 
-                                                <div className="text-sm text-gray-500 mb-3 line-clamp-1">
+                                                <div className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 line-clamp-1">
                                                     {proposal.title}
                                                 </div>
 
-                                                <div className="flex items-center gap-2 mb-3">
-                                                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${proposal.calculator_type === 'marketing'
+                                                <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
+                                                    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-medium ${proposal.calculator_type === 'marketing'
                                                         ? 'bg-blue-50 text-blue-700'
                                                         : 'bg-emerald-50 text-emerald-700'
                                                         }`}>
                                                         {proposal.calculator_type === 'marketing' ? 'Marketing' : 'Custom'}
                                                     </span>
-                                                    <span className="text-sm font-semibold text-gray-900">
+                                                    <span className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
                                                         {formatCurrency(getProposalValue(proposal))}
-                                                        <span className="text-xs font-normal text-gray-400">/mo</span>
+                                                        <span className="text-[10px] sm:text-xs font-normal text-gray-400">/mo</span>
                                                     </span>
                                                 </div>
 
-                                                <div className="flex items-center justify-between pt-3 border-t border-gray-50 text-xs text-gray-400">
-                                                    <div className="flex items-center gap-1.5" title="Created date">
-                                                        <Calendar className="w-3.5 h-3.5" />
-                                                        {new Date(proposal.created_at).toLocaleDateString()}
+                                                <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-50 text-[10px] sm:text-xs text-gray-400">
+                                                    <div className="flex items-center gap-1 sm:gap-1.5" title="Created date">
+                                                        <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                        <span className="truncate">{new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                                     </div>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-1.5 sm:gap-2">
                                                         {(proposal.calculator_data as any)?.notes && (
-                                                            <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
+                                                            <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8C0000]" />
                                                         )}
                                                     </div>
                                                 </div>
