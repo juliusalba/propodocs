@@ -10,10 +10,17 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Email configuration
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
 const FROM_NAME = process.env.FROM_NAME || 'Propodocs';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// SMS configuration (Twilio)
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+const twilioConfigured = !!(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER);
 
 // Notification event types
 export type NotificationEventType =
@@ -92,6 +99,19 @@ async function getUserEmail(userId: number): Promise<string | null> {
         .single();
 
     return data?.email || null;
+}
+
+/**
+ * Get user phone by ID
+ */
+async function getUserPhone(userId: number): Promise<string | null> {
+    const { data } = await supabase
+        .from('users')
+        .select('phone')
+        .eq('id', userId)
+        .single();
+
+    return data?.phone || null;
 }
 
 /**
@@ -195,13 +215,62 @@ export async function sendNotification(payload: NotificationPayload): Promise<vo
         await sendEmailNotification(userId, payload);
     }
 
-    // Future: Check SMS preference
-    // const smsEnabled = await isNotificationEnabled(userId, 'sms', type);
-    // if (smsEnabled) { await sendSMSNotification(userId, payload); }
+    // Check SMS preference and send if enabled
+    const smsEnabled = await isNotificationEnabled(userId, 'sms', type);
+    if (smsEnabled) {
+        await sendSMSNotification(userId, payload);
+    }
 
     // Future: Check push preference
     // const pushEnabled = await isNotificationEnabled(userId, 'push', type);
     // if (pushEnabled) { await sendPushNotification(userId, payload); }
+}
+
+/**
+ * Send SMS notification via Twilio
+ * Gracefully skips if Twilio is not configured or package not installed
+ */
+async function sendSMSNotification(
+    userId: number,
+    payload: NotificationPayload
+): Promise<boolean> {
+    // Skip if Twilio not configured
+    if (!twilioConfigured) {
+        console.log(`📱 [SMS SKIPPED] Twilio not configured. Would send to user ${userId}: ${payload.title}`);
+        return false;
+    }
+
+    const phone = await getUserPhone(userId);
+    if (!phone) {
+        console.log(`📱 [SMS SKIPPED] No phone number for user ${userId}`);
+        return false;
+    }
+
+    try {
+        // Dynamic require to avoid requiring twilio package when not installed
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const twilio = require('twilio') as any;
+        const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+
+        const shortLink = payload.link ? ` ${FRONTEND_URL}${payload.link}` : '';
+        const body = `${payload.title}: ${payload.message.slice(0, 140)}${shortLink}`;
+
+        await client.messages.create({
+            body,
+            from: TWILIO_PHONE_NUMBER,
+            to: phone
+        });
+
+        console.log(`✅ SMS notification sent to ${phone}: ${payload.title}`);
+        return true;
+    } catch (error: any) {
+        if (error.code === 'MODULE_NOT_FOUND') {
+            console.log(`📱 [SMS SKIPPED] Twilio package not installed. Run: npm install twilio`);
+        } else {
+            console.error('SMS send error:', error);
+        }
+        return false;
+    }
 }
 
 /**
