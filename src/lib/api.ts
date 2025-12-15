@@ -775,6 +775,46 @@ class APIClient {
             body: JSON.stringify(data),
         });
     }
+
+    // ======================
+    // NOTIFICATIONS
+    // ======================
+
+    async getNotifications(params?: { limit?: number; offset?: number; unread?: boolean }) {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', String(params.limit));
+        if (params?.offset) query.set('offset', String(params.offset));
+        if (params?.unread) query.set('unread', 'true');
+        const queryString = query.toString() ? `?${query.toString()}` : '';
+        return this.request(`/notifications${queryString}`);
+    }
+
+    async getUnreadNotificationCount() {
+        return this.request('/notifications/unread-count');
+    }
+
+    async markNotificationRead(id: number) {
+        return this.request(`/notifications/${id}/read`, { method: 'PUT' });
+    }
+
+    async markAllNotificationsRead() {
+        return this.request('/notifications/read-all', { method: 'PUT' });
+    }
+
+    async deleteNotification(id: number) {
+        return this.request(`/notifications/${id}`, { method: 'DELETE' });
+    }
+
+    async getNotificationPreferences() {
+        return this.request('/notifications/preferences');
+    }
+
+    async updateNotificationPreferences(preferences: Record<string, Record<string, boolean>>) {
+        return this.request('/notifications/preferences', {
+            method: 'PUT',
+            body: JSON.stringify({ preferences }),
+        });
+    }
 }
 
 export const api = new APIClient();

@@ -90,13 +90,7 @@ export function Settings() {
         }
     };
 
-    const [notifications, setNotifications] = useState({
-        emailProposalViewed: true,
-        emailProposalAccepted: true,
-        emailProposalRejected: true,
-        emailWeeklyDigest: false,
-        pushNotifications: true
-    });
+    const [notifications, setNotifications] = useState<Record<string, Record<string, boolean>>>({});
 
     const [security, setSecurity] = useState({
         currentPassword: '',
@@ -509,33 +503,51 @@ export function Settings() {
                             {/* Notifications Tab */}
                             {activeTab === 'notifications' && (
                                 <div className="space-y-6">
-                                    <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
-
-                                    <div className="space-y-4">
-                                        {[
-                                            { key: 'emailProposalViewed', label: 'Email when proposal is viewed', description: 'Get notified when a client views your proposal' },
-                                            { key: 'emailProposalAccepted', label: 'Email when proposal is accepted', description: 'Get notified when a client accepts your proposal' },
-                                            { key: 'emailProposalRejected', label: 'Email when proposal is rejected', description: 'Get notified when a client rejects your proposal' },
-                                            { key: 'emailWeeklyDigest', label: 'Weekly digest', description: 'Receive a weekly summary of your proposal activity' },
-                                            { key: 'pushNotifications', label: 'Push notifications', description: 'Receive push notifications in your browser' }
-                                        ].map((item) => (
-                                            <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                                <div>
-                                                    <h4 className="font-medium text-gray-900">{item.label}</h4>
-                                                    <p className="text-sm text-gray-500">{item.description}</p>
-                                                </div>
-                                                <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={notifications[item.key as keyof typeof notifications]}
-                                                        onChange={(e) => setNotifications({ ...notifications, [item.key]: e.target.checked })}
-                                                        className="sr-only peer"
-                                                    />
-                                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#8C0000]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8C0000]"></div>
-                                                </label>
-                                            </div>
-                                        ))}
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
+                                        <p className="text-sm text-gray-500">Choose how you want to be notified</p>
                                     </div>
+
+                                    {/* Email Notifications Section */}
+                                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-[#8C0000]" />
+                                            Email Notifications
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {[
+                                                { key: 'proposal_viewed', label: 'Proposal viewed', description: 'When a client views your proposal' },
+                                                { key: 'proposal_accepted', label: 'Proposal accepted', description: 'When a client accepts your proposal' },
+                                                { key: 'proposal_rejected', label: 'Proposal rejected', description: 'When a client declines your proposal' },
+                                                { key: 'comment_added', label: 'New comments', description: 'When someone comments on your proposals' },
+                                                { key: 'contract_signed', label: 'Contract signed', description: 'When a client signs a contract' },
+                                                { key: 'invoice_paid', label: 'Invoice paid', description: 'When a payment is received' },
+                                            ].map((item) => (
+                                                <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                                                    <div>
+                                                        <h4 className="font-medium text-gray-900 text-sm">{item.label}</h4>
+                                                        <p className="text-xs text-gray-500">{item.description}</p>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={notifications[item.key]?.email ?? true}
+                                                            onChange={(e) => setNotifications(prev => ({
+                                                                ...prev,
+                                                                [item.key]: { ...prev[item.key], email: e.target.checked }
+                                                            }))}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#8C0000]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8C0000]"></div>
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <p className="text-xs text-gray-400 text-center">
+                                        SMS and push notifications coming soon
+                                    </p>
                                 </div>
                             )}
 

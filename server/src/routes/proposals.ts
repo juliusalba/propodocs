@@ -3,6 +3,7 @@ import { z } from 'zod';
 import supabase from '../db/index.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { sendProposalLinkEmail } from '../utils/email.js';
+import { notifyProposalStatusChange, notifyCommentAdded } from '../services/notification.js';
 
 const router = Router();
 
@@ -249,6 +250,11 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
         if (error) throw error;
 
+        // Send notification for status changes
+        if (data.status === 'accepted' || data.status === 'rejected') {
+            notifyProposalStatusChange(proposalId, data.status).catch(console.error);
+        }
+
         res.json({ proposal: updated });
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -456,6 +462,9 @@ router.post('/:id/comments', async (req, res) => {
             .single();
 
         if (error) throw error;
+
+        // Send notification to proposal owner
+        notifyCommentAdded(proposalId, author_name || 'Anonymous', content).catch(console.error);
 
         return res.status(201).json({ comment });
     } catch (error) {

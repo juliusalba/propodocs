@@ -18,6 +18,7 @@ import contractRoutes from './routes/contracts.js';
 import contractTemplateRoutes from './routes/contract-templates.js';
 import paymentRoutes from './routes/payments.js';
 import clientRoutes from './routes/clients.js';
+import notificationRoutes from './routes/notifications.js';
 import db from './db/index.js';
 import path from 'path';
 
@@ -88,6 +89,7 @@ app.use('/api/contracts', contractRoutes);
 app.use('/api/contract-templates', contractTemplateRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/clients', clientRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/', pdfRoutes);
 
 // Serve uploaded files

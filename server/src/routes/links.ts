@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import bcrypt from 'bcryptjs';
 import supabase from '../db/index.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { notifyProposalViewed } from '../services/notification.js';
 
 const router = Router();
 
@@ -286,6 +287,9 @@ router.get('/share/:token', async (req, res) => {
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', proposal.id);
+
+            // Notify proposal owner
+            notifyProposalViewed(proposal.id).catch(console.error);
         }
 
         res.json({
