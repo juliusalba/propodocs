@@ -816,7 +816,24 @@ export function Dashboard() {
                                     </button>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => {
+                                            setShowCreateModal(false);
+                                            navigate('/proposals/new?mode=blank');
+                                        }}
+                                        className="group relative p-6 rounded-xl border-2 border-gray-100 hover:border-[#8C0000] hover:bg-red-50/30 transition-all text-left"
+                                    >
+                                        <div className="w-12 h-12 rounded-lg bg-red-100 text-[#8C0000] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                            <FileText className="w-6 h-6" />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Blank Proposal</h3>
+                                        <p className="text-sm text-gray-500 mb-4">Create from scratch with custom pricing. Import your own terms.</p>
+                                        <div className="flex items-center text-[#8C0000] font-medium text-sm">
+                                            Start Fresh <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        </div>
+                                    </button>
+
                                     <button
                                         onClick={() => navigate('/calculators')}
                                         className="group relative p-6 rounded-xl border-2 border-gray-100 hover:border-blue-600 hover:bg-blue-50/30 transition-all text-left"
@@ -825,7 +842,7 @@ export function Dashboard() {
                                             <Calculator className="w-6 h-6" />
                                         </div>
                                         <h3 className="text-lg font-bold text-gray-900 mb-2">My Calculators</h3>
-                                        <p className="text-sm text-gray-500 mb-4">Access your saved custom calculators to generate new proposals.</p>
+                                        <p className="text-sm text-gray-500 mb-4">Use your saved custom calculators to generate proposals.</p>
                                         <div className="flex items-center text-blue-600 font-medium text-sm">
                                             View Calculators <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </div>
@@ -839,7 +856,7 @@ export function Dashboard() {
                                             <LayoutTemplate className="w-6 h-6" />
                                         </div>
                                         <h3 className="text-lg font-bold text-gray-900 mb-2">Templates</h3>
-                                        <p className="text-sm text-gray-500 mb-4">Start with a pre-built industry standard calculator.</p>
+                                        <p className="text-sm text-gray-500 mb-4">Start with a pre-built industry template.</p>
                                         <div className="flex items-center text-purple-600 font-medium text-sm">
                                             Browse Templates <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </div>
@@ -852,8 +869,8 @@ export function Dashboard() {
                                         <div className="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                             <Wand2 className="w-6 h-6" />
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Create New</h3>
-                                        <p className="text-sm text-gray-500 mb-4">Design a new calculator from scratch with AI assistance.</p>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Create Calculator</h3>
+                                        <p className="text-sm text-gray-500 mb-4">Design a new calculator with AI assistance.</p>
                                         <div className="flex items-center text-emerald-600 font-medium text-sm">
                                             Start Building <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { type PartialBlock } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
@@ -48,10 +48,10 @@ import { SaveStatus } from '../components/SaveStatus';
 export function ProposalEditor() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const isBlankMode = searchParams.get('mode') === 'blank';
     const toast = useToast();
     const { user } = useAuth();
-    // const [searchParams] = useSearchParams();
-    // const isViewMode = searchParams.get('view') === 'true';
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [proposal, setProposal] = useState<Proposal | null>(null);
@@ -147,11 +147,49 @@ export function ProposalEditor() {
         }
     }, [editor]);
 
+    // Handle loading existing proposal or creating blank proposal
     useEffect(() => {
-        if (id && !isNaN(Number(id))) {
-            loadProposal(Number(id));
-        }
-    }, [id]);
+        const initializeProposal = async () => {
+            if (id && !isNaN(Number(id))) {
+                // Load existing proposal
+                loadProposal(Number(id));
+            } else if (isBlankMode) {
+                // Create new blank proposal
+                try {
+                    setLoading(true);
+                    const response = await api.createProposal({
+                        title: 'Untitled Proposal',
+                        clientName: 'New Client',
+                        clientEmail: '',
+                        calculatorType: 'manual',
+                        calculatorData: {
+                            totals: { monthlyTotal: 0, annualTotal: 0 },
+                            lineItems: [],
+                            description: ''
+                        },
+                        content: []
+                    });
+
+                    if (response?.proposal?.id) {
+                        // Navigate to the new proposal's edit page
+                        navigate(`/proposals/${response.proposal.id}/edit`, { replace: true });
+                    } else {
+                        toast.error('Failed to create proposal');
+                        navigate('/proposals');
+                    }
+                } catch (error) {
+                    console.error('Failed to create blank proposal:', error);
+                    toast.error('Failed to create proposal');
+                    navigate('/proposals');
+                }
+            } else {
+                // No id and not blank mode - redirect to proposals
+                setLoading(false);
+            }
+        };
+
+        initializeProposal();
+    }, [id, isBlankMode]);
 
     // Load user's saved signature on mount
     useEffect(() => {
