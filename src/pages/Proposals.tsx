@@ -568,6 +568,24 @@ export function Proposals() {
                                         <button
                                             onClick={() => {
                                                 setShowCreateModal(false);
+                                                navigate('/proposals/new?mode=blank');
+                                            }}
+                                            className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#8C0000] hover:bg-red-50/30 transition-all text-left group"
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#8C0000] to-[#500000] text-white flex items-center justify-center shadow-lg shadow-red-900/20">
+                                                    <FileText className="w-6 h-6" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-bold text-gray-900 mb-1 group-hover:text-[#8C0000] transition-colors">Blank Proposal</h3>
+                                                    <p className="text-sm text-gray-500">Create from scratch with custom pricing</p>
+                                                </div>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={() => {
+                                                setShowCreateModal(false);
                                                 navigate('/calculator/marketing');
                                             }}
                                             className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#3b82f6] hover:bg-blue-50/30 transition-all text-left group"
