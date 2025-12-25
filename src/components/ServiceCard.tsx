@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Info, Check, Sparkles } from 'lucide-react';
 import type { Tier } from '../types';
 import { cn } from '../lib/utils';
