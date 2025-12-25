@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { X, Eye, Clock, Monitor, Smartphone, Tablet, Calendar, ChevronDown, ChevronRight } from 'lucide-react';
 import { api } from '../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -121,17 +121,20 @@ export function ViewAnalyticsModal({ proposalId, isOpen, onClose }: ViewAnalytic
         setExpandedDates(newExpanded);
     };
 
-    const getTotalViews = () => sessions.length;
+    const getTotalViews = useCallback(() => sessions.length, [sessions.length]);
 
-    const getAverageDuration = () => {
+    const getAverageDuration = useCallback(() => {
         if (sessions.length === 0) return 0;
         const total = sessions.reduce((acc, s) => acc + (s.duration_seconds || 0), 0);
         return total / sessions.length;
-    };
+    }, [sessions]);
 
-    const groupedSessions = groupSessionsByDate();
-    const sortedDates = Object.keys(groupedSessions).sort((a, b) =>
-        new Date(b).getTime() - new Date(a).getTime()
+    const groupedSessions = useMemo(() => groupSessionsByDate(), [sessions]);
+    const sortedDates = useMemo(() =>
+        Object.keys(groupedSessions).sort((a, b) =>
+            new Date(b).getTime() - new Date(a).getTime()
+        ),
+        [groupedSessions]
     );
 
     if (!isOpen) return null;

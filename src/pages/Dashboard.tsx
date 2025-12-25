@@ -16,7 +16,9 @@ import {
     Loader2,
     TrendingUp,
     Wand2,
-    Calculator
+    Calculator,
+    Sparkles,
+    LayoutTemplate
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
@@ -24,7 +26,6 @@ import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { PipelineChart } from '../components/dashboard/PipelineChart';
 import { ViewAnalyticsModal } from '../components/ViewAnalyticsModal';
 import { ChangelogModal } from '../components/ChangelogModal';
-import { Sparkles, LayoutTemplate } from 'lucide-react';
 import type { Proposal } from '../types';
 import { useToast } from '../components/Toast';
 
@@ -122,14 +123,25 @@ export function Dashboard() {
             filteredProposals = proposals.filter(p => new Date(p.created_at) >= startOfYear);
         }
 
-        // Recalculate pipeline stats
+        // Single-pass grouping by status
+        const groupedByStatus = filteredProposals.reduce((acc, p) => {
+            const status = p.status || 'draft';
+            if (!acc[status]) {
+                acc[status] = { proposals: [], value: 0, count: 0 };
+            }
+            acc[status].proposals.push(p);
+            acc[status].value += (p.calculator_data.totals?.annualTotal || 0);
+            acc[status].count += 1;
+            return acc;
+        }, {} as Record<string, any>);
+
+        // Map over breakdown items using pre-grouped data
         const breakdown = data.breakdown.map((item: any) => {
-            const statusProposals = filteredProposals.filter(p => p.status === item.status);
-            const value = statusProposals.reduce((acc, p) => acc + (p.calculator_data.totals?.annualTotal || 0), 0);
+            const statusData = groupedByStatus[item.status] || { value: 0, count: 0 };
             return {
                 ...item,
-                value,
-                count: statusProposals.length
+                value: statusData.value,
+                count: statusData.count
             };
         });
 

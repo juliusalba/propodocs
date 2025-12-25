@@ -27,10 +27,10 @@ export function ProposalComments({ proposalId, highlightedText, activeBlockId, a
     const [showForm, setShowForm] = useState(false);
     const [filterByBlock, setFilterByBlock] = useState(false);
 
-    // Auto-refresh comments every 10 seconds to catch new guest comments
+    // Auto-refresh comments every 30 seconds to catch new guest comments
     useEffect(() => {
         loadComments();
-        const interval = setInterval(loadComments, 10000);
+        const interval = setInterval(loadComments, 30000);
         return () => clearInterval(interval);
     }, [proposalId]);
 

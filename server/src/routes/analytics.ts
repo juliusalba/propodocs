@@ -118,61 +118,55 @@ router.get('/proposals/:proposalId/analytics', async (req, res) => {
   try {
     const proposalId = parseInt(req.params.proposalId);
 
-    // Supabase doesn't support complex aggregations in one go easily via JS client
-    // We'll do separate queries or use RPCs in a real production app
-    // For now, we'll fetch data and aggregate in JS or use simple counts
+    // Fetch views and interactions data in parallel
+    const [
+      { data: views, count: totalViews },
+      { data: interactions }
+    ] = await Promise.all([
+      supabase
+        .from('proposal_views')
+        .select('session_id, duration_seconds, viewed_at, device_type, browser', { count: 'exact' })
+        .eq('proposal_id', proposalId),
+      supabase
+        .from('proposal_interactions')
+        .select('*')
+        .eq('proposal_id', proposalId)
+        .in('interaction_type', ['click', 'hover', 'scroll'])
+    ]);
 
-    // Total Views
-    const { count: totalViews } = await supabase
-      .from('proposal_views')
-      .select('*', { count: 'exact', head: true })
-      .eq('proposal_id', proposalId);
+    // Filter scroll interactions in memory
+    const scrollInteractions = interactions?.filter(i => i.interaction_type === 'scroll') || [];
+    const heatmapInteractions = interactions?.filter(i => i.interaction_type === 'click' || i.interaction_type === 'hover') || [];
 
-    // Unique Views (approximate via JS for now, or use RPC)
-    const { data: views } = await supabase
-      .from('proposal_views')
-      .select('session_id, duration_seconds, viewed_at, device_type, browser')
-      .eq('proposal_id', proposalId);
-
+    // Single-pass aggregation of view data
     const uniqueViews = new Set(views?.map(v => v.session_id)).size;
-    const avgDuration = (views && views.length > 0) ? views.reduce((acc, v) => acc + (v.duration_seconds || 0), 0) / views.length : 0;
-    const maxDuration = Math.max(...(views?.map(v => v.duration_seconds || 0) || [0]));
+    const viewsOverTime: any = {};
+    const deviceBreakdown: any = {};
+    const browserBreakdown: any = {};
+    let totalDuration = 0;
+    let maxDuration = 0;
 
-    // Views Over Time
-    const viewsOverTime = views?.reduce((acc: any, v) => {
+    views?.forEach(v => {
+      // Duration stats
+      const duration = v.duration_seconds || 0;
+      totalDuration += duration;
+      if (duration > maxDuration) maxDuration = duration;
+
+      // Views over time
       const date = new Date(v.viewed_at).toISOString().split('T')[0];
-      acc[date] = (acc[date] || 0) + 1;
-      return acc;
-    }, {});
+      viewsOverTime[date] = (viewsOverTime[date] || 0) + 1;
 
-    // Device Breakdown
-    const deviceBreakdown = views?.reduce((acc: any, v) => {
+      // Device breakdown
       const type = v.device_type || 'unknown';
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {});
+      deviceBreakdown[type] = (deviceBreakdown[type] || 0) + 1;
 
-    // Browser Breakdown
-    const browserBreakdown = views?.reduce((acc: any, v) => {
+      // Browser breakdown
       if (v.browser) {
-        acc[v.browser] = (acc[v.browser] || 0) + 1;
+        browserBreakdown[v.browser] = (browserBreakdown[v.browser] || 0) + 1;
       }
-      return acc;
-    }, {});
+    });
 
-    // Heatmap Data
-    const { data: interactions } = await supabase
-      .from('proposal_interactions')
-      .select('*')
-      .eq('proposal_id', proposalId)
-      .in('interaction_type', ['click', 'hover']);
-
-    // Scroll Data
-    const { data: scrollInteractions } = await supabase
-      .from('proposal_interactions')
-      .select('scroll_depth')
-      .eq('proposal_id', proposalId)
-      .eq('interaction_type', 'scroll');
+    const avgDuration = (views && views.length > 0) ? totalDuration / views.length : 0;
 
     res.json({
       viewStats: {
@@ -181,10 +175,10 @@ router.get('/proposals/:proposalId/analytics', async (req, res) => {
         avg_duration: avgDuration,
         max_duration: maxDuration,
       },
-      viewsOverTime: Object.entries(viewsOverTime || {}).map(([date, views]) => ({ date, views })),
-      deviceBreakdown: Object.entries(deviceBreakdown || {}).map(([device_type, count]) => ({ device_type, count })),
-      browserBreakdown: Object.entries(browserBreakdown || {}).map(([browser, count]) => ({ browser, count })),
-      heatmapData: interactions, // Sending raw data for now, frontend can aggregate
+      viewsOverTime: Object.entries(viewsOverTime).map(([date, views]) => ({ date, views })),
+      deviceBreakdown: Object.entries(deviceBreakdown).map(([device_type, count]) => ({ device_type, count })),
+      browserBreakdown: Object.entries(browserBreakdown).map(([browser, count]) => ({ browser, count })),
+      heatmapData: heatmapInteractions,
       scrollData: scrollInteractions,
     });
   } catch (error) {
@@ -280,6 +274,11 @@ router.get('/pipeline', authMiddleware, async (req: AuthRequest, res) => {
       ]
     };
 
+    // Use Map for O(1) lookups instead of O(n) findIndex
+    const statusMap = new Map(
+      pipelineStats.breakdown.map(b => [b.status, b])
+    );
+
     proposals?.forEach(proposal => {
       // Extract annual total from calculator data
       // Note: Structure depends on calculator type, but both use 'totals.annualTotal' currently
@@ -288,10 +287,10 @@ router.get('/pipeline', authMiddleware, async (req: AuthRequest, res) => {
 
       pipelineStats.totalPipelineValue += annualTotal;
 
-      const statIndex = pipelineStats.breakdown.findIndex(s => s.status === status);
-      if (statIndex !== -1) {
-        pipelineStats.breakdown[statIndex].value += annualTotal;
-        pipelineStats.breakdown[statIndex].count += 1;
+      const stat = statusMap.get(status);
+      if (stat) {
+        stat.value += annualTotal;
+        stat.count += 1;
       }
     });
 
