@@ -868,12 +868,24 @@ router.get('/:id/comments', async (req, res) => {
 
     try {
         const contractId = parseInt(req.params.id);
+        const { limit, since } = req.query;
 
-        const { data: comments, error } = await supabase
+        // Default limit to 100, max 500
+        const limitNum = Math.min(parseInt(limit as string) || 100, 500);
+
+        let query = supabase
             .from('contract_comments')
             .select('*')
             .eq('contract_id', contractId)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: true })
+            .limit(limitNum);
+
+        // Incremental loading: only fetch comments after a certain timestamp
+        if (since) {
+            query = query.gt('created_at', since);
+        }
+
+        const { data: comments, error } = await query;
 
         if (error) throw error;
 

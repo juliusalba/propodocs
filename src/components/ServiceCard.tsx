@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Info, Check, Sparkles } from 'lucide-react';
 import type { Tier } from '../types';
 import { cn } from '../lib/utils';
@@ -11,11 +12,19 @@ interface ServiceCardProps {
     onSelect: (tier: number) => void;
 }
 
+// Constants to avoid recreating on every render
+const TIER_NUMBERS = [1, 2, 3] as const;
+const ICON_STYLE = { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' };
+const SELECTED_STYLE = { background: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)' };
+const EMPTY_STYLE = {};
+const CHECK_BADGE_STYLE = { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' };
+const TIER_BADGE_STYLE = { color: '#3b82f6', backgroundColor: '#FEE2E2' };
+
 export function ServiceCard({ title, icon, description, tiers, selectedTier, onSelect }: ServiceCardProps) {
     return (
         <div className="mb-6 animate-fade-in">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-gradient-to-r from-red-100 to-transparent">
-                <div className="p-2 rounded-lg shadow-md" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}>
+                <div className="p-2 rounded-lg shadow-md" style={ICON_STYLE}>
                     <div className="text-white">{icon}</div>
                 </div>
                 <div className="flex-1">
@@ -31,7 +40,7 @@ export function ServiceCard({ title, icon, description, tiers, selectedTier, onS
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[1, 2, 3].map((tierNum) => {
+                {TIER_NUMBERS.map((tierNum) => {
                     const tier = tiers[tierNum];
                     const isSelected = selectedTier === tierNum;
 
@@ -45,7 +54,7 @@ export function ServiceCard({ title, icon, description, tiers, selectedTier, onS
                                     ? "border-[#3b82f6] shadow-lg shadow-red-100 scale-[1.02]"
                                     : "bg-white border-gray-200 hover:border-[#3b82f6] hover:shadow-md hover:-translate-y-0.5"
                             )}
-                            style={isSelected ? { background: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)' } : {}}
+                            style={isSelected ? SELECTED_STYLE : EMPTY_STYLE}
                         >
                             {/* Background Gradient on Hover */}
                             {!isSelected && (
@@ -54,13 +63,13 @@ export function ServiceCard({ title, icon, description, tiers, selectedTier, onS
 
                             <div className="relative">
                                 {isSelected && (
-                                    <div className="absolute -top-2 -right-2 text-white rounded-full p-1.5 shadow-lg" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}>
+                                    <div className="absolute -top-2 -right-2 text-white rounded-full p-1.5 shadow-lg" style={CHECK_BADGE_STYLE}>
                                         <Check className="w-4 h-4" />
                                     </div>
                                 )}
 
                                 <div className="flex items-center gap-2 mb-2">
-                                    <div className="text-xs font-bold px-2 py-1 rounded-md" style={{ color: '#3b82f6', backgroundColor: '#FEE2E2' }}>
+                                    <div className="text-xs font-bold px-2 py-1 rounded-md" style={TIER_BADGE_STYLE}>
                                         Tier {tierNum}
                                     </div>
                                     {tierNum === 3 && (

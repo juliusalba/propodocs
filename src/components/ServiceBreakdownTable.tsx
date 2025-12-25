@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Check, Clock, Wrench, Package } from 'lucide-react';
 import type { CalculatorTier } from '../types/calculator';
 import type { LineItem } from './QuoteSummaryEnhanced';
@@ -38,6 +39,26 @@ export const getServiceDetails = (serviceName: string, description?: string): Se
 };
 
 export function ServiceBreakdownTable({ selectedTier, selectedAddOns }: ServiceBreakdownTableProps) {
+    // Memoize service details to avoid recreating on every render
+    const serviceDetailsCache = useMemo(() => {
+        const cache = new Map<string, ServiceDetail>();
+        return {
+            get: (name: string, desc?: string) => {
+                const key = `${name}-${desc || ''}`;
+                if (!cache.has(key)) {
+                    cache.set(key, getServiceDetails(name, desc));
+                }
+                return cache.get(key)!;
+            }
+        };
+    }, []);
+
+    // Pre-compute tier service details if tier is selected
+    const tierDetails = useMemo(() => {
+        if (!selectedTier) return null;
+        return serviceDetailsCache.get(selectedTier.name);
+    }, [selectedTier, serviceDetailsCache]);
+
     if (!selectedTier && selectedAddOns.length === 0) {
         return null;
     }
@@ -88,7 +109,7 @@ export function ServiceBreakdownTable({ selectedTier, selectedAddOns }: ServiceB
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 bg-white">
                                         {selectedTier.features.map((feature, index) => {
-                                            const detail = getServiceDetails(feature);
+                                            const detail = serviceDetailsCache.get(feature);
                                             return (
                                                 <tr key={index} className="hover:bg-gray-50 transition-colors">
                                                     <td className="px-4 py-4">
@@ -128,7 +149,7 @@ export function ServiceBreakdownTable({ selectedTier, selectedAddOns }: ServiceB
                                 Technical Specifications
                             </h5>
                             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
-                                {getServiceDetails(selectedTier.name).technicalSpecs?.map((spec, index) => (
+                                {tierDetails?.technicalSpecs?.map((spec, index) => (
                                     <li key={index} className="flex items-start gap-2">
                                         <Check className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                         <span>{spec}</span>
@@ -165,7 +186,7 @@ export function ServiceBreakdownTable({ selectedTier, selectedAddOns }: ServiceB
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 bg-white">
                                     {selectedAddOns.map((addon) => {
-                                        const detail = getServiceDetails(addon.name, addon.description);
+                                        const detail = serviceDetailsCache.get(addon.name, addon.description);
                                         return (
                                             <tr key={addon.id} className="hover:bg-gray-50 transition-colors">
                                                 <td className="px-4 py-4">
