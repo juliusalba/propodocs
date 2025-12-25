@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     MoreVertical,
@@ -25,6 +25,7 @@ interface Proposal {
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
     calculator_data: any;
     created_at: string;
+    updated_at: string;
     view_count?: number;
     cover_photo_url?: string;
 }
@@ -43,39 +44,39 @@ const statusConfig = {
     rejected: { color: 'bg-red-50 text-red-700', label: 'Rejected' }
 };
 
-export function ProposalCard({ proposal, onDelete, onShare }: ProposalCardProps) {
+export const ProposalCard = memo(function ProposalCard({ proposal, onDelete, onShare }: ProposalCardProps) {
     const navigate = useNavigate();
     const toast = useToast();
     const [showMenu, setShowMenu] = useState(false);
     const [generating, setGenerating] = useState(false);
     const status = statusConfig[proposal.status];
 
-    const getProposalValue = () => {
+    const getProposalValue = useCallback(() => {
         try {
             return proposal.calculator_data?.totals?.monthlyTotal || 0;
         } catch {
             return 0;
         }
-    };
+    }, [proposal.calculator_data]);
 
-    const handleEdit = (e: React.MouseEvent) => {
+    const handleEdit = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         navigate(`/proposals/${proposal.id}/edit`);
-    };
+    }, [proposal.id, navigate]);
 
-    const handleDelete = (e: React.MouseEvent) => {
+    const handleDelete = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         onDelete(proposal.id);
         setShowMenu(false);
-    };
+    }, [proposal.id, onDelete]);
 
-    const handleShare = (e: React.MouseEvent) => {
+    const handleShare = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         onShare(proposal.id);
         setShowMenu(false);
-    };
+    }, [proposal.id, onShare]);
 
-    const handleGenerateInvoice = async (e: React.MouseEvent) => {
+    const handleGenerateInvoice = useCallback(async (e: React.MouseEvent) => {
         e.stopPropagation();
         setGenerating(true);
         try {
@@ -88,9 +89,9 @@ export function ProposalCard({ proposal, onDelete, onShare }: ProposalCardProps)
             setGenerating(false);
             setShowMenu(false);
         }
-    };
+    }, [proposal.id, toast, navigate]);
 
-    const handleGenerateContract = async (e: React.MouseEvent) => {
+    const handleGenerateContract = useCallback(async (e: React.MouseEvent) => {
         e.stopPropagation();
         setGenerating(true);
         try {
@@ -103,7 +104,7 @@ export function ProposalCard({ proposal, onDelete, onShare }: ProposalCardProps)
             setGenerating(false);
             setShowMenu(false);
         }
-    };
+    }, [proposal.id, toast, navigate]);
 
     return (
         <motion.div
@@ -248,4 +249,9 @@ export function ProposalCard({ proposal, onDelete, onShare }: ProposalCardProps)
             </div>
         </motion.div>
     );
-}
+}, (prevProps, nextProps) => {
+    // Custom comparison function for optimal re-renders
+    return prevProps.proposal.id === nextProps.proposal.id &&
+           prevProps.proposal.updated_at === nextProps.proposal.updated_at &&
+           prevProps.proposal.status === nextProps.proposal.status;
+});

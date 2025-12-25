@@ -99,7 +99,12 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const userId = req.user!.userId;
-        const { trashed } = req.query;
+        const { trashed, page, limit } = req.query;
+
+        // Pagination parameters
+        const pageNum = parseInt(page as string) || 1;
+        const limitNum = parseInt(limit as string) || 50;
+        const offset = (pageNum - 1) * limitNum;
 
         let query = supabase
             .from('proposals')
@@ -107,9 +112,10 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
                 *,
                 view_count:proposal_views(count),
                 comment_count:proposal_comments(count)
-            `)
+            `, { count: 'exact' })
             .eq('user_id', userId)
-            .order('updated_at', { ascending: false });
+            .order('updated_at', { ascending: false })
+            .range(offset, offset + limitNum - 1);
 
         // Filter based on trashed status
         // We use the theme->isArchived flag for soft delete since we can't easily alter schema
@@ -126,7 +132,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
             query = query.not('theme', 'cs', '{"isArchived": true}');
         }
 
-        const { data: proposals, error } = await query;
+        const { data: proposals, error, count } = await query;
 
         if (error) throw error;
 
@@ -137,7 +143,15 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
             comment_count: p.comment_count?.[0]?.count || 0,
         }));
 
-        res.json({ proposals: formattedProposals });
+        res.json({
+            proposals: formattedProposals,
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total: count || 0,
+                totalPages: Math.ceil((count || 0) / limitNum)
+            }
+        });
     } catch (error) {
         console.error('Get proposals error:', error);
         res.status(500).json({ error: 'Failed to get proposals' });
@@ -822,6 +836,23 @@ router.get('/:id/viewers', authMiddleware, async (req: AuthRequest, res) => {
         // Format viewer data with analytics
         const formattedViewers = viewers.map(v => {
             const sessions = v.sessions || [];
+
+            // Single-pass aggregation instead of multiple reduces and sorting
+            let lastViewedAt = v.created_at;
+            let totalTimeSeconds = 0;
+            let totalScrollDepth = 0;
+
+            sessions.forEach((s: any) => {
+                // Find latest viewed_at
+                if (new Date(s.viewed_at) > new Date(lastViewedAt)) {
+                    lastViewedAt = s.viewed_at;
+                }
+                // Sum duration
+                totalTimeSeconds += (s.duration_seconds || 0);
+                // Sum scroll depth for averaging
+                totalScrollDepth += (s.scroll_depth || 0);
+            });
+
             return {
                 id: v.id,
                 email: v.email,
@@ -829,12 +860,10 @@ router.get('/:id/viewers', authMiddleware, async (req: AuthRequest, res) => {
                 company: v.company,
                 first_viewed_at: v.created_at,
                 view_count: sessions.length,
-                last_viewed_at: sessions.length > 0
-                    ? sessions.sort((a: any, b: any) => new Date(b.viewed_at).getTime() - new Date(a.viewed_at).getTime())[0].viewed_at
-                    : v.created_at,
-                total_time_seconds: sessions.reduce((acc: number, s: any) => acc + (s.duration_seconds || 0), 0),
+                last_viewed_at: lastViewedAt,
+                total_time_seconds: totalTimeSeconds,
                 avg_scroll_depth: sessions.length > 0
-                    ? Math.round(sessions.reduce((acc: number, s: any) => acc + (s.scroll_depth || 0), 0) / sessions.length)
+                    ? Math.round(totalScrollDepth / sessions.length)
                     : 0,
             };
         });

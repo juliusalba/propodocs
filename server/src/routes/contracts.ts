@@ -61,13 +61,19 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 
     try {
         const userId = req.user!.userId;
-        const { status, proposalId } = req.query;
+        const { status, proposalId, page, limit } = req.query;
+
+        // Pagination parameters
+        const pageNum = parseInt(page as string) || 1;
+        const limitNum = parseInt(limit as string) || 50;
+        const offset = (pageNum - 1) * limitNum;
 
         let query = supabase
             .from('contracts')
-            .select('*, contract_signatures(*)')
+            .select('*, contract_signatures(*)', { count: 'exact' })
             .eq('user_id', userId)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limitNum - 1);
 
         if (status && status !== 'all') {
             query = query.eq('status', status);
@@ -76,12 +82,20 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
             query = query.eq('proposal_id', parseInt(proposalId as string));
         }
 
-        const { data, error } = await query;
+        const { data, error, count } = await query;
 
         if (error) throw error;
 
-        log.info('Contracts fetched', { count: data?.length || 0 });
-        res.json({ contracts: data || [] });
+        log.info('Contracts fetched', { count: data?.length || 0, total: count });
+        res.json({
+            contracts: data || [],
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total: count || 0,
+                totalPages: Math.ceil((count || 0) / limitNum)
+            }
+        });
     } catch (error) {
         log.error('Failed to fetch contracts', error);
         res.status(500).json({ error: 'Failed to fetch contracts' });
