@@ -337,4 +337,50 @@ RULES:
     }
 });
 
+// Analyze transcript for proposal intake
+router.post('/analyze-transcript', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { transcript } = req.body;
+
+        if (!openai) {
+            res.status(503).json({ error: 'OpenAI API key not configured' });
+            return;
+        }
+
+        if (!transcript || transcript.length < 10) {
+            res.status(400).json({ error: 'Transcript is too short or missing' });
+            return;
+        }
+
+        const systemPrompt = `You are an expert sales assistant. passed with analyzing a meeting transcript or notes.
+Your goal is to extract structured information to help create a proposal.
+
+Return ONLY a valid JSON object with the following keys:
+- clientName: (string) The name of the client or prospect.
+- clientCompany: (string) The name of their company.
+- clientIndustry: (string) Their industry (inferred if not explicit).
+- summary: (string) A brief 2-3 sentence summary of what they need.
+- projectGoals: (array of strings) Key goals or pain points mentioned.
+- suggestedServices: (array of strings) Services that should be proposed based on the transcript.
+
+If a field is not found, stick to reasonable inferences or leave as empty string/array. Do not hallucinate.`;
+
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Analyze this transcript:\n\n${transcript}` },
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.3,
+        });
+
+        const analysis = JSON.parse(completion.choices[0].message.content || '{}');
+        res.json({ analysis });
+    } catch (error) {
+        console.error('Transcript analysis error:', error);
+        res.status(500).json({ error: 'Failed to analyze transcript' });
+    }
+});
+
 export default router;

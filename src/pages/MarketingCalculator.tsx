@@ -137,7 +137,6 @@ function MarketingCalculator() {
         document.body.removeChild(a);
       }, 100);
 
-      console.log('PDF downloaded successfully');
       toast.success('PDF downloaded successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);

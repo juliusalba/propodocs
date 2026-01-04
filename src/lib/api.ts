@@ -306,6 +306,13 @@ class APIClient {
         });
     }
 
+    async analyzeTranscript(transcript: string) {
+        return this.request('/ai/analyze-transcript', {
+            method: 'POST',
+            body: JSON.stringify({ transcript }),
+        });
+    }
+
     async enhanceContent(content: string, instruction?: string) {
         return this.request('/ai/enhance-content', {
             method: 'POST',

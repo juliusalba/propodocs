@@ -5,6 +5,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { logger } from '../utils/logger.js';
 import { standardRateLimiter } from '../middleware/rateLimiter.js';
 import { sanitizeContractData } from '../utils/sanitize.js';
+import { notifyContractSigned } from '../services/notification.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -420,7 +421,8 @@ router.post('/sign/:token', async (req, res) => {
 
         if (error) throw error;
 
-        // TODO: Send notification to contract owner
+        // Send notification to contract owner
+        await notifyContractSigned(contract.id, input.signer_name);
 
         log.info('Contract signed by client', { contractId: contract.id });
         res.json({ success: true, contract: data });

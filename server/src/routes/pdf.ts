@@ -1,19 +1,21 @@
 import express from 'express';
 import puppeteer from 'puppeteer';
 
+import { logger } from '../utils/logger.js';
+
 const router = express.Router();
 
 // Propodocs PDF Generation
 router.post('/generate-pdf', async (req, res) => {
-    console.log('PDF generation request received');
+    logger.info('PDF generation request received');
     let browser;
     try {
         const { clientName, selectedServices, addOns, contractTerm, totals, coverPhotoUrl } = req.body;
-        console.log('Request data:', { clientName, selectedServices, contractTerm });
+        logger.debug('Request data', { clientName, selectedServices, contractTerm });
 
         const htmlContent = generatePDFHTML(clientName, selectedServices, addOns, contractTerm, totals, coverPhotoUrl);
 
-        console.log('Launching Puppeteer...');
+        logger.debug('Launching Puppeteer');
         browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -22,7 +24,7 @@ router.post('/generate-pdf', async (req, res) => {
         const page = await browser.newPage();
         await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-        console.log('Generating PDF...');
+        logger.debug('Generating PDF');
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
@@ -30,13 +32,13 @@ router.post('/generate-pdf', async (req, res) => {
         });
 
         await browser.close();
-        console.log('PDF generated successfully');
+        logger.info('PDF generated successfully');
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=Propodocs-Quote-${clientName || 'Client'}.pdf`);
         res.send(pdfBuffer);
     } catch (error: any) {
-        console.error('Error generating PDF:', error);
+        logger.error('Error generating PDF', error);
         if (browser) await browser.close();
         res.status(500).json({ error: 'Failed to generate PDF', message: error.message });
     }
@@ -44,7 +46,7 @@ router.post('/generate-pdf', async (req, res) => {
 
 // Custom Calculator PDF Generation
 router.post('/generate-custom-pdf', async (req, res) => {
-    console.log('Custom PDF generation request received');
+    logger.info('Custom PDF generation request received');
     let browser;
     try {
         const {
@@ -60,7 +62,7 @@ router.post('/generate-custom-pdf', async (req, res) => {
             selectedAddOns,
             detailedBreakdown
         } = req.body;
-        console.log('Request data:', {
+        logger.debug('Request data', {
             clientName,
             calculatorName,
             scopeLength: scope?.length,
@@ -83,7 +85,7 @@ router.post('/generate-custom-pdf', async (req, res) => {
             detailedBreakdown
         );
 
-        console.log('Launching Puppeteer...');
+        logger.debug('Launching Puppeteer');
         browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -92,7 +94,7 @@ router.post('/generate-custom-pdf', async (req, res) => {
         const page = await browser.newPage();
         await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-        console.log('Generating Custom PDF...');
+        logger.debug('Generating Custom PDF');
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
@@ -100,19 +102,19 @@ router.post('/generate-custom-pdf', async (req, res) => {
         });
 
         await browser.close();
-        console.log('Custom PDF generated successfully');
+        logger.info('Custom PDF generated successfully');
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=${calculatorName.replace(/\s+/g, '-')}-${clientName || 'Client'}.pdf`);
         res.send(pdfBuffer);
     } catch (error: any) {
-        console.error('Error generating Custom PDF:', error);
-        console.error('Error stack:', error.stack);
+        logger.error('Error generating Custom PDF', error);
+        logger.error('Error stack', { stack: error.stack });
         if (browser) {
             try {
                 await browser.close();
             } catch (closeError) {
-                console.error('Error closing browser:', closeError);
+                logger.error('Error closing browser', closeError);
             }
         }
         res.status(500).json({

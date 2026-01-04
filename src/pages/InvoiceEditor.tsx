@@ -470,13 +470,7 @@ export function InvoiceEditor() {
         try {
             if (id === 'new') {
                 // Create new invoice
-                console.log('Creating new invoice with data:', {
-                    title,
-                    client_name: clientName,
-                    client_email: clientEmail,
-                    line_items_count: lineItems.length,
-                    total
-                });
+
 
                 const newInvoice = await api.createInvoice({
                     title,
@@ -500,12 +494,12 @@ export function InvoiceEditor() {
                     status: 'draft'
                 });
 
-                console.log('Invoice created successfully:', newInvoice);
+
                 toast.success('Invoice created successfully!');
                 navigate(`/invoices/${newInvoice.id}`);
             } else {
                 // Update existing invoice
-                console.log('Updating invoice:', invoice.id);
+
 
                 await api.updateInvoice(invoice.id, {
                     title,
@@ -528,7 +522,7 @@ export function InvoiceEditor() {
                     payment_link: paymentLink,
                 });
 
-                console.log('Invoice updated successfully');
+
                 toast.success('Invoice saved successfully!');
                 loadInvoice();
             }

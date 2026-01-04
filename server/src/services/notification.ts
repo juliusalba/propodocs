@@ -6,6 +6,7 @@
 
 import { Resend } from 'resend';
 import supabase from '../db/index.js';
+import { logger } from '../utils/logger.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -81,7 +82,7 @@ async function logNotification(payload: NotificationPayload): Promise<number | n
         .single();
 
     if (error) {
-        console.error('Failed to log notification:', error);
+        logger.error('Failed to log notification', error);
         return null;
     }
 
@@ -123,7 +124,7 @@ async function sendEmailNotification(
 ): Promise<boolean> {
     const email = await getUserEmail(userId);
     if (!email) {
-        console.warn(`No email found for user ${userId}`);
+        logger.warn(`No email found for user ${userId}`);
         return false;
     }
 
@@ -183,18 +184,18 @@ async function sendEmailNotification(
             });
 
             if (error) {
-                console.error('Resend error:', error);
+                logger.error('Resend error', error);
                 return false;
             }
 
-            console.log(`✅ Email notification sent to ${email}: ${payload.title}`);
+            logger.info('Email notification sent', { email, title: payload.title });
             return true;
         } catch (e) {
-            console.error('Email send error:', e);
+            logger.error('Email send error', e);
             return false;
         }
     } else {
-        console.log(`📧 [MOCK] Email to ${email}: ${payload.title}`);
+        logger.info('[MOCK] Email sent', { email, title: payload.title });
         return true;
     }
 }
@@ -236,13 +237,13 @@ async function sendSMSNotification(
 ): Promise<boolean> {
     // Skip if Twilio not configured
     if (!twilioConfigured) {
-        console.log(`📱 [SMS SKIPPED] Twilio not configured. Would send to user ${userId}: ${payload.title}`);
+        logger.debug('[SMS SKIPPED] Twilio not configured', { userId: String(userId), title: payload.title });
         return false;
     }
 
     const phone = await getUserPhone(userId);
     if (!phone) {
-        console.log(`📱 [SMS SKIPPED] No phone number for user ${userId}`);
+        logger.debug('[SMS SKIPPED] No phone number', { userId: String(userId) });
         return false;
     }
 
@@ -261,13 +262,13 @@ async function sendSMSNotification(
             to: phone
         });
 
-        console.log(`✅ SMS notification sent to ${phone}: ${payload.title}`);
+        logger.info('SMS notification sent', { phone, title: payload.title });
         return true;
     } catch (error: any) {
         if (error.code === 'MODULE_NOT_FOUND') {
-            console.log(`📱 [SMS SKIPPED] Twilio package not installed. Run: npm install twilio`);
+            logger.warn('[SMS SKIPPED] Twilio package not installed');
         } else {
-            console.error('SMS send error:', error);
+            logger.error('SMS send error', error);
         }
         return false;
     }

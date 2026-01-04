@@ -118,12 +118,7 @@ export function ContractEditor() {
         setSaving(true);
         try {
             if (id === 'new') {
-                console.log('Creating new contract with data:', {
-                    title,
-                    client_name: clientName,
-                    client_email: clientEmail,
-                    content_length: content.length
-                });
+
 
                 const newContract = await api.createContract({
                     title,
@@ -135,11 +130,11 @@ export function ContractEditor() {
                     client_address: clientAddress,
                 });
 
-                console.log('Contract created successfully:', newContract);
+
                 toast.success('Contract created successfully!');
                 navigate(`/contracts/${newContract.id}`);
             } else {
-                console.log('Updating contract:', contract.id);
+
 
                 await api.updateContract(contract.id, {
                     title,
@@ -151,7 +146,7 @@ export function ContractEditor() {
                     client_address: clientAddress,
                 });
 
-                console.log('Contract updated successfully');
+
                 toast.success('Contract saved successfully!');
                 loadContract();
             }

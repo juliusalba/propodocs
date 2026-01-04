@@ -244,7 +244,6 @@ export function ProposalEditor() {
                         if (selection && selection.block && selection.block.type === 'table') {
                             // BlockNote's table API - add row
                             // This is a simplified version - actual implementation depends on BlockNote's API
-                            console.log('Adding new row to table');
                             // You may need to use editor's table manipulation methods here
                         }
                     } catch (error) {
@@ -372,7 +371,7 @@ export function ProposalEditor() {
                 timestamp: new Date().toISOString(),
                 content: content,
                 title: proposalTitle,
-                author: 'Current User' // TODO: Get from auth context
+                author: user?.name || 'Unknown User'
             };
 
             const updatedVersions = [...versions, newVersion];
@@ -564,7 +563,6 @@ export function ProposalEditor() {
                     }
                 } catch (fallbackError) {
                     console.error('BlockNote methods failed:', fallbackError);
-                    console.log('AI-generated text:', text);
                 }
             }
         }

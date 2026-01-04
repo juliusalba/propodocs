@@ -2,6 +2,7 @@ import express, { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { sendPaymentConfirmationEmail } from '../utils/email.js';
+import { logger } from '../utils/logger.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -84,7 +85,7 @@ router.post('/create-payment-link/:invoiceId', async (req: Request, res: Respons
             sessionId: session.id,
         });
     } catch (error: any) {
-        console.error('Error creating payment link:', error);
+        logger.error('Error creating payment link', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -105,11 +106,11 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req: R
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, stripeWebhookSecret);
     } catch (err: any) {
-        console.error(`⚠️ Webhook signature verification failed:`, err.message);
+        logger.error('Webhook signature verification failed', err);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    console.log(`📥 Received Stripe webhook: ${event.type}`);
+    logger.info('Received Stripe webhook', { type: event.type });
 
     // Handle the event
     switch (event.type) {
@@ -120,17 +121,17 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req: R
         }
         case 'payment_intent.succeeded': {
             const paymentIntent = event.data.object as Stripe.PaymentIntent;
-            console.log(`💰 Payment intent succeeded: ${paymentIntent.id}`);
+            logger.info('Payment intent succeeded', { id: paymentIntent.id });
             break;
         }
         case 'payment_intent.payment_failed': {
             const failedPayment = event.data.object as Stripe.PaymentIntent;
-            console.log(`❌ Payment failed: ${failedPayment.id}`);
+            logger.warn('Payment failed', { id: failedPayment.id });
             // Could add notification logic here
             break;
         }
         default:
-            console.log(`Unhandled event type: ${event.type}`);
+            logger.debug('Unhandled event type', { type: event.type });
     }
 
     res.json({ received: true });
@@ -143,11 +144,11 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req: R
 async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
     const invoiceId = session.metadata?.invoice_id;
     if (!invoiceId) {
-        console.error('No invoice ID in session metadata');
+        logger.error('No invoice ID in session metadata');
         return;
     }
 
-    console.log(`✅ Processing payment for invoice ${invoiceId}`);
+    logger.info('Processing payment for invoice', { invoiceId });
 
     try {
         // Get invoice details
@@ -158,7 +159,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
             .single();
 
         if (invoiceError || !invoice) {
-            console.error('Invoice not found:', invoiceId);
+            logger.error('Invoice not found', { invoiceId });
             return;
         }
 
@@ -182,7 +183,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
             });
 
         if (paymentError) {
-            console.error('Failed to record payment:', paymentError);
+            logger.error('Failed to record payment', paymentError);
         }
 
         // Update invoice status
@@ -201,7 +202,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
             .eq('id', invoiceId);
 
         if (updateError) {
-            console.error('Failed to update invoice:', updateError);
+            logger.error('Failed to update invoice', updateError);
         }
 
         // Send confirmation email
@@ -215,13 +216,13 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
                     paymentMethod: 'Credit Card (Stripe)',
                 });
             } catch (emailError) {
-                console.error('Failed to send confirmation email:', emailError);
+                logger.error('Failed to send confirmation email', emailError);
             }
         }
 
-        console.log(`✅ Invoice ${invoiceId} payment processed successfully`);
+        logger.info('Invoice payment processed successfully', { invoiceId });
     } catch (error) {
-        console.error('Error processing payment:', error);
+        logger.error('Error processing payment', error);
     }
 }
 
@@ -256,7 +257,7 @@ router.get('/status/:invoiceId', async (req: Request, res: Response) => {
             payments: payments || [],
         });
     } catch (error: any) {
-        console.error('Error getting payment status:', error);
+        logger.error('Error getting payment status', error);
         res.status(500).json({ error: error.message });
     }
 });

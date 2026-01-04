@@ -4,6 +4,7 @@ import supabase from '../db/index.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { sendProposalLinkEmail } from '../utils/email.js';
 import { notifyProposalStatusChange, notifyCommentAdded } from '../services/notification.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -73,11 +74,11 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
             .single();
 
         if (error) {
-            console.error('Supabase insert error details:', JSON.stringify(error, null, 2));
+            logger.error('Supabase insert error details', error);
             throw error;
         }
         if (!proposal) {
-            console.error('No proposal returned after insert');
+            logger.error('No proposal returned after insert');
             throw new Error('Failed to create proposal - no data returned');
         }
 
@@ -87,7 +88,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
             res.status(400).json({ error: 'Invalid input', details: error.errors });
             return;
         }
-        console.error('Create proposal error (full):', error);
+        logger.error('Create proposal error', error);
         res.status(500).json({
             error: 'Failed to create proposal',
             details: error instanceof Error ? error.message : 'Unknown error'
@@ -153,7 +154,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
             }
         });
     } catch (error) {
-        console.error('Get proposals error:', error);
+        logger.error('Get proposals error', error);
         res.status(500).json({ error: 'Failed to get proposals' });
     }
 });
@@ -184,7 +185,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
         res.json({ proposal });
     } catch (error) {
-        console.error('Get proposal error:', error);
+        logger.error('Get proposal error', error);
         res.status(500).json({ error: 'Failed to get proposal' });
     }
 });
@@ -223,7 +224,7 @@ router.get('/:id/versions/:versionId', authMiddleware, async (req: AuthRequest, 
             clientName: proposal.client_name
         });
     } catch (error) {
-        console.error('Get version error:', error);
+        logger.error('Get version error', error);
         res.status(500).json({ error: 'Failed to get version' });
     }
 });
@@ -274,7 +275,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
         // Send notification for status changes
         if (data.status === 'accepted' || data.status === 'rejected') {
-            notifyProposalStatusChange(proposalId, data.status).catch(console.error);
+            notifyProposalStatusChange(proposalId, data.status).catch((err) => logger.error('Notification error', err));
         }
 
         res.json({ proposal: updated });
@@ -283,7 +284,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
             res.status(400).json({ error: 'Invalid input', details: error.errors });
             return;
         }
-        console.error('Update proposal error:', error);
+        logger.error('Update proposal error', error);
         res.status(500).json({ error: 'Failed to update proposal' });
     }
 });
@@ -337,7 +338,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
         res.json({ message: 'Proposal moved to trash' });
     } catch (error) {
-        console.error('Delete proposal error:', error);
+        logger.error('Delete proposal error', error);
         res.status(500).json({ error: 'Failed to delete proposal' });
     }
 });
@@ -376,7 +377,7 @@ router.post('/:id/restore', authMiddleware, async (req: AuthRequest, res) => {
 
         res.json({ message: 'Proposal restored' });
     } catch (error) {
-        console.error('Restore proposal error:', error);
+        logger.error('Restore proposal error', error);
         res.status(500).json({ error: 'Failed to restore proposal' });
     }
 });
@@ -421,7 +422,7 @@ router.post('/:id/accept', async (req, res) => {
 
         // Here you would typically trigger a notification and send an email
         // For now, we'll just log it to the console
-        console.log(`Proposal ${proposalId} accepted via token ${token}. Triggering notifications.`);
+        logger.info(`Proposal accepted via token. Triggering notifications.`, { proposalId, token });
 
         // Return with suggestion to create contract
         res.json({
@@ -430,7 +431,7 @@ router.post('/:id/accept', async (req, res) => {
             proposalId: proposalId
         });
     } catch (error) {
-        console.error('Accept proposal error:', error);
+        logger.error('Accept proposal error', error);
         res.status(500).json({ error: 'Failed to accept proposal' });
     }
 });
@@ -453,7 +454,7 @@ router.post('/:id/reject', async (req, res) => {
 
         res.json({ message: 'Proposal rejected' });
     } catch (error) {
-        console.error('Reject proposal error:', error);
+        logger.error('Reject proposal error', error);
         res.status(500).json({ error: 'Failed to reject proposal' });
     }
 });
@@ -485,12 +486,14 @@ router.post('/:id/comments', async (req, res) => {
 
         if (error) throw error;
 
+        if (error) throw error;
+
         // Send notification to proposal owner
-        notifyCommentAdded(proposalId, author_name || 'Anonymous', content).catch(console.error);
+        notifyCommentAdded(proposalId, author_name || 'Anonymous', content).catch((err) => logger.error('Notification error', err));
 
         return res.status(201).json({ comment });
     } catch (error) {
-        console.error('Add comment error:', error);
+        logger.error('Add comment error', error);
         return res.status(500).json({ error: 'Failed to add comment' });
     }
 });
@@ -510,7 +513,7 @@ router.get('/:id/comments', async (req, res) => {
 
         return res.json({ comments });
     } catch (error) {
-        console.error('Get comments error:', error);
+        logger.error('Get comments error', error);
         return res.status(500).json({ error: 'Failed to get comments' });
     }
 });
@@ -532,7 +535,7 @@ router.patch('/:id/comments/:commentId/resolve', async (req, res) => {
 
         return res.json({ comment });
     } catch (error) {
-        console.error('Resolve comment error:', error);
+        logger.error('Resolve comment error', error);
         return res.status(500).json({ error: 'Failed to resolve comment' });
     }
 });
@@ -554,7 +557,7 @@ router.get('/:id/comments/block/:blockId', async (req, res) => {
 
         return res.json({ comments });
     } catch (error: any) {
-        console.error('Get block comments error:', error);
+        logger.error('Get block comments error', error);
 
         // Check for missing column error (PostgreSQL error code 42703)
         if (error.code === '42703') {
@@ -592,7 +595,7 @@ router.post('/:id/blocks/:blockId/changes', authMiddleware, async (req: AuthRequ
 
         return res.status(201).json({ change });
     } catch (error) {
-        console.error('Track block change error:', error);
+        logger.error('Track block change error', error);
         return res.status(500).json({ error: 'Failed to track block change' });
     }
 });
@@ -615,7 +618,7 @@ router.get('/:id/blocks/:blockId/changes', async (req, res) => {
 
         return res.json({ changes });
     } catch (error) {
-        console.error('Get block changes error:', error);
+        logger.error('Get block changes error', error);
         return res.status(500).json({ error: 'Failed to get block changes' });
     }
 });
@@ -654,7 +657,7 @@ router.post('/:id/share-email', authMiddleware, async (req: AuthRequest, res) =>
 
         res.json({ message: 'Email sent successfully' });
     } catch (error) {
-        console.error('Send email error:', error);
+        logger.error('Send email error', error);
         res.status(500).json({ error: 'Failed to send email' });
     }
 });
@@ -684,7 +687,7 @@ router.post('/check-viewer', async (req, res) => {
 
         return res.json({ exists: false });
     } catch (error) {
-        console.error('Check viewer error:', error);
+        logger.error('Check viewer error', error);
         return res.json({ exists: false });
     }
 });
@@ -767,7 +770,7 @@ router.post('/:id/register-viewer', async (req, res) => {
             sessionId: session.id,
         });
     } catch (error) {
-        console.error('Register viewer error:', error);
+        logger.error('Register viewer error', error);
         return res.status(500).json({ error: 'Failed to register viewer' });
     }
 });
@@ -792,7 +795,7 @@ router.patch('/view-session/:sessionId', async (req, res) => {
 
         return res.json({ success: true });
     } catch (error) {
-        console.error('Update view session error:', error);
+        logger.error('Update view session error', error);
         return res.status(500).json({ error: 'Failed to update session' });
     }
 });

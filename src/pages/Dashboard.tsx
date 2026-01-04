@@ -26,6 +26,7 @@ import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { PipelineChart } from '../components/dashboard/PipelineChart';
 import { ViewAnalyticsModal } from '../components/ViewAnalyticsModal';
 import { ChangelogModal } from '../components/ChangelogModal';
+import { IntakeWizard } from '../components/dashboard/IntakeWizard';
 import type { Proposal } from '../types';
 import { useToast } from '../components/Toast';
 
@@ -57,6 +58,7 @@ export function Dashboard() {
     const [pipelineTimePeriod, setPipelineTimePeriod] = useState('all');
     const [showChangelog, setShowChangelog] = useState(false);
     const [hasNewChangelog, setHasNewChangelog] = useState(false);
+    const [showIntakeWizard, setShowIntakeWizard] = useState(false);
     const CURRENT_VERSION = '2.2.0';
 
     useEffect(() => {
@@ -832,17 +834,38 @@ export function Dashboard() {
                                     <button
                                         onClick={() => {
                                             setShowCreateModal(false);
+                                            setShowIntakeWizard(true);
+                                        }}
+                                        className="group relative p-6 rounded-xl border-2 border-gray-100 hover:border-[#8C0000] hover:bg-red-50/30 transition-all text-left col-span-1 md:col-span-2"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-lg bg-red-100 text-[#8C0000] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                                <Sparkles className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-bold text-gray-900 mb-1">AI Guided Setup</h3>
+                                                <p className="text-sm text-gray-500">Analyze your meeting notes and generate a proposal automatically.</p>
+                                            </div>
+                                            <div className="ml-auto text-[#8C0000]">
+                                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setShowCreateModal(false);
                                             navigate('/proposals/new?mode=blank');
                                         }}
-                                        className="group relative p-6 rounded-xl border-2 border-gray-100 hover:border-[#8C0000] hover:bg-red-50/30 transition-all text-left"
+                                        className="group relative p-6 rounded-xl border-2 border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all text-left"
                                     >
-                                        <div className="w-12 h-12 rounded-lg bg-red-100 text-[#8C0000] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <div className="w-12 h-12 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                             <FileText className="w-6 h-6" />
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Blank Proposal</h3>
-                                        <p className="text-sm text-gray-500 mb-4">Create from scratch with custom pricing. Import your own terms.</p>
-                                        <div className="flex items-center text-[#8C0000] font-medium text-sm">
-                                            Start Fresh <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Start from Scratch</h3>
+                                        <p className="text-sm text-gray-500 mb-4">Create a blank proposal with custom pricing terms.</p>
+                                        <div className="flex items-center text-gray-600 font-medium text-sm">
+                                            Manual Setup <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                         </div>
                                     </button>
 
@@ -967,6 +990,11 @@ export function Dashboard() {
             <ChangelogModal
                 isOpen={showChangelog}
                 onClose={() => setShowChangelog(false)}
+            />
+
+            <IntakeWizard
+                isOpen={showIntakeWizard}
+                onClose={() => setShowIntakeWizard(false)}
             />
         </DashboardLayout >
     );

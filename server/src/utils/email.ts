@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { logger } from './logger.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -157,25 +158,22 @@ Propodocs Team
             });
 
             if (error) {
-                console.error('❌ Resend error:', error);
+                logger.error('Resend error', error);
                 throw new Error('Failed to send password reset email');
             }
 
-            console.log(`✅ Password reset email sent to ${data.to} (ID: ${emailData?.id})`);
+            logger.info('Password reset email sent', { to: data.to, id: emailData?.id });
         } catch (error: any) {
-            console.error('❌ Resend error:', error);
+            logger.error('Resend error', error);
             throw new Error('Failed to send password reset email');
         }
     } else {
         // Fallback: Log to console for development
-        console.log('\n📧 ===== PASSWORD RESET EMAIL (Resend not configured) =====');
-        console.log(`To: ${data.to}`);
-        console.log('Subject: Reset Your Password - Propodocs');
-        console.log('\n--- Email Content ---');
-        console.log(textContent);
-        console.log('\n--- Reset Link ---');
-        console.log(resetLink);
-        console.log('==========================================================\n');
+        logger.info('[MOCK] Password Reset Email', {
+            to: data.to,
+            subject: 'Reset Your Password - Propodocs',
+            resetLink
+        });
     }
 }
 
@@ -284,24 +282,21 @@ Propodocs Team
             });
 
             if (error) {
-                console.error('❌ Resend error:', error);
+                logger.error('Resend error', error);
                 throw new Error('Failed to send proposal email');
             }
 
-            console.log(`✅ Proposal email sent to ${data.to} (ID: ${emailData?.id})`);
+            logger.info('Proposal email sent', { to: data.to, id: emailData?.id });
         } catch (error: any) {
-            console.error('❌ Resend error:', error);
+            logger.error('Resend error', error);
             throw new Error('Failed to send proposal email');
         }
     } else {
-        console.log('\n📧 ===== PROPOSAL EMAIL (Resend not configured) =====');
-        console.log(`To: ${data.to}`);
-        console.log(`Subject: New Proposal for ${data.clientName} - Propodocs`);
-        console.log('\n--- Email Content ---');
-        console.log(textContent);
-        console.log('\n--- Link ---');
-        console.log(data.link);
-        console.log('=====================================================\n');
+        logger.info('[MOCK] Proposal Email', {
+            to: data.to,
+            subject: `New Proposal for ${data.clientName} - Propodocs`,
+            link: data.link
+        });
     }
 }
 
@@ -435,22 +430,21 @@ Propodocs Team
             });
 
             if (error) {
-                console.error('❌ Resend error:', error);
+                logger.error('Resend error', error);
                 throw new Error('Failed to send invoice email');
             }
 
-            console.log(`✅ Invoice email sent to ${data.to} (ID: ${emailData?.id})`);
+            logger.info('Invoice email sent', { to: data.to, id: emailData?.id });
         } catch (error: any) {
-            console.error('❌ Resend error:', error);
+            logger.error('Resend error', error);
             throw new Error('Failed to send invoice email');
         }
     } else {
-        console.log('\n📧 ===== INVOICE EMAIL (Resend not configured) =====');
-        console.log(`To: ${data.to}`);
-        console.log(`Subject: Invoice #${data.invoiceNumber} - ${formattedAmount}`);
-        console.log('\n--- Email Content ---');
-        console.log(textContent);
-        console.log('=====================================================\n');
+        logger.info('[MOCK] Invoice Email', {
+            to: data.to,
+            subject: `Invoice #${data.invoiceNumber}`,
+            amount: formattedAmount
+        });
     }
 }
 
@@ -577,22 +571,20 @@ Propodocs Team
             });
 
             if (error) {
-                console.error('❌ Resend error:', error);
+                logger.error('Resend error', error);
                 throw new Error('Failed to send contract email');
             }
 
-            console.log(`✅ Contract email sent to ${data.to} (ID: ${emailData?.id})`);
+            logger.info('Contract email sent', { to: data.to, id: emailData?.id });
         } catch (error: any) {
-            console.error('❌ Resend error:', error);
+            logger.error('Resend error', error);
             throw new Error('Failed to send contract email');
         }
     } else {
-        console.log('\n📧 ===== CONTRACT EMAIL (Resend not configured) =====');
-        console.log(`To: ${data.to}`);
-        console.log(`Subject: Contract Ready: ${data.contractTitle} - Propodocs`);
-        console.log('\n--- Email Content ---');
-        console.log(textContent);
-        console.log('=====================================================\n');
+        logger.info('[MOCK] Contract Email', {
+            to: data.to,
+            subject: `Contract Ready: ${data.contractTitle}`
+        });
     }
 }
 
@@ -700,22 +692,20 @@ Propodocs Team
             });
 
             if (error) {
-                console.error('❌ Resend error:', error);
+                logger.error('Resend error', error);
                 throw new Error('Failed to send payment confirmation email');
             }
 
-            console.log(`✅ Payment confirmation email sent to ${data.to} (ID: ${emailData?.id})`);
+            logger.info('Payment confirmation email sent', { to: data.to, id: emailData?.id });
         } catch (error: any) {
-            console.error('❌ Resend error:', error);
+            logger.error('Resend error', error);
             throw new Error('Failed to send payment confirmation email');
         }
     } else {
-        console.log('\n📧 ===== PAYMENT CONFIRMATION EMAIL (Resend not configured) =====');
-        console.log(`To: ${data.to}`);
-        console.log(`Subject: Payment Received - Invoice #${data.invoiceNumber}`);
-        console.log('\n--- Email Content ---');
-        console.log(textContent);
-        console.log('=====================================================\n');
+        logger.info('[MOCK] Payment Confirmation Email', {
+            to: data.to,
+            subject: `Payment Received - Invoice #${data.invoiceNumber}`
+        });
     }
 }
 
