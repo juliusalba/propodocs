@@ -34,6 +34,7 @@ app.use(cors({
         const allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:3000',
+            'http://localhost:4000',
             'https://propodocs.vercel.app',
             'https://propodocs.online',
             'https://www.propodocs.online',

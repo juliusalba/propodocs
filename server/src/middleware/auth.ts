@@ -1,6 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
+// Validate JWT_SECRET at startup
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('❌ FATAL: JWT_SECRET environment variable is required');
+    process.exit(1);
+}
+
 export interface JWTPayload {
     userId: number;
     email: string;
@@ -17,14 +24,12 @@ export interface AuthRequest extends Request {
 }
 
 export function generateToken(payload: JWTPayload): string {
-    const secret = process.env.JWT_SECRET || 'default-secret-change-me';
     const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-    return jwt.sign(payload, secret, { expiresIn: expiresIn as any });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn as any });
 }
 
 export function verifyToken(token: string): JWTPayload {
-    const secret = process.env.JWT_SECRET || 'default-secret-change-me';
-    return jwt.verify(token, secret) as JWTPayload;
+    return jwt.verify(token, JWT_SECRET) as JWTPayload;
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {

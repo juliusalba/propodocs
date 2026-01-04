@@ -154,6 +154,30 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
+// Refresh Token - Extend session
+router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('id, email, name, company, signature_url, logo_url, avatar_url, bank_details, payment_preferences, created_at')
+            .eq('id', req.user!.userId)
+            .single();
+
+        if (error || !user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+
+        // Generate NEW token
+        const token = generateToken({ userId: user.id, email: user.email });
+
+        res.json({ user, token });
+    } catch (error) {
+        console.error('Refresh token error:', error);
+        res.status(500).json({ error: 'Failed to refresh token' });
+    }
+});
+
 // Update user profile
 router.put('/profile', authMiddleware, async (req: AuthRequest, res) => {
     try {

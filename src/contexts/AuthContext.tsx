@@ -39,8 +39,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const token = localStorage.getItem('auth_token');
                 if (token) {
-                    // Verify token by fetching current user
-                    const data = await api.getCurrentUser();
+                    // VERIFY token by refreshing it (sliding session)
+                    // This gets the user AND a new 30-day token
+                    const data = await api.refreshToken();
                     setUser(data.user);
                 }
             } catch (error) {

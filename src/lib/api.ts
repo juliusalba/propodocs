@@ -104,6 +104,14 @@ class APIClient {
         );
     }
 
+    async refreshToken() {
+        const result = await this.request('/auth/refresh', {
+            method: 'POST',
+        });
+        this.setToken(result.token);
+        return result;
+    }
+
     async updateProfile(data: {
         name?: string;
         company?: string;
