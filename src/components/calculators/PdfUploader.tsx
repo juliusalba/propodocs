@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { FileText, Upload, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+
 interface PdfUploaderProps {
     onFileProcessed: (extractedText: string) => void;
     onError: (error: string) => void;
@@ -49,12 +51,18 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onFileProcessed, onErr
 
         try {
             const formData = new FormData();
-            formData.append('pdf', selectedFile);
+            formData.append('file', selectedFile);
+            const token = localStorage.getItem('auth_token');
+            const headers: Record<string, string> = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
-            const response = await fetch('http://localhost:3001/api/uploads/pdf', {
+            const response = await fetch(`${API_BASE_URL}/uploads/document`, {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
+                headers,
             });
 
             if (!response.ok) throw new Error('Failed to process PDF');

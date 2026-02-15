@@ -21,9 +21,13 @@ interface Proposal {
     title: string;
     client_name: string;
     client_company?: string;
-    calculator_type: 'marketing' | 'custom';
+    calculator_type: 'marketing' | 'custom' | 'manual';
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
-    calculator_data: any;
+    calculator_data?: {
+        totals?: {
+            monthlyTotal?: number;
+        };
+    };
     created_at: string;
     updated_at: string;
     view_count?: number;
@@ -83,7 +87,7 @@ export const ProposalCard = memo(function ProposalCard({ proposal, onDelete, onS
             await api.generateInvoiceFromProposal(proposal.id);
             toast.success('Invoice created successfully!');
             navigate('/invoices');
-        } catch (error) {
+        } catch {
             toast.error('Failed to generate invoice');
         } finally {
             setGenerating(false);
@@ -98,7 +102,7 @@ export const ProposalCard = memo(function ProposalCard({ proposal, onDelete, onS
             const result = await api.generateContractFromProposal(proposal.id);
             toast.success('Contract created successfully!');
             navigate(`/contracts/${result.id}/edit`);
-        } catch (error) {
+        } catch {
             toast.error('Failed to generate contract');
         } finally {
             setGenerating(false);
@@ -211,9 +215,15 @@ export const ProposalCard = memo(function ProposalCard({ proposal, onDelete, onS
                         </p>
                         <span className={`text-[10px] font-medium px-2 py-0.5 rounded border ${proposal.calculator_type === 'marketing'
                                 ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                : proposal.calculator_type === 'custom'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                    : 'bg-gray-100 text-gray-700 border-gray-200'
                             }`}>
-                            {proposal.calculator_type === 'marketing' ? 'Marketing' : 'Custom'}
+                            {proposal.calculator_type === 'marketing'
+                                ? 'Marketing'
+                                : proposal.calculator_type === 'custom'
+                                    ? 'Custom'
+                                    : 'Manual'}
                         </span>
                     </div>
                 </div>

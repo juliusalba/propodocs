@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 import {
@@ -20,7 +20,8 @@ import {
     RefreshCw,
     Send,
     CheckCircle,
-    XCircle
+    XCircle,
+    Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
@@ -28,13 +29,14 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { api } from '../lib/api';
 import { ViewAnalyticsModal } from '../components/ViewAnalyticsModal';
 import { ProposalCard } from '../components/ProposalCard';
+import { IntakeWizard } from '../components/dashboard/IntakeWizard';
 
 interface Proposal {
     id: number;
     title: string;
     client_name: string;
     client_company?: string;
-    calculator_type: 'marketing' | 'custom';
+    calculator_type: 'marketing' | 'custom' | 'manual';
     status: 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected';
     calculator_data: Record<string, unknown>;
     created_at: string;
@@ -44,6 +46,16 @@ interface Proposal {
     avg_session_duration?: number;
     revision_count?: number;
     cover_photo_url?: string;
+}
+
+interface ProposalCalculatorData {
+    calculatorDefinitionId?: string;
+}
+
+interface ShareLink {
+    url?: string;
+    is_active?: boolean;
+    revoked_at?: string | null;
 }
 
 const statusConfig = {
@@ -64,6 +76,7 @@ export function Proposals() {
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showIntakeWizard, setShowIntakeWizard] = useState(false);
     const [viewMode, setViewMode] = useState<'active' | 'trash'>('active');
     // Confirm dialog state
     const [confirmDialog, setConfirmDialog] = useState<{
@@ -81,18 +94,7 @@ export function Proposals() {
     const [selectedProposalForAnalytics, setSelectedProposalForAnalytics] = useState<number | null>(null);
     const [displayMode, setDisplayMode] = useState<'table' | 'gallery'>('table');
 
-    useEffect(() => {
-        loadProposals();
-    }, [viewMode]);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = () => setActiveMenu(null);
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
-
-    const loadProposals = async () => {
+    const loadProposals = useCallback(async () => {
         setLoading(true);
         try {
             const data = await api.getProposals({ trashed: viewMode === 'trash' });
@@ -103,7 +105,18 @@ export function Proposals() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [viewMode]);
+
+    useEffect(() => {
+        loadProposals();
+    }, [loadProposals]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenu(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
     const handleDelete = async (id: number) => {
         const isTrashMode = viewMode === 'trash';
@@ -142,13 +155,15 @@ export function Proposals() {
         let path: string;
         if (proposal.calculator_type === 'custom') {
             // For custom calculators, we need the calculator definition ID
-            const calculatorDefinitionId = (proposal.calculator_data as any)?.calculatorDefinitionId;
+            const calculatorDefinitionId = (proposal.calculator_data as ProposalCalculatorData | null)?.calculatorDefinitionId;
             if (calculatorDefinitionId) {
                 path = `/calculator/custom/${calculatorDefinitionId}?id=${proposal.id}`;
             } else {
                 toast.error('Calculator definition not found');
                 return;
             }
+        } else if (proposal.calculator_type === 'manual') {
+            path = `/proposals/${proposal.id}/edit`;
         } else {
             // Default to marketing calculator
             path = `/calculator/marketing?id=${proposal.id}`;
@@ -158,12 +173,18 @@ export function Proposals() {
 
     const copyShareLink = async (proposalId: number) => {
         try {
-            // Generate the share link (you can customize the base URL)
-            const baseUrl = window.location.origin;
-            const shareLink = `${baseUrl}/view/${proposalId}`;
+            const linksData = await api.getLinks(proposalId) as { links?: ShareLink[] };
+            let link = linksData.links?.find((candidate) => candidate?.is_active !== false && !candidate?.revoked_at);
+            if (!link) {
+                const result = await api.createLink(proposalId, {});
+                link = result.link as ShareLink;
+            }
 
-            // Copy to clipboard
-            await navigator.clipboard.writeText(shareLink);
+            if (!link?.url) {
+                throw new Error('Failed to generate share link');
+            }
+
+            await navigator.clipboard.writeText(link.url);
             toast.success('Share link copied to clipboard!');
         } catch (error) {
             console.error('Failed to copy link:', error);
@@ -273,6 +294,7 @@ export function Proposals() {
                                             <option value="all">All Types</option>
                                             <option value="marketing">Marketing</option>
                                             <option value="custom">Custom</option>
+                                            <option value="manual">Manual</option>
                                         </select>
                                         <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                     </div>
@@ -391,9 +413,15 @@ export function Proposals() {
                                                     <td className="px-6 py-4">
                                                         <span className={`inline-flex items-center px-2 py-1 rounded text-[11px] font-medium border ${proposal.calculator_type === 'marketing'
                                                             ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                                            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                            : proposal.calculator_type === 'custom'
+                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                                : 'bg-gray-100 text-gray-700 border-gray-200'
                                                             }`}>
-                                                            {proposal.calculator_type === 'marketing' ? 'Marketing' : 'Custom'}
+                                                            {proposal.calculator_type === 'marketing'
+                                                                ? 'Marketing'
+                                                                : proposal.calculator_type === 'custom'
+                                                                    ? 'Custom'
+                                                                    : 'Manual'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -568,16 +596,34 @@ export function Proposals() {
                                         <button
                                             onClick={() => {
                                                 setShowCreateModal(false);
-                                                navigate('/proposals/new?mode=blank');
+                                                setShowIntakeWizard(true);
                                             }}
                                             className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#8C0000] hover:bg-red-50/30 transition-all text-left group"
                                         >
                                             <div className="flex items-start gap-4">
-                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#8C0000] to-[#500000] text-white flex items-center justify-center shadow-lg shadow-red-900/20">
+                                                <div className="w-12 h-12 rounded-lg bg-red-100 text-[#8C0000] flex items-center justify-center shadow-lg shadow-red-900/20">
+                                                    <Sparkles className="w-6 h-6" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-bold text-gray-900 mb-1 group-hover:text-[#8C0000] transition-colors">AI Guided Setup</h3>
+                                                    <p className="text-sm text-gray-500">Analyze notes and generate proposal</p>
+                                                </div>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={() => {
+                                                setShowCreateModal(false);
+                                                navigate('/proposals/new?mode=blank');
+                                            }}
+                                            className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all text-left group"
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-12 h-12 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center shadow-sm">
                                                     <FileText className="w-6 h-6" />
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h3 className="font-bold text-gray-900 mb-1 group-hover:text-[#8C0000] transition-colors">Blank Proposal</h3>
+                                                    <h3 className="font-bold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors">Blank Proposal</h3>
                                                     <p className="text-sm text-gray-500">Create from scratch with custom pricing</p>
                                                 </div>
                                             </div>
@@ -642,6 +688,11 @@ export function Proposals() {
                         )
                     }
                 </div>
+
+                <IntakeWizard
+                    isOpen={showIntakeWizard}
+                    onClose={() => setShowIntakeWizard(false)}
+                />
             </DashboardLayout>
 
             {/* Confirm Dialog */}

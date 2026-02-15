@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import puppeteer from 'puppeteer';
 import authRoutes from './routes/auth.js';
 import proposalRoutes from './routes/proposals.js';
 import linkRoutes from './routes/links.js';
@@ -19,7 +18,6 @@ import contractTemplateRoutes from './routes/contract-templates.js';
 import paymentRoutes from './routes/payments.js';
 import clientRoutes from './routes/clients.js';
 import notificationRoutes from './routes/notifications.js';
-import db from './db/index.js';
 import path from 'path';
 
 // Load environment variables
@@ -57,7 +55,14 @@ app.use(cors({
     },
     credentials: true,
 }));
-app.use(express.json({ limit: '10mb' }));
+const jsonParser = express.json({ limit: '10mb' });
+app.use((req, res, next) => {
+    // Keep raw body intact for Stripe webhook verification.
+    if (req.originalUrl.startsWith('/api/payments/webhook')) {
+        return next();
+    }
+    return jsonParser(req, res, next);
+});
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -91,6 +96,7 @@ app.use('/api/contract-templates', contractTemplateRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/pdf', pdfRoutes);
 app.use('/', pdfRoutes);
 
 // Serve uploaded files
@@ -99,10 +105,13 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    void req;
+    void next;
+    const typedError = err as { status?: number; message?: string };
     console.error('Error:', err);
-    res.status(err.status || 500).json({
-        error: err.message || 'Internal server error',
+    res.status(typedError.status || 500).json({
+        error: typedError.message || 'Internal server error',
     });
 });
 

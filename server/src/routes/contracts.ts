@@ -140,7 +140,7 @@ router.get('/view/:token', async (req, res) => {
 
         const { data, error } = await supabase
             .from('contracts')
-            .select('id, title, content, client_name, client_company, deliverables, total_value, contract_term, status, client_signed_at, expires_at')
+            .select('id, title, content, client_name, client_company, deliverables, total_value, contract_term, status, client_signed_at, owner_signed_at, expires_at')
             .eq('access_token', token)
             .single();
 
@@ -486,7 +486,8 @@ router.post('/:id/countersign', authMiddleware, async (req: AuthRequest, res) =>
             .from('contracts')
             .update({
                 status: 'completed',
-                user_signed_at: new Date().toISOString(),
+                owner_signed_at: new Date().toISOString(),
+                countersigned_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })
             .eq('id', id)
@@ -776,7 +777,7 @@ router.post('/:id/pdf', authMiddleware, async (req: AuthRequest, res) => {
                         <div class="signature-line"></div>
                         <div class="signature-label">Provider Signature</div>
                         <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">Propodocs</div>
-                        ${contract.user_signed_at ? `<div style="font-size: 11px; color: #059669;">Signed: ${new Date(contract.user_signed_at).toLocaleString()}</div>` : ''}
+                        ${contract.owner_signed_at ? `<div style="font-size: 11px; color: #059669;">Signed: ${new Date(contract.owner_signed_at).toLocaleString()}</div>` : ''}
                     </div>
                 </div>
             </body>
@@ -954,7 +955,6 @@ router.post('/:id/create-invoice', authMiddleware, async (req: AuthRequest, res)
             .insert({
                 user_id: userId,
                 contract_id: contractId,
-                client_id: contract.client_id,
                 invoice_number: invoiceNumber,
                 title: `Invoice - ${contract.client_name || 'Client'}`,
                 client_name: contract.client_name || '',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ArrowLeft, Calculator, Calendar } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -48,19 +48,7 @@ export function CustomCalculatorUsage() {
 
     const [existingProposal, setExistingProposal] = useState<Proposal | null>(null);
 
-    useEffect(() => {
-        if (calculatorId) {
-            loadCalculator(calculatorId);
-        }
-    }, [calculatorId]);
-
-    useEffect(() => {
-        if (proposalId) {
-            loadProposal(Number(proposalId));
-        }
-    }, [proposalId]);
-
-    const loadCalculator = async (id: string) => {
+    const loadCalculator = useCallback(async (id: string) => {
         try {
             const data = await api.getCalculator(id);
             setCalculator(data);
@@ -68,9 +56,9 @@ export function CustomCalculatorUsage() {
             console.error('Failed to load calculator:', error);
             toast.error('Failed to load calculator definition');
         }
-    };
+    }, [toast]);
 
-    const loadProposal = async (id: number) => {
+    const loadProposal = useCallback(async (id: number) => {
         try {
             const response = await api.getProposal(id);
             const proposal = response.proposal;
@@ -96,7 +84,25 @@ export function CustomCalculatorUsage() {
         } catch (error) {
             console.error('Failed to load proposal:', error);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (calculatorId) {
+            const timeoutId = window.setTimeout(() => {
+                void loadCalculator(calculatorId);
+            }, 0);
+            return () => window.clearTimeout(timeoutId);
+        }
+    }, [calculatorId, loadCalculator]);
+
+    useEffect(() => {
+        if (proposalId) {
+            const timeoutId = window.setTimeout(() => {
+                void loadProposal(Number(proposalId));
+            }, 0);
+            return () => window.clearTimeout(timeoutId);
+        }
+    }, [proposalId, loadProposal]);
 
     const handleClientDetailsChange = (key: keyof ClientDetails, value: string) => {
         setClientDetails(prev => ({
@@ -261,7 +267,16 @@ export function CustomCalculatorUsage() {
             };
 
             if (existingProposal) {
-                await api.updateProposal(existingProposal.id, newProposal);
+                await api.updateProposal(existingProposal.id, {
+                    title: newProposal.title,
+                    client_name: newProposal.clientName,
+                    client_company: newProposal.clientCompany,
+                    client_email: newProposal.clientEmail,
+                    client_phone: newProposal.clientPhone,
+                    client_address: newProposal.clientAddress,
+                    calculator_data: newProposal.calculatorData,
+                    status
+                });
                 toast.success('Proposal updated');
             } else {
                 const response = await api.createProposal(newProposal);

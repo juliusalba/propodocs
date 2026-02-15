@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Image as ImageIcon, Upload, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+
 interface ScreenshotUploaderProps {
     onFileProcessed: (extractedData: string) => void;
     onError: (error: string) => void;
@@ -58,11 +60,17 @@ export const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({ onFilePr
         try {
             const formData = new FormData();
             formData.append('image', selectedFile);
+            const token = localStorage.getItem('auth_token');
+            const headers: Record<string, string> = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
 
-            const response = await fetch('http://localhost:3001/api/uploads/image', {
+            const response = await fetch(`${API_BASE_URL}/uploads/image`, {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
+                headers,
             });
 
             if (!response.ok) throw new Error('Failed to process image');

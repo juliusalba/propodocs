@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Users, Zap, Palette, FileText, Sparkles, ArrowLeft, FileDown } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,13 +47,7 @@ function MarketingCalculator() {
   const [searchParams] = useSearchParams();
   const proposalId = searchParams.get('id');
 
-  useEffect(() => {
-    if (proposalId) {
-      loadProposal(Number(proposalId));
-    }
-  }, [proposalId]);
-
-  const loadProposal = async (id: number) => {
+  const loadProposal = useCallback(async (id: number) => {
     try {
       const response = await api.getProposal(id);
       const proposal = response.proposal; // API returns { proposal: ... }
@@ -75,7 +69,13 @@ function MarketingCalculator() {
       console.error('Failed to load proposal:', error);
       toast.error('Failed to load proposal');
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (proposalId) {
+      loadProposal(Number(proposalId));
+    }
+  }, [proposalId, loadProposal]);
 
   // Handlers
   const handleServiceSelect = (service: keyof SelectedServices, tier: number) => {
@@ -101,27 +101,14 @@ function MarketingCalculator() {
 
   const handleExportPDF = async () => {
     try {
-      const response = await fetch('http://localhost:3001/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientName: clientDetails.name,
-          clientDetails,
-          selectedServices,
-          addOns,
-          contractTerm,
-          totals,
-        }),
+      const blob = await api.generateProposalPdf({
+        clientName: clientDetails.name,
+        clientDetails,
+        selectedServices,
+        addOns,
+        contractTerm,
+        totals,
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`PDF generation failed: ${errorText}`);
-      }
-
-      const blob = await response.blob();
       const pdfBlob = new Blob([blob], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
@@ -160,7 +147,7 @@ function MarketingCalculator() {
         clientEmail: clientDetails.email,
         clientPhone: clientDetails.phone,
         clientAddress: clientDetails.address,
-        calculatorType: 'vmg',
+        calculatorType: 'marketing',
         calculatorData: {
           selectedServices,
           addOns,
@@ -202,7 +189,7 @@ function MarketingCalculator() {
       // First generate AI content
       const aiResponse = await api.generateProposal({
         clientName: clientDetails.name,
-        calculatorType: 'vmg',
+        calculatorType: 'marketing',
         calculatorData: {
           selectedServices,
           addOns,
@@ -220,7 +207,7 @@ function MarketingCalculator() {
         clientEmail: clientDetails.email,
         clientPhone: clientDetails.phone,
         clientAddress: clientDetails.address,
-        calculatorType: 'vmg',
+        calculatorType: 'marketing',
         calculatorData: {
           selectedServices,
           addOns,

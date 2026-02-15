@@ -4,19 +4,42 @@ import { CheckCircle, Download, ArrowLeft, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 
+interface AcceptedProposal {
+    id: number;
+    title: string;
+    client_name: string;
+    client_company?: string;
+    client_signature_url?: string;
+    cover_photo_url?: string;
+    calculator_type: 'marketing' | 'custom' | 'manual';
+    calculator_data?: {
+        totals?: {
+            monthlyTotal?: number;
+        };
+        [key: string]: unknown;
+    };
+}
+
+interface AcceptanceLocationState {
+    proposal?: AcceptedProposal;
+    suggestContract?: boolean;
+    proposalId?: number;
+}
+
 export function AcceptanceSuccess() {
     const { token } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const [proposal, setProposal] = useState<any>(null);
+    const state = location.state as AcceptanceLocationState | null;
+    const [proposal, setProposal] = useState<AcceptedProposal | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Get proposal data from location state or fetch it
     useEffect(() => {
         const loadProposal = async () => {
             try {
-                if (location.state?.proposal) {
-                    setProposal(location.state.proposal);
+                if (state?.proposal) {
+                    setProposal(state.proposal);
                 } else if (token) {
                     const response = await api.getProposalByToken(token);
                     setProposal(response.proposal);
@@ -29,17 +52,35 @@ export function AcceptanceSuccess() {
         };
 
         loadProposal();
-    }, [token, location.state]);
+    }, [token, state]);
 
-    const handleDownloadPDF = () => {
-        if (token) {
-            window.open(`/api/proposals/${token}/pdf`, '_blank');
+    const handleDownloadPDF = async () => {
+        if (!proposal) return;
+
+        try {
+            const calculatorData = proposal.calculator_data ?? {};
+            const blob = await api.generateProposalPdf({
+                ...calculatorData,
+                clientName: proposal.client_name,
+                coverPhotoUrl: proposal.cover_photo_url,
+                calculatorType: proposal.calculator_type
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `${proposal.title || 'Proposal'}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
         }
     };
 
     const handleReturnToProposal = () => {
         if (token) {
-            navigate(`/view/${token}`);
+            navigate(`/p/${token}`);
         }
     };
 
@@ -159,7 +200,7 @@ export function AcceptanceSuccess() {
                     </div>
 
                     {/* Create Contract Suggestion */}
-                    {location.state?.suggestContract && location.state?.proposalId && (
+                    {state?.suggestContract && state?.proposalId && (
                         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -167,7 +208,7 @@ export function AcceptanceSuccess() {
                                     <p className="text-sm text-gray-600">Create a contract from this accepted proposal.</p>
                                 </div>
                                 <button
-                                    onClick={() => navigate(`/contracts/new?from_proposal=${location.state.proposalId}`)}
+                                    onClick={() => navigate(`/contracts/new?from_proposal=${state.proposalId}`)}
                                     className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-600/20"
                                 >
                                     Create Contract

@@ -358,7 +358,7 @@ router.post('/reset-password', async (req, res) => {
 // Google OAuth
 router.get('/google', (req, res) => {
     const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:4001';
     const REDIRECT_URI = `${BACKEND_URL}/api/auth/google/callback`;
 
     if (!GOOGLE_CLIENT_ID) {
@@ -382,7 +382,7 @@ router.get('/google/callback', async (req, res) => {
         const { code } = req.query;
         const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
         const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-        const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+        const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:4001';
         const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
         const REDIRECT_URI = `${BACKEND_URL}/api/auth/google/callback`;
 

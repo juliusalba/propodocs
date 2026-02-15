@@ -207,7 +207,7 @@ const ThemedApp = () => {
           {/* Public routes */}
           <Route path="/p/:token" element={<ProposalView />} />
           <Route path="/c/:token" element={<ContractSigning />} />
-          <Route path="/proposal/:id/success" element={<AcceptanceSuccess />} />
+          <Route path="/proposal/:token/success" element={<AcceptanceSuccess />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

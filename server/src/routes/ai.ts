@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import OpenAI from 'openai';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -352,7 +353,7 @@ router.post('/analyze-transcript', authMiddleware, async (req: AuthRequest, res)
             return;
         }
 
-        const systemPrompt = `You are an expert sales assistant. passed with analyzing a meeting transcript or notes.
+        const systemPrompt = `You are an expert sales assistant tasked with analyzing a meeting transcript or notes.
 Your goal is to extract structured information to help create a proposal.
 
 Return ONLY a valid JSON object with the following keys:
@@ -378,7 +379,7 @@ If a field is not found, stick to reasonable inferences or leave as empty string
         const analysis = JSON.parse(completion.choices[0].message.content || '{}');
         res.json({ analysis });
     } catch (error) {
-        console.error('Transcript analysis error:', error);
+        logger.error('Transcript analysis error:', error);
         res.status(500).json({ error: 'Failed to analyze transcript' });
     }
 });

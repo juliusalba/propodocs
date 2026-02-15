@@ -163,9 +163,10 @@ export function ProposalView() {
             trackView(data.proposal.id, data.linkId);
             loadComments(data.proposal.id);
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Failed to load proposal:', err);
-            setError(err.message || 'Failed to load proposal');
+            const message = err instanceof Error ? err.message : 'Failed to load proposal';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -225,7 +226,7 @@ export function ProposalView() {
 
         try {
             setIsPosting(true);
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/proposals/${proposal.id}/comments`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4001/api'}/proposals/${proposal.id}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -256,7 +257,7 @@ export function ProposalView() {
         if (!replyText.trim() || !commenterName.trim() || !proposal) return;
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/proposals/${proposal.id}/comments`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4001/api'}/proposals/${proposal.id}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -293,12 +294,16 @@ export function ProposalView() {
 
         try {
             setAccepting(true);
-            await api.acceptProposal(proposal.id, token);
+            const acceptResult = await api.acceptProposal(proposal.id, token);
             setAccepted(true);
 
             // Navigate to success page with proposal data
-            navigate(`/proposal-accepted/${token}`, {
-                state: { proposal }
+            navigate(`/proposal/${token}/success`, {
+                state: {
+                    proposal,
+                    suggestContract: !!acceptResult?.suggestContract,
+                    proposalId: acceptResult?.proposalId || proposal.id
+                }
             });
         } catch (error) {
             console.error('Failed to accept proposal:', error);
@@ -312,20 +317,12 @@ export function ProposalView() {
         if (!proposal) return;
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/pdf/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    clientName: proposal.client_name,
-                    ...proposal.calculator_data,
-                    coverPhotoUrl: proposal.cover_photo_url,
-                    calculatorType: proposal.calculator_type
-                }),
+            const blob = await api.generateProposalPdf({
+                clientName: proposal.client_name,
+                ...proposal.calculator_data,
+                coverPhotoUrl: proposal.cover_photo_url,
+                calculatorType: proposal.calculator_type
             });
-
-            if (!response.ok) throw new Error('PDF generation failed');
-
-            const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';

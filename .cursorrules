@@ -1,0 +1,23 @@
+# Project Rules (King Mode)
+
+## Safety and Change Control
+- Do NOT run destructive commands.
+- Do NOT modify files outside this repo.
+- Do NOT touch .env, credentials, keys, tokens.
+- Prefer small diffs. Avoid sweeping refactors unless asked.
+- When editing, preserve existing architecture unless asked to change it.
+
+## Stack Discipline
+- Use only the libraries already in this repo.
+- If you need a new dependency, ask first and explain why.
+- Never hallucinate packages or APIs.
+
+## Output Discipline
+- Default: output code/diff first, minimal commentary.
+- If uncertain about installed libraries or project structure, stop and ask.
+
+## Ultrathink Trigger
+When the user includes "ultrathink":
+- Analyze performance, scalability, state shape, failure modes.
+- Reject naive solutions.
+- Then implement.

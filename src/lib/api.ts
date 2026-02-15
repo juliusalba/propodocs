@@ -529,7 +529,26 @@ class APIClient {
         });
     }
 
-    async generateCustomPDF(data: any) {
+    async generateProposalPdf(data: Record<string, unknown>) {
+        const token = this.token;
+        const response = await fetch(`${API_BASE_URL}/pdf/generate-pdf`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`PDF generation failed: ${error}`);
+        }
+
+        return response.blob();
+    }
+
+    async generateCustomPDF(data: Record<string, unknown>) {
         const token = this.token;
         const response = await fetch(`${API_BASE_URL}/pdf/generate-custom-pdf`, {
             method: 'POST',

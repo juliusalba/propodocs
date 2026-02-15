@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     X,
@@ -11,7 +11,8 @@ import {
     CheckCircle,
     Building2,
     User,
-    Globe
+    Globe,
+    Loader2
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +24,15 @@ interface IntakeWizardProps {
 }
 
 type Step = 'mode' | 'transcript' | 'analysis' | 'details' | 'pricing';
+type ProposalBlock = {
+    type: string;
+    props: Record<string, unknown>;
+    content: Array<{
+        type: 'text';
+        text: string;
+        styles: Record<string, unknown>;
+    }>;
+};
 
 export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
     const navigate = useNavigate();
@@ -30,6 +40,8 @@ export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
     const [step, setStep] = useState<Step>('mode');
     const [transcript, setTranscript] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [cameFromTranscript, setCameFromTranscript] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -43,6 +55,27 @@ export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
         suggestedServices: [] as string[]
     });
 
+    // Reset state when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setStep('mode');
+            setTranscript('');
+            setIsAnalyzing(false);
+            setIsCreating(false);
+            setCameFromTranscript(false);
+            setFormData({
+                clientName: '',
+                clientCompany: '',
+                clientIndustry: '',
+                website: '',
+                email: '',
+                goals: [],
+                summary: '',
+                suggestedServices: []
+            });
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const handleAnalyze = async () => {
@@ -53,6 +86,7 @@ export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
 
         setIsAnalyzing(true);
         setStep('analysis');
+        setCameFromTranscript(true);
 
         try {
             const result = await api.analyzeTranscript(transcript);
@@ -69,36 +103,110 @@ export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
             }));
 
             setStep('details');
-        } catch (error) {
+        } catch (error: unknown) {
             console.error(error);
-            toast.error("Failed to analyze transcript");
+            const message = error instanceof Error ? error.message : 'Failed to analyze transcript. Please try again.';
+            toast.error(message);
             setStep('transcript');
         } finally {
             setIsAnalyzing(false);
         }
     };
 
-    const handleCreateProposal = (calculatorType: 'manual' | 'marketing' | 'custom') => {
-        // In a real implementation, we might navigate to a specific calculator 
-        // with pre-filled state, or create the proposal directly.
-        // For now, let's route to the new proposal page with params
+    const handleCreateProposal = async (calculatorType: 'manual' | 'marketing' | 'custom') => {
+        setIsCreating(true);
+        let created = false;
+        try {
+            // Prepare initial content blocks from the analysis
+            const initialBlocks: ProposalBlock[] = [
+                {
+                    type: 'heading',
+                    props: { level: 1 },
+                    content: [{ type: 'text', text: 'Proposal for ' + (formData.clientName || formData.clientCompany || 'New Client'), styles: {} }]
+                },
+                {
+                    type: 'heading',
+                    props: { level: 2 },
+                    content: [{ type: 'text', text: 'Executive Summary', styles: {} }]
+                },
+                {
+                    type: 'paragraph',
+                    props: {},
+                    content: [{ type: 'text', text: formData.summary || 'Summary pending...', styles: {} }]
+                }
+            ];
 
-        const params = new URLSearchParams({
-            mode: 'ai_setup',
-            client: formData.clientName,
-            company: formData.clientCompany,
-            industry: formData.clientIndustry,
-            calcType: calculatorType
-        });
+            if (formData.goals.length > 0) {
+                initialBlocks.push({
+                    type: 'heading',
+                    props: { level: 2 },
+                    content: [{ type: 'text', text: 'Project Goals', styles: {} }]
+                });
+                formData.goals.forEach(goal => {
+                    initialBlocks.push({
+                        type: 'bulletListItem',
+                        props: {},
+                        content: [{ type: 'text', text: goal, styles: {} }]
+                    });
+                });
+            }
 
-        // Store temp data in session/local storage or state management if needed
-        // For simple passing, we can use state or specialized route
-        // We'll use the existing /proposals/new route but enhanced
+            if (formData.suggestedServices.length > 0) {
+                initialBlocks.push({
+                    type: 'heading',
+                    props: { level: 2 },
+                    content: [{ type: 'text', text: 'Suggested Services', styles: {} }]
+                });
+                formData.suggestedServices.forEach(service => {
+                    initialBlocks.push({
+                        type: 'bulletListItem',
+                        props: {},
+                        content: [{ type: 'text', text: service, styles: {} }]
+                    });
+                });
+            }
 
-        // Simulating creation by navigating to blank for now, but in reality 
-        // this would trigger the AI generation endpoint or pre-fill the editor
-        navigate(`/proposals/new?${params.toString()}`);
-        onClose();
+
+            const createResult = await api.createProposal({
+                title: `Proposal for ${formData.clientCompany || formData.clientName}`,
+                clientName: formData.clientName || 'New Client',
+                clientCompany: formData.clientCompany,
+                calculatorType: calculatorType,
+                calculatorData: {
+                    totals: { monthlyTotal: 0, annualTotal: 0 },
+                    lineItems: [],
+                    description: formData.summary,
+                    goals: formData.goals,
+                    industry: formData.clientIndustry
+                },
+                content: initialBlocks
+            });
+
+            if (createResult?.proposal?.id) {
+                // Determine if we should auto-generate more rich content
+                // For now, let's just go to the editor where the content is already pre-filled from our blocks
+                // The user can use the "Generate AI Proposal" feature inside too for refinement.
+
+                toast.success('Proposal created from analysis!');
+                const destination = calculatorType === 'marketing'
+                    ? `/calculator/marketing?id=${createResult.proposal.id}`
+                    : `/proposals/${createResult.proposal.id}/edit`;
+                navigate(destination);
+                created = true;
+            } else {
+                toast.error("Failed to create proposal");
+            }
+
+        } catch (error: unknown) {
+            console.error("Creation failed", error);
+            const message = error instanceof Error ? error.message : 'Failed to create proposal';
+            toast.error(message);
+        } finally {
+            setIsCreating(false);
+            if (created) {
+                onClose();
+            }
+        }
     };
 
     return (
@@ -120,12 +228,18 @@ export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-white z-10">
                     <div className="flex items-center gap-3">
-                        {step !== 'mode' && step !== 'analysis' && (
+                        {step !== 'mode' && step !== 'analysis' && !isCreating && (
                             <button
                                 onClick={() => {
-                                    if (step === 'details') setStep('transcript');
-                                    else if (step === 'pricing') setStep('details');
-                                    else if (step === 'transcript') setStep('mode');
+                                    if (step === 'details' && cameFromTranscript) {
+                                        setStep('transcript');
+                                    } else if (step === 'details') {
+                                        setStep('mode');
+                                    } else if (step === 'pricing') {
+                                        setStep('details');
+                                    } else if (step === 'transcript') {
+                                        setStep('mode');
+                                    }
                                 }}
                                 className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
                             >
@@ -338,26 +452,44 @@ export function IntakeWizard({ isOpen, onClose }: IntakeWizardProps) {
                             >
                                 <button
                                     onClick={() => handleCreateProposal('marketing')}
-                                    className="flex items-start gap-4 p-6 bg-white rounded-xl border-2 border-transparent hover:border-[#8C0000] shadow-sm hover:shadow-md transition-all text-left group"
+                                    disabled={isCreating}
+                                    className="flex items-start gap-4 p-6 bg-white rounded-xl border-2 border-transparent hover:border-[#8C0000] shadow-sm hover:shadow-md transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                                        <Calculator className="w-6 h-6 text-purple-600" />
-                                    </div>
+                                    {isCreating ? (
+                                        <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                            <Calculator className="w-6 h-6 text-purple-600" />
+                                        </div>
+                                    )}
                                     <div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1">Performance Marketing Calculator</h3>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                            {isCreating ? 'Creating Proposal...' : 'Performance Marketing Calculator'}
+                                        </h3>
                                         <p className="text-gray-500 text-sm mb-3">Calculate ROI, ad spend, and management fees. Best for PPC/Social agencies.</p>
                                     </div>
                                 </button>
 
                                 <button
                                     onClick={() => handleCreateProposal('manual')}
-                                    className="flex items-start gap-4 p-6 bg-white rounded-xl border-2 border-transparent hover:border-[#8C0000] shadow-sm hover:shadow-md transition-all text-left group"
+                                    disabled={isCreating}
+                                    className="flex items-start gap-4 p-6 bg-white rounded-xl border-2 border-transparent hover:border-[#8C0000] shadow-sm hover:shadow-md transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                                        <FileText className="w-6 h-6 text-gray-600" />
-                                    </div>
+                                    {isCreating ? (
+                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <Loader2 className="w-6 h-6 text-gray-600 animate-spin" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                            <FileText className="w-6 h-6 text-gray-600" />
+                                        </div>
+                                    )}
                                     <div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1">Manual Pricing</h3>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                            {isCreating ? 'Creating Proposal...' : 'Manual Pricing'}
+                                        </h3>
                                         <p className="text-gray-500 text-sm mb-3">Define your own line items and costs from scratch.</p>
                                     </div>
                                 </button>

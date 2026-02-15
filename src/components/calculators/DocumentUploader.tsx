@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { FileText, Upload, X, Loader2, CheckCircle2, FileSpreadsheet, FileType } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+
 interface DocumentUploaderProps {
     onFileProcessed: (extractedText: string) => void;
     onError: (error: string) => void;
@@ -76,7 +78,7 @@ export const DocumentUploader: React.FC<DocumentUploaderProps> = ({ onFileProces
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await fetch('http://localhost:3001/api/uploads/document', {
+            const response = await fetch(`${API_BASE_URL}/uploads/document`, {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',

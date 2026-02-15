@@ -15,7 +15,7 @@ interface EmailGateProps {
     onVerified: (viewerData: { email: string; name: string; company?: string }) => void;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
 
 export function EmailGate({ proposalTitle, clientName, onVerified }: EmailGateProps) {
     const [email, setEmail] = useState('');

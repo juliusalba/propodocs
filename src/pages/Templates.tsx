@@ -42,7 +42,7 @@ export function Templates() {
             setDuplicating(templateId);
 
             // Duplicate template to create new proposal
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/templates/${templateId}/duplicate`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4001/api'}/templates/${templateId}/duplicate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
